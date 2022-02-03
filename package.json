@@ -1,14 +1,30 @@
 {
   "name": "flama-site",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "private": true,
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/perdy/flama-site.git"
+  },
+  "author": "José Antonio Perdiguero López",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/perdy/flama-site/issues"
+  },
+  "homepage": "https://flama.dev",
   "scripts": {
-    "dev": "next dev",
+    "start": "npm run dev",
+    "dev": "next",
     "build": "next build",
-    "start": "next start"
+    "serve": "next start",
+    "lint": "next lint",
+    "lint:fix": "npm run lint -- --fix",
+    "format": "prettier . --write --ignore-path .gitignore --ignore-unknown",
+    "prepare": "is-ci || husky install"
   },
   "dependencies": {
     "next": "12.0.10",
+    "next-seo": "^5.1.0",
     "react": "17.0.2",
     "react-dom": "17.0.2"
   },
@@ -16,8 +32,17 @@
     "@types/node": "^17.0.14",
     "@types/react": "17.0.38",
     "autoprefixer": "^10.4.2",
+    "commitlint": "^16.1.0",
+    "eslint": "^8.8.0",
+    "eslint-config-next": "^12.0.10",
+    "eslint-config-prettier": "^8.3.0",
+    "husky": "^7.0.4",
+    "is-ci": "^3.0.1",
+    "lint-staged": "^12.3.3",
     "postcss": "^8.4.6",
+    "prettier": "^2.5.1",
+    "prettier-plugin-tailwindcss": "^0.1.4",
     "tailwindcss": "^3.0.18",
-    "typescript": "4.5.5"
+    "typescript": "^4.5.5"
   }
 }

@@ -1,5 +1,14 @@
 {
   "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "~/*": [
+        "src/*"
+      ],
+      "@app-public/*": [
+        "./public/*"
+      ]
+    },
     "target": "es5",
     "lib": [
       "dom",
