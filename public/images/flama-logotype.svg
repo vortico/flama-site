@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="3497.8459"
+   height="730.00006"
+   viewBox="0 0 925.42602 193.14585"
+   version="1.1"
+   id="svg8"
+   inkscape:version="1.1.1 (3bf5ae0d25, 2021-09-20, custom)"
+   sodipodi:docname="flama-no-space.svg"
+   inkscape:export-filename="/home/perdy/Imágenes/flama-logo.png"
+   inkscape:export-xdpi="12.0064"
+   inkscape:export-ydpi="12.0064"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:dc="http://purl.org/dc/elements/1.1/">
+  <defs
+     id="defs2">
+    <linearGradient
+       inkscape:collect="always"
+       id="linearGradient4603">
+      <stop
+         style="stop-color:#ffca28;stop-opacity:1;"
+         offset="0"
+         id="stop4599" />
+      <stop
+         style="stop-color:#ffca28;stop-opacity:0;"
+         offset="1"
+         id="stop4601" />
+    </linearGradient>
+    <radialGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient4603"
+       id="radialGradient4605"
+       cx="24.50528"
+       cy="242.49722"
+       fx="24.50528"
+       fy="242.49722"
+       r="2.9036851"
+       gradientTransform="matrix(1,0,0,2.8365375,0,-445.35524)"
+       gradientUnits="userSpaceOnUse" />
+  </defs>
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="0.69999999"
+     inkscape:cx="1735"
+     inkscape:cy="288.57143"
+     inkscape:document-units="px"
+     inkscape:current-layer="layer2"
+     showgrid="true"
+     units="px"
+     width="96px"
+     inkscape:pagecheckerboard="false"
+     showguides="true"
+     inkscape:window-width="1920"
+     inkscape:window-height="1119"
+     inkscape:window-x="0"
+     inkscape:window-y="0"
+     inkscape:window-maximized="1"
+     fit-margin-top="0"
+     fit-margin-left="0"
+     fit-margin-right="0"
+     fit-margin-bottom="0"
+     viewbox-width="512">
+    <inkscape:grid
+       type="xygrid"
+       id="grid3717"
+       originx="-30.407294"
+       originy="-30.427089" />
+  </sodipodi:namedview>
+  <metadata
+     id="metadata5">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:groupmode="layer"
+     id="layer2"
+     inkscape:label="Background"
+     style="display:inline"
+     transform="translate(-30.408776,198.17291)">
+    <path
+       style="fill:#e25822;fill-opacity:1;stroke:none;stroke-width:7.93478;stroke-opacity:1"
+       d="M 480,115 A 364.99999,364.99999 0 0 0 115,480 364.99999,364.99999 0 0 0 480,845 364.99999,364.99999 0 0 0 845,480 364.99999,364.99999 0 0 0 480,115 Z m -36.40039,82.80078 c 133.2,78.60002 114.9888,183.37063 69,229.19922 -21.6,21.52501 -22.45461,50.63892 2.40039,65.41211 30.6,18.1878 72.00039,-9.01133 68.40039,-48.61133 C 577.9338,383.6682 597.2,347.20039 653,342.40039 606.2,429.92537 699.19922,444.40078 699.19922,548.80078 699.19922,720.40074 523.40039,754 523.40039,754 c 31.8,-16.2 40.80039,-38.39922 41.40039,-67.19922 0.87118,-41.82357 -32.40059,-78.60024 -83.60937,-61.28906 C 428.9422,643.17511 387.383,595.063 410,520 322.40001,597.4 339.8008,720.99961 420.80078,763.59961 228.2008,720.39961 237.19863,555.51603 290.64844,480.58984 367.39924,373.00083 506.59961,367.0008 443.59961,197.80078 Z"
+       transform="matrix(0.26458333,0,0,0.26458333,-0.04281667,-228.59999)"
+       id="path3768"
+       inkscape:connector-curvature="0" />
+  </g>
+  <g
+     inkscape:label="Curly Braces"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(-30.408776,-73.427091)"
+     style="display:inline" />
+  <g
+     inkscape:groupmode="layer"
+     id="layer3"
+     inkscape:label="Stars"
+     transform="translate(-30.408776,198.17291)" />
+  <g
+     inkscape:groupmode="layer"
+     id="layer4"
+     inkscape:label="Name"
+     transform="translate(-30.408776,-30.427083)">
+    <text
+       xml:space="preserve"
+       style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:253.472px;line-height:1.25;font-family:'Fira Sans';-inkscape-font-specification:'Fira Sans, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:start;letter-spacing:0px;word-spacing:0px;writing-mode:lr-tb;text-anchor:start;fill:#e25822;fill-opacity:1;stroke:none;stroke-width:0.211227"
+       x="284.66205"
+       y="220.53127"
+       id="text2404"><tspan
+         sodipodi:role="line"
+         id="tspan2402"
+         x="284.66205"
+         y="220.53127"
+         style="font-style:normal;font-variant:normal;font-weight:normal;font-stretch:normal;font-size:253.472px;font-family:'Fira Sans';-inkscape-font-specification:'Fira Sans, Normal';font-variant-ligatures:normal;font-variant-caps:normal;font-variant-numeric:normal;font-feature-settings:normal;text-align:start;writing-mode:lr-tb;text-anchor:start;fill:#e25822;fill-opacity:1;stroke-width:0.211227">Flama</tspan></text>
+  </g>
+</svg>

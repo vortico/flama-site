@@ -23,6 +23,8 @@
     "prepare": "is-ci || husky install"
   },
   "dependencies": {
+    "@heroicons/react": "^1.0.5",
+    "@tailwindcss/typography": "^0.5.1",
     "next": "12.0.10",
     "next-seo": "^5.1.0",
     "react": "17.0.2",

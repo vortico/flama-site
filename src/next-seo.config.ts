@@ -1,4 +1,4 @@
-export default {
+const SEO = {
   titleTemplate: 'Flama - %s',
   defaultTitle: 'Flama',
   description: 'Fire up your API',
@@ -14,3 +14,5 @@ export default {
     imageHeight: 640
   }
 }
+
+export default SEO
