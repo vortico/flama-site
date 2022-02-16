@@ -11,8 +11,14 @@ const SEO = {
     image: 'https://flama.dev/images/flama-social-preview.jpg',
     site_name: 'flama.dev',
     imageWidth: 1280,
-    imageHeight: 640
-  }
+    imageHeight: 640,
+  },
+  additionalLinkTags: [
+    {
+      rel: 'stylesheet',
+      href: 'https://fonts.googleapis.com/css2?family=Montserrat&display=optional',
+    },
+  ],
 }
 
 export default SEO
