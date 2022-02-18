@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import { FlamaIcon, GithubIcon } from '~/components/icons'
+import ThemeModeSwitcher from '~/components/ThemeModeSwitcher'
 
 function Nav() {
   const entries = [
@@ -8,7 +9,7 @@ function Nav() {
   ]
 
   return (
-    <nav className="pr-16 text-zinc-700 dark:text-zinc-200">
+    <nav className="pr-16 font-medium text-zinc-600 dark:text-zinc-400">
       <ul className="flex space-x-10">
         {entries.map((entry) => (
           <li key={entry.href}>
@@ -39,10 +40,11 @@ function Menu() {
         </div>
         <div className="relative hidden items-center justify-between md:flex">
           <Nav />
-          <div className="flex items-center space-x-10 border-l border-brand-100 pl-16 dark:border-brand-500">
+          <div className="flex items-center space-x-10 border-l border-brand-500 pl-16">
+            <ThemeModeSwitcher className="h-6 w-6 text-zinc-400 hover:text-zinc-500 dark:text-zinc-600 dark:hover:text-zinc-300" />
             <a
               href="https://github.com/perdy/flama"
-              className="block text-zinc-400 hover:text-zinc-500 dark:hover:text-zinc-300"
+              className="block text-zinc-400 hover:text-zinc-500 dark:text-zinc-600 dark:hover:text-zinc-300"
             >
               <span className="sr-only">Flama on GitHub</span>
               <GithubIcon className="h-6 w-6" />
