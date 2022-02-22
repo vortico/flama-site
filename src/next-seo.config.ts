@@ -1,3 +1,5 @@
+import Algolia from './algolia.config'
+
 const SEO = {
   titleTemplate: 'Flama - %s',
   defaultTitle: 'Flama',
@@ -17,6 +19,19 @@ const SEO = {
     {
       rel: 'stylesheet',
       href: 'https://fonts.googleapis.com/css2?family=Montserrat&display=optional',
+    },
+    {
+      rel: 'stylesheet',
+      href: 'https://fonts.googleapis.com/css2?family=Fira+Sans&display=optional',
+    },
+    {
+      rel: 'stylesheet',
+      href: 'https://fonts.googleapis.com/css2?family=Fira+Mono&display=optional',
+    },
+    {
+      rel: 'preconnect',
+      href: `https://${Algolia.APP_ID}-dsn.algolia.net`,
+      crossOrigin: 'true',
     },
   ],
 }

@@ -1,3 +1,6 @@
+// eslint-disable-next-line @typescript-eslint/no-var-requires
+const defaultTheme = require('tailwindcss/defaultTheme')
+
 module.exports = {
   darkMode: 'class',
   content: [
@@ -23,9 +26,9 @@ module.exports = {
       },
     },
     fontFamily: {
-      serif: ['Montserrat', 'serif'],
-      sans: ['"Fira Sans"', 'sans-serif'],
-      mono: ['"Fira Mono"', 'monospace'],
+      serif: ['Montserrat', ...defaultTheme.fontFamily.serif],
+      sans: ['"Fira Sans"', ...defaultTheme.fontFamily.sans],
+      mono: ['"Fira Mono"', ...defaultTheme.fontFamily.mono],
     },
   },
   plugins: [require('@tailwindcss/typography')],
