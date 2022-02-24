@@ -327,7 +327,7 @@
 }
 
 .DocSearch-Hit--Result {
-  @apply rounded-lg bg-zinc-50 dark:bg-zinc-700/30;
+  @apply rounded bg-zinc-50 dark:bg-zinc-700/30;
 }
 
 .DocSearch-Hit[aria-selected='true'] > a {
@@ -412,7 +412,7 @@
 }
 
 .DocSearch-NoResults-Prefill-List ul {
-  @apply overflow-hidden rounded-lg border border-zinc-200 bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-700/30;
+  @apply overflow-hidden rounded border border-zinc-200 bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-700/30;
 }
 
 .DocSearch-NoResults-Prefill-List button {

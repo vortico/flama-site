@@ -5,7 +5,7 @@ export default function FlamaIcon({ ...props }: React.ComponentProps<'svg'>) {
     <svg
       viewBox="0 0 148 148"
       fill="currentColor"
-      aria-hidden="true"
+      xmlns="http://www.w3.org/2000/svg"
       {...props}
     >
       <g transform="translate(-48.149569,-67.173321)">
