@@ -1,9 +1,10 @@
 import Algolia from './algolia.config'
 
 const SEO = {
-  titleTemplate: 'Flama - %s',
+  titleTemplate: '%s - Flama',
   defaultTitle: 'Flama',
   description: 'Fire up your API',
+  canonical: 'https://flama.dev',
   openGraph: {
     type: 'website',
     locale: 'en_EN',

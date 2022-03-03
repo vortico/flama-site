@@ -10,7 +10,11 @@ export default function App({ Component, pageProps }: AppProps) {
     <>
       <DefaultSeo {...SEO} />
       <SearchProvider>
-        <ThemeProvider defaultTheme="system" attribute="class">
+        <ThemeProvider
+          defaultTheme="system"
+          attribute="class"
+          disableTransitionOnChange
+        >
           <Component {...pageProps} />
         </ThemeProvider>
       </SearchProvider>

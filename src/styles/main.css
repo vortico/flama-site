@@ -4,3 +4,11 @@
 @import 'docsearch.css';
 @import 'scrollbar.css';
 /*! purgecss end ignore */
+
+:root {
+  --scroll-mt: 7rem;
+}
+
+body {
+  @apply bg-zinc-100 text-zinc-600 transition-colors duration-500 dark:bg-zinc-800 dark:text-zinc-400;
+}
