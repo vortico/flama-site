@@ -15,7 +15,7 @@ export function QuickSearchButton({
             <kbd className="font-sans font-semibold text-brand-500">
               <abbr
                 title={actionKey[1]}
-                className="text-zinc-500 no-underline dark:text-zinc-400"
+                className="text-primary-500 no-underline dark:text-primary-400"
               >
                 {actionKey[0]}
               </abbr>{' '}

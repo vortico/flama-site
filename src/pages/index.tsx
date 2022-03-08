@@ -7,7 +7,7 @@ import BaseLayout from '@/layouts/base'
 function Construction() {
   return (
     <>
-      <div className="relative min-h-screen overflow-hidden bg-zinc-100 text-zinc-400 dark:bg-zinc-800 dark:text-zinc-600">
+      <div className="relative min-h-screen overflow-hidden bg-primary-100 text-primary-400 dark:bg-primary-800 dark:text-primary-600">
         <main className="mx-auto mt-10 max-w-7xl px-4 sm:mt-12 sm:px-6 md:mt-16 lg:mt-20 lg:px-8 xl:mt-28">
           <section className="text-center">
             <h1>

@@ -10,5 +10,5 @@
 }
 
 body {
-  @apply bg-zinc-100 text-zinc-600 transition-colors duration-500 dark:bg-zinc-800 dark:text-zinc-400;
+  @apply bg-primary-100 text-primary-600 transition-colors duration-500 dark:bg-primary-800 dark:text-primary-400;
 }

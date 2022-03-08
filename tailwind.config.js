@@ -1,4 +1,5 @@
 const defaultTheme = require('tailwindcss/defaultTheme')
+const colors = require('tailwindcss/colors')
 
 module.exports = {
   darkMode: 'class',
@@ -25,6 +26,7 @@ module.exports = {
           800: '#511E0B',
           900: '#1F0C04',
         },
+        primary: colors.zinc,
       },
       typography: (theme) => ({
         DEFAULT: {

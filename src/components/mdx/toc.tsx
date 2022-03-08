@@ -115,7 +115,7 @@ export function withTOC({ title, titleSlug, activeClassNames }: withTOCProps) {
         {...props}
         className="prose-toc fixed top-20 bottom-0 right-[max(0px,calc(50%-45rem))] z-20 hidden w-[19.5rem] overflow-y-auto px-8 xl:block"
       >
-        <h5 className="mb-4 mt-8 text-sm font-semibold text-zinc-900 dark:text-zinc-100">
+        <h5 className="mb-4 mt-8 text-sm font-semibold text-primary-900 dark:text-primary-100">
           On this page
         </h5>
         {titleSlug && (

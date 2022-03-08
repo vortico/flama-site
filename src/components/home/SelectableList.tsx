@@ -25,10 +25,10 @@ function SelectableItem({
   return (
     <button
       type="button"
-      className={`group md:text-md flex w-full flex-col items-center gap-6 text-xs font-semibold ${
+      className={`md:text-md group flex w-full flex-col items-center gap-6 text-xs font-semibold ${
         selected == id
           ? 'text-brand-600 dark:text-brand-400'
-          : 'text-zinc-600 dark:text-zinc-400'
+          : 'text-primary-600 dark:text-primary-400'
       }`}
       onClick={() => {
         onSelect(id)

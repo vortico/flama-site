@@ -1,6 +1,6 @@
 .prose {
   hr {
-    @apply my-12 border-zinc-100;
+    @apply my-12 border-primary-100;
   }
 
   h2,
@@ -27,7 +27,7 @@
   h4 small,
   h5 small,
   h6 small {
-    @apply font-mono font-medium text-zinc-500;
+    @apply font-mono font-medium text-primary-500;
   }
 
   h2 small {
@@ -60,7 +60,7 @@
         height: 0.125rem;
         top: calc(0.875rem - 0.0625rem);
 
-        @apply absolute left-0 rounded-full bg-zinc-300;
+        @apply absolute left-0 rounded-full bg-primary-300;
       }
 
       @apply relative pl-6;
@@ -84,7 +84,7 @@
   }
 
   strong {
-    @apply font-semibold text-zinc-900;
+    @apply font-semibold text-primary-900;
   }
 
   code {
@@ -101,7 +101,7 @@
       @apply min-w-full flex-none;
     }
 
-    @apply mt-5 mb-10 flex rounded-xl bg-white p-5 text-zinc-700 shadow-md;
+    @apply mt-5 mb-10 flex rounded-xl bg-white p-5 text-primary-700 shadow-md;
   }
 
   p + pre {
@@ -117,7 +117,7 @@
       @apply pt-0 font-semibold;
     }
 
-    @apply border-b-zinc-200 text-zinc-700;
+    @apply border-b-primary-200 text-primary-700;
   }
 
   tbody {
@@ -126,7 +126,7 @@
         @apply border-b-2;
       }
 
-      @apply border-b-zinc-100;
+      @apply border-b-primary-100;
     }
 
     code {
@@ -147,14 +147,14 @@
   nav {
     a {
       &:hover {
-        @apply text-zinc-900;
+        @apply text-primary-900;
       }
 
       &:target {
         @apply text-brand-500;
       }
 
-      @apply text-zinc-700;
+      @apply text-primary-700;
     }
 
     ol {
@@ -200,7 +200,7 @@
     }
   }
 
-  @apply max-w-none text-zinc-600;
+  @apply max-w-none text-primary-600;
 }
 
 .dark:prose-dark {
@@ -211,7 +211,7 @@
   h5,
   h6,
   thead th {
-    @apply text-zinc-200;
+    @apply text-primary-200;
   }
 
   h1 small,
@@ -220,15 +220,15 @@
   h4 small,
   h5 small,
   h6 small {
-    @apply text-zinc-400;
+    @apply text-primary-400;
   }
 
   thead {
     th {
-      @apply text-zinc-200;
+      @apply text-primary-200;
     }
 
-    @apply border-none text-zinc-300;
+    @apply border-none text-primary-300;
   }
 
   tbody {
@@ -238,42 +238,42 @@
   }
 
   code {
-    @apply text-zinc-200;
+    @apply text-primary-200;
   }
 
   hr {
-    @apply border-zinc-200 opacity-5;
+    @apply border-primary-200 opacity-5;
   }
 
   a {
-    @apply border-none text-zinc-200;
+    @apply border-none text-primary-200;
   }
 
   strong {
-    @apply text-zinc-200;
+    @apply text-primary-200;
   }
 
   blockquote {
-    @apply text-zinc-50;
+    @apply text-primary-50;
   }
 
   pre {
-    @apply bg-zinc-700 text-zinc-50 shadow-md;
+    @apply bg-primary-700 text-primary-50 shadow-md;
   }
 
   nav {
     a {
       &:hover {
-        @apply text-zinc-300;
+        @apply text-primary-300;
       }
 
       &:target {
         @apply text-brand-500;
       }
 
-      @apply text-zinc-400;
+      @apply text-primary-400;
     }
   }
 
-  @apply text-zinc-400;
+  @apply text-primary-400;
 }

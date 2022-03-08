@@ -18,9 +18,9 @@ function BlogMenu({ authors, date, readingTime }: BlogMenuProps) {
 
   return (
     <div className="mb-16 text-sm leading-6 xl:mb-0">
-      <div className="mb-5 hidden border-b border-zinc-200 pb-5 dark:border-zinc-200/5 xl:block">
+      <div className="mb-5 hidden border-b border-primary-200 pb-5 dark:border-primary-200/5 xl:block">
         <Link href="/blog">
-          <a className="group flex font-semibold text-zinc-600 hover:text-brand-500 dark:text-zinc-400 dark:hover:text-brand-400">
+          <a className="group flex font-semibold text-primary-600 hover:text-brand-500 dark:text-primary-400 dark:hover:text-brand-400">
             <svg
               viewBox="0 -9 3 24"
               className="mr-3 h-6 w-auto overflow-visible"
@@ -40,7 +40,7 @@ function BlogMenu({ authors, date, readingTime }: BlogMenuProps) {
       </div>
       <div className="space-y-4 sm:flex sm:flex-wrap sm:justify-center xl:block">
         <div>
-          <h5 className="mb-4 text-zinc-700 dark:text-zinc-200">{`${
+          <h5 className="mb-4 text-primary-700 dark:text-primary-200">{`${
             authors.length > 1 ? 'Authors' : 'Author'
           }`}</h5>
           <div className="space-y-4">
@@ -59,14 +59,16 @@ function BlogMenu({ authors, date, readingTime }: BlogMenuProps) {
           </div>
         </div>
         <div>
-          <h5 className="mb-4 text-zinc-700 dark:text-zinc-200">Publication</h5>
+          <h5 className="mb-4 text-primary-700 dark:text-primary-200">
+            Publication
+          </h5>
           <div className="pl-4">
             <time dateTime={date}>{dateFormatter.format(new Date(date))}</time>
           </div>
         </div>
 
         <div>
-          <h5 className="mb-4 text-zinc-700 dark:text-zinc-200">
+          <h5 className="mb-4 text-primary-700 dark:text-primary-200">
             Reading Time
           </h5>
           <div className="pl-4">
@@ -87,7 +89,7 @@ export function BlogLayout({ blog, children }: BlogLayoutProps) {
   return (
     <BaseLayout>
       <header className="space-y-4 pt-16 pb-9 sm:pb-16 sm:text-center">
-        <h1 className="text-3xl font-extrabold tracking-tight text-zinc-700 dark:text-zinc-200 sm:text-4xl">
+        <h1 className="text-3xl font-extrabold tracking-tight text-primary-700 dark:text-primary-200 sm:text-4xl">
           {blog.title}
         </h1>
         <p className="text-lg">{blog.description}</p>

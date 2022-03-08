@@ -31,7 +31,7 @@ function DocsMenuCategoryItem({ link }: DocsMenuCategoryItemProps) {
           className={`-ml-px block border-l border-transparent pl-4 ${
             isActive
               ? 'border-current font-semibold text-brand-500 dark:text-brand-400'
-              : 'text-zinc-700 hover:border-zinc-400 hover:text-zinc-900 dark:text-zinc-400 dark:hover:border-zinc-500 dark:hover:text-zinc-300'
+              : 'text-primary-700 hover:border-primary-400 hover:text-primary-900 dark:text-primary-400 dark:hover:border-primary-500 dark:hover:text-primary-300'
           }`}
         >
           {link.title}
@@ -48,10 +48,10 @@ interface DocsMenuCategoryProps {
 function DocsMenuCategory({ category }: DocsMenuCategoryProps) {
   return (
     <li>
-      <h5 className="mb-8 font-semibold text-zinc-800 dark:text-zinc-200 lg:mb-3">
+      <h5 className="mb-8 font-semibold text-primary-800 dark:text-primary-200 lg:mb-3">
         {category.name}
       </h5>
-      <ul className="space-y-6 border-l border-zinc-300 dark:border-zinc-700 lg:space-y-2">
+      <ul className="space-y-6 border-l border-primary-300 dark:border-primary-700 lg:space-y-2">
         {category.links
           .sort((a, b) => a.order - b.order)
           .map((link, i) => (
