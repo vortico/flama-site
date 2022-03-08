@@ -43,7 +43,7 @@ interface TOCProps {
 
 interface withTOCProps {
   title: string
-  titleSlug: string
+  titleSlug?: string
   activeClassNames: string
 }
 
@@ -118,9 +118,11 @@ export function withTOC({ title, titleSlug, activeClassNames }: withTOCProps) {
         <h5 className="mb-4 mt-8 text-sm font-semibold text-zinc-900 dark:text-zinc-100">
           On this page
         </h5>
-        <a className="prose-toc-link" href={`#${titleSlug}`}>
-          {title}
-        </a>
+        {titleSlug && (
+          <a className="prose-toc-link" href={`#${titleSlug}`}>
+            {title}
+          </a>
+        )}
         {children}
       </nav>
     )

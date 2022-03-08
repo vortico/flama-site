@@ -1,10 +1,10 @@
 import React, { ReactNode, useMemo } from 'react'
 import { allDocs } from '@/contentlayer'
+import { Docs as IDocs } from '@/contentlayer/types'
 import { tableOfContent, TOC, TOCCategory, TOCLink } from '@/lib/toc'
 import Link from 'next/link'
-import BaseLayout from '@/layouts/base'
 import { useRouter } from 'next/router'
-import { QuickSearchButton } from '@/components/QuickSearchButton'
+import SidebarLayout from '@/layouts/sidebar'
 
 interface DocsMenuCategoryItemProps {
   link: TOCLink
@@ -66,7 +66,7 @@ function DocsMenu() {
   const links = allDocs.map((docs) => ({
     title: docs.title,
     path: docs.path,
-    url: `/docs/${docs.slug}`,
+    url: docs.url,
     order: docs.order,
   }))
   const toc = useMemo<TOC>(() => tableOfContent(links), [links])
@@ -83,50 +83,27 @@ function DocsMenu() {
 }
 
 interface DocLayoutProps {
-  title: string
-  titleSlug: string
-  group: string
-  words: string
-  readingTime: number
+  docs: IDocs
   children: ReactNode
 }
 
-export function DocsLayout({
-  title,
-  titleSlug,
-  group,
-  readingTime,
-  children,
-}: DocLayoutProps) {
+export function DocsLayout({ docs, children }: DocLayoutProps) {
   return (
-    <BaseLayout>
-      <div className="fixed bottom-0 top-16 left-[max(0px,calc(50%-45rem))] right-auto z-20 hidden w-[19.5rem] overflow-y-auto px-8 pb-10 md:top-20 lg:block">
-        <div className="fixed">
-          <div className="bg-zinc-100 pb-px pt-8 dark:bg-zinc-800">
-            <QuickSearchButton className="dark:highlight-white/5 hidden h-8 w-full items-center space-x-3 rounded-full bg-white px-4 text-left shadow-sm ring-1 ring-brand-900/10 hover:ring-brand-300 focus:outline-none focus:ring-2 focus:ring-brand-500 dark:bg-zinc-700 dark:ring-0 dark:hover:bg-zinc-600 sm:flex" />
+    <SidebarLayout menu={<DocsMenu />}>
+      <article className="prose dark:prose-dark">
+        <section>
+          <div className="my-2 flex items-center justify-between">
+            <span className="font-semibold text-brand-500">{docs.group}</span>
+            <span className="italic">
+              ~ {Math.round(docs.readingTime.minutes)} min read
+            </span>
           </div>
-          <div className="h-10 bg-gradient-to-b from-zinc-100 to-transparent dark:from-zinc-800" />
-        </div>
-        <nav className="pt-28 pb-10">
-          <DocsMenu />
-        </nav>
-      </div>
-      <main className="mt-8 max-w-5xl lg:pl-[20rem]">
-        <article className="prose dark:prose-dark">
-          <section>
-            <div className="my-2 flex items-center justify-between">
-              <span className="font-semibold text-brand-500">{group}</span>
-              <span className="italic">
-                ~ {Math.round(readingTime)} min read
-              </span>
-            </div>
-            <h1 id={titleSlug} className="scroll-mt-[var(--scroll-mt)]">
-              {title}
-            </h1>
-          </section>
-          {children}
-        </article>
-      </main>
-    </BaseLayout>
+          <h1 id={docs.titleSlug} className="scroll-mt-[var(--scroll-mt)]">
+            {docs.title}
+          </h1>
+        </section>
+        {children}
+      </article>
+    </SidebarLayout>
   )
 }

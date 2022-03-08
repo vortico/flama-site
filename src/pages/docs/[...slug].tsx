@@ -1,6 +1,6 @@
 import { DocsLayout } from '@/layouts/docs'
 import { allDocs } from '@/contentlayer'
-import type { Docs } from '@/contentlayer/types'
+import type { Docs as IDocs } from '@/contentlayer/types'
 import { useMDXComponent } from 'next-contentlayer/hooks' // eslint-disable-line import/no-unresolved
 import { withTOC } from '@/components/mdx/toc'
 import { withHeader } from '@/components/mdx/header'
@@ -21,28 +21,25 @@ interface StaticProps {
 
 export async function getStaticProps({ params }: StaticProps) {
   const docs = allDocs.find((docs) => docs.slug === params.slug.join('/'))
-  return { props: { ...docs } }
+  return { props: { docs } }
 }
 
-export default function Docs({ title, group, readingTime, slug, body }: Docs) {
-  const Component = useMDXComponent(body.code)
-  const titleSlug = title.toLowerCase().replace(/ /g, '-')
+interface DocsProps {
+  docs: IDocs
+}
+
+export default function Docs({ docs }: DocsProps) {
+  const Component = useMDXComponent(docs.body.code)
 
   return (
     <>
-      <NextSeo title={title} canonical={`https://flama.dev/docs/${slug}`} />
-      <DocsLayout
-        title={title}
-        titleSlug={titleSlug}
-        group={group}
-        words={readingTime.words}
-        readingTime={readingTime.minutes}
-      >
+      <NextSeo title={docs.title} canonical={`https://flama.dev/${docs.url}`} />
+      <DocsLayout docs={docs}>
         <Component
           components={{
             nav: withTOC({
-              title,
-              titleSlug,
+              title: docs.title,
+              titleSlug: docs.titleSlug,
               activeClassNames: '!text-brand-500',
             }),
             h1: withHeader({ level: 1 }),

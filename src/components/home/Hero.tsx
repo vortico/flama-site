@@ -4,8 +4,8 @@ import { QuickSearchButton } from '@/components/QuickSearchButton'
 
 export function Hero() {
   return (
-    <section className="mx-auto max-w-5xl px-6 pt-40 text-center md:px-8 md:pt-52 lg:pt-60">
-      <h1 className="text-5xl font-extrabold text-zinc-700 dark:text-zinc-200 sm:text-6xl lg:text-8xl">
+    <section className="mx-auto max-w-5xl px-6 pt-40 text-center md:px-8 md:pt-48 lg:pt-52">
+      <h1 className="text-5xl font-extrabold text-zinc-700 dark:text-zinc-200 sm:text-6xl lg:text-7xl">
         Lorem ipsum dolor sit amet, consectetur adipiscing elit.
       </h1>
       <p className="mx-auto mt-10 max-w-3xl text-lg">
