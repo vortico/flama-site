@@ -30,7 +30,7 @@ function BlogPreview({ blog }: BlogPreviewProps) {
       </div>
       <div>
         <a
-          className="dark:highlight-white/5 inline-flex h-7 items-center rounded-full bg-white px-4 shadow-sm ring-1 ring-brand-900/10 hover:ring-brand-300 focus:outline-none focus:ring-2 focus:ring-brand-500 dark:bg-primary-700 dark:ring-0 dark:hover:bg-primary-600"
+          className="dark:highlight-white/5 mb-px inline-flex h-7 items-center rounded-full bg-white px-4 shadow-sm ring-1 ring-brand-900/10 hover:ring-brand-300 focus:outline-none focus:ring-2 focus:ring-brand-500 dark:bg-primary-700 dark:ring-0 dark:hover:bg-primary-600"
           href={`/${blog.url}`}
         >
           <span className="text-left text-sm">Read more</span>

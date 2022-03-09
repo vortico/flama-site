@@ -1,2 +1,6 @@
 *.config.js
 *.config.ts
+.contentlayer/
+.husky/
+.next/
+node_modules/

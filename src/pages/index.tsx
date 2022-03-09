@@ -23,16 +23,20 @@ function Construction() {
 export default function Home() {
   const { query } = useRouter()
 
-  if (query.dev === undefined) return <Construction />
-
   return (
     <BaseLayout>
-      <header>
-        <Hero />
-      </header>
-      <main className="space-y-20 pt-20 sm:space-y-32 sm:pt-32 md:space-y-40 md:pt-40">
-        <DeployModels />
-      </main>
+      {query.dev === undefined ? (
+        <Construction />
+      ) : (
+        <>
+          <header>
+            <Hero />
+          </header>
+          <main className="space-y-20 pt-20 sm:space-y-32 sm:pt-32 md:space-y-40 md:pt-40">
+            <DeployModels />
+          </main>
+        </>
+      )}
     </BaseLayout>
   )
 }
