@@ -32,7 +32,10 @@ export default function Blog({ blog }: BlogProps) {
 
   return (
     <>
-      <NextSeo title={blog.title} canonical={`https://flama.dev/${blog.url}`} />
+      <NextSeo
+        title={blog.title}
+        canonical={`https://flama.dev/blog/${blog.slug}`}
+      />
       <BlogLayout blog={blog}>
         <Component
           components={{

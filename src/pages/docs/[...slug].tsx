@@ -33,7 +33,10 @@ export default function Docs({ docs }: DocsProps) {
 
   return (
     <>
-      <NextSeo title={docs.title} canonical={`https://flama.dev/${docs.url}`} />
+      <NextSeo
+        title={docs.title}
+        canonical={`https://flama.dev/docs/${docs.slug}`}
+      />
       <DocsLayout docs={docs}>
         <Component
           components={{

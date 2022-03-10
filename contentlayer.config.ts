@@ -91,14 +91,6 @@ export const Docs = defineDocumentType(() => ({
       type: 'string',
       resolve: (doc) => doc._raw.flattenedPath.replace('docs/', ''),
     },
-    url: {
-      type: 'string',
-      resolve: (item) =>
-        item._raw.flattenedPath
-          .toLowerCase()
-          .replace(/ /g, '-')
-          .replace(/(\d+-)/g, ''),
-    },
     group: {
       type: 'string',
       resolve: (item) =>
@@ -139,14 +131,6 @@ export const Blog = defineDocumentType(() => ({
     path: {
       type: 'string',
       resolve: (doc) => doc._raw.flattenedPath.replace('blog/', ''),
-    },
-    url: {
-      type: 'string',
-      resolve: (item) =>
-        item._raw.flattenedPath
-          .toLowerCase()
-          .replace(/ /g, '-')
-          .replace(/\d{4}-\d{2}-\d{2}_/, ''),
     },
     date: {
       type: 'date',

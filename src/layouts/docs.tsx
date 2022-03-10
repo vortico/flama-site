@@ -66,7 +66,7 @@ function DocsMenu() {
   const links = allDocs.map((docs) => ({
     title: docs.title,
     path: docs.path,
-    url: docs.url,
+    url: `/docs/${docs.slug}`,
     order: docs.order,
   }))
   const toc = useMemo<TOC>(() => tableOfContent(links), [links])
