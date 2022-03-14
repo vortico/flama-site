@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import React, { ReactNode } from 'react'
+import { ChevronRightIcon } from '@heroicons/react/solid'
 
 interface HomeSectionProps extends React.ComponentProps<'section'> {
   icon: ReactNode
@@ -32,8 +33,9 @@ export function HomeSection({
       <p className="mt-4 max-w-3xl">{content}</p>
       {docRef && (
         <Link href={docRef}>
-          <a className="dark:highlight-white/20 mt-8 inline-flex h-8 items-center rounded-full bg-brand-500 px-6 font-semibold text-primary-100 hover:bg-brand-700 focus:outline-none focus:ring-2 focus:ring-brand-400 focus:ring-offset-2 focus:ring-offset-brand-50 dark:bg-brand-500 dark:hover:bg-brand-400">
-            Learn more
+          <a className="dark:highlight-white/20 mt-8 inline-flex h-8 items-center rounded-full bg-brand-500 pl-4 pr-2 font-semibold text-primary-100 hover:bg-brand-700 focus:outline-none focus:ring-2 focus:ring-brand-400 focus:ring-offset-2 focus:ring-offset-brand-50 dark:bg-brand-500 dark:hover:bg-brand-400">
+            <span className="text-left text-sm">Read more</span>
+            <ChevronRightIcon className="h-4 pl-2" />
           </a>
         </Link>
       )}
