@@ -1,7 +1,8 @@
 import { allBlogs } from '@/contentlayer'
 import { Blog as IBlog } from '@/contentlayer/types'
 import { NextSeo } from 'next-seo'
-import BaseLayout from '@/layouts/base'
+import PlainLayout from '@/layouts/plain'
+import { ChevronRightIcon } from '@heroicons/react/solid'
 
 interface BlogPreviewProps {
   blog: IBlog
@@ -30,10 +31,11 @@ function BlogPreview({ blog }: BlogPreviewProps) {
       </div>
       <div>
         <a
-          className="dark:highlight-white/5 mb-px inline-flex h-7 items-center rounded-full bg-white px-4 shadow-sm ring-1 ring-brand-900/10 hover:ring-brand-300 focus:outline-none focus:ring-2 focus:ring-brand-500 dark:bg-primary-700 dark:ring-0 dark:hover:bg-primary-600"
+          className="dark:highlight-white/5 mb-px inline-flex h-7 items-center rounded-full bg-white pl-4 pr-2 shadow-sm ring-1 ring-brand-900/10 hover:ring-brand-300 focus:outline-none focus:ring-2 focus:ring-brand-500 dark:bg-primary-700 dark:ring-0 dark:hover:bg-primary-600"
           href={`/blog/${blog.slug}`}
         >
           <span className="text-left text-sm">Read more</span>
+          <ChevronRightIcon className="h-4 pl-2" />
         </a>
       </div>
     </article>
@@ -44,7 +46,7 @@ export default function Blog() {
   return (
     <>
       <NextSeo title="Blog" canonical="https://flama.dev/blog" />
-      <BaseLayout>
+      <PlainLayout>
         <header className="space-y-4 pt-16 pb-9 sm:pb-16 sm:text-center">
           <h1 className="text-3xl font-extrabold tracking-tight text-primary-700 dark:text-primary-200 sm:text-4xl">
             Blog
@@ -58,7 +60,7 @@ export default function Blog() {
             <BlogPreview key={i} blog={blog} />
           ))}
         </main>
-      </BaseLayout>
+      </PlainLayout>
     </>
   )
 }

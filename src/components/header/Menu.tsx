@@ -3,7 +3,7 @@ import { FlamaIcon, GithubIcon } from '@/components/icons'
 import ThemeModeSwitcher from '@/components/ThemeModeSwitcher'
 import { MenuIcon, SearchIcon, XIcon } from '@heroicons/react/outline'
 import { SearchButton } from '@/components/Search'
-import React, { useCallback, useEffect, useState } from 'react'
+import React, { useCallback, useState } from 'react'
 import { createPortal } from 'react-dom'
 
 function Logo() {
@@ -63,7 +63,7 @@ interface FloatMenuProps {
 function FloatMenu({ onClose }: FloatMenuProps) {
   return (
     <div
-      className="fixed top-0 left-0 z-[200] h-screen w-screen p-4 sm:p-6 md:p-[10vh] lg:p-[12vh]"
+      className="fixed inset-0 z-[200] min-h-screen w-screen p-4 sm:p-6 md:p-[10vh] lg:p-[12vh]"
       aria-modal="true"
       role="dialog"
     >
@@ -72,8 +72,8 @@ function FloatMenu({ onClose }: FloatMenuProps) {
         aria-hidden="true"
         onClick={onClose}
       />
-      <div className="fixed top-5 right-5 w-full max-w-xs rounded bg-primary-100 py-6 text-base font-semibold text-primary-600 shadow-lg dark:bg-primary-800 dark:text-primary-400">
-        <button className="absolute top-5 right-5 flex h-9 w-9 items-center justify-center text-primary-400 hover:text-primary-500 dark:text-primary-600 dark:hover:text-primary-500">
+      <div className="relative rounded bg-primary-100 py-6 text-base font-semibold text-primary-600 shadow-lg dark:bg-primary-800 dark:text-primary-400">
+        <button className="absolute top-5 right-5 flex h-8 w-8 items-center justify-center text-primary-400 hover:text-primary-500 dark:text-primary-600 dark:hover:text-primary-500">
           <XIcon
             className="h-5 w-5"
             onClick={onClose}
@@ -92,7 +92,6 @@ function FloatMenu({ onClose }: FloatMenuProps) {
 }
 
 export default function Menu() {
-  const [isOpaque, setIsOpaque] = useState<boolean>(false)
   const [isOpen, setIsOpen] = useState<boolean>(false)
 
   const onOpen = useCallback(() => {
@@ -103,58 +102,34 @@ export default function Menu() {
     setIsOpen(false)
   }, [setIsOpen])
 
-  useEffect(() => {
-    const offset = 50
-
-    function onScroll() {
-      if (!isOpaque && window.scrollY > offset) {
-        setIsOpaque(true)
-      } else if (isOpaque && window.scrollY <= offset) {
-        setIsOpaque(false)
-      }
-    }
-
-    onScroll()
-    window.addEventListener('scroll', onScroll, { passive: true })
-    return () => {
-      window.removeEventListener('scroll', onScroll)
-    }
-  }, [isOpaque])
-
   return (
     <>
-      <div
-        className={`fixed inset-x-0 top-0 z-30 mx-auto flex h-16 items-center border-b border-brand-500 backdrop-blur transition-colors duration-500 md:h-20 ${
-          isOpaque
-            ? 'bg-primary-100/90 supports-backdrop-blur:bg-primary-100/50 dark:bg-primary-800/80 supports-backdrop-blur:dark:bg-primary-800/50'
-            : 'bg-transparent'
-        }
-      `}
-      >
-        <div className="mx-auto flex h-5 max-w-[90rem] flex-1 items-center justify-between px-4 sm:px-6 md:px-8 lg:h-6">
-          <div className="flex justify-start lg:w-1 lg:flex-1">
-            <Logo />
+      <div className="flex w-full items-center justify-between">
+        <div className="flex justify-start lg:w-1 lg:flex-1">
+          <Logo />
+        </div>
+        <div className="hidden items-center justify-between md:flex">
+          <nav className="pr-16">
+            <NavList className="flex flex-row gap-10 text-lg font-medium text-primary-600 dark:text-primary-400" />
+          </nav>
+          <div className="flex items-center justify-around gap-10 border-l border-brand-500 pl-16">
+            <SocialList />
           </div>
-          <div className="hidden items-center justify-between md:flex">
-            <nav className="pr-16">
-              <NavList className="flex flex-row gap-10 text-lg font-medium text-primary-600 dark:text-primary-400" />
-            </nav>
-            <div className="flex items-center justify-around gap-10 border-l border-brand-500 pl-16">
-              <SocialList />
-            </div>
-          </div>
-          <div className="flex items-center justify-end gap-5 md:hidden">
-            <SearchButton className="block text-primary-400 hover:text-primary-500 dark:text-primary-600 dark:hover:text-primary-500">
-              <SearchIcon className="h-5 w-5" aria-label="Search" />
-            </SearchButton>
-            <button className="block text-primary-400 hover:text-primary-500 dark:text-primary-600 dark:hover:text-primary-500">
-              <MenuIcon
-                className="h-5 w-5"
-                onClick={onOpen}
-                aria-label="Open menu"
-              />
-            </button>
-          </div>
+        </div>
+        <div className="flex items-center justify-end gap-5 md:hidden">
+          <SearchButton
+            className="block text-primary-400 hover:text-primary-500 dark:text-primary-600 dark:hover:text-primary-500"
+            aria-label="Search"
+          >
+            <SearchIcon className="h-5 w-5" />
+          </SearchButton>
+          <button
+            className="block text-primary-400 hover:text-primary-500 dark:text-primary-600 dark:hover:text-primary-500"
+            onClick={onOpen}
+            aria-label="Open menu"
+          >
+            <MenuIcon className="h-5 w-5" />
+          </button>
         </div>
       </div>
 

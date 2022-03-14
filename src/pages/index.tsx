@@ -2,7 +2,7 @@ import { useRouter } from 'next/router'
 import React from 'react'
 import { Hero } from '@/components/home/Hero'
 import { DeployModels } from '@/components/home/DeployModels'
-import BaseLayout from '@/layouts/base'
+import PlainLayout from '@/layouts/plain'
 
 function Construction() {
   return (
@@ -24,7 +24,7 @@ export default function Home() {
   const { query } = useRouter()
 
   return (
-    <BaseLayout>
+    <PlainLayout>
       {query.dev === undefined ? (
         <Construction />
       ) : (
@@ -37,6 +37,6 @@ export default function Home() {
           </main>
         </>
       )}
-    </BaseLayout>
+    </PlainLayout>
   )
 }
