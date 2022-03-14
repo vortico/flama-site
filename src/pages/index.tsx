@@ -3,6 +3,7 @@ import React from 'react'
 import { Hero } from '@/components/home/Hero'
 import { DeployModels } from '@/components/home/DeployModels'
 import PlainLayout from '@/layouts/plain'
+import Footer from '@/components/home/Footer'
 
 function Construction() {
   return (
@@ -32,9 +33,10 @@ export default function Home() {
           <header>
             <Hero />
           </header>
-          <main className="space-y-20 pt-20 sm:space-y-32 sm:pt-32 md:space-y-40 md:pt-40">
+          <main className="mb-20 space-y-20 pt-20 sm:mb-32 sm:space-y-32 sm:pt-32 md:mb-40 md:space-y-40 md:pt-40">
             <DeployModels />
           </main>
+          <Footer />
         </>
       )}
     </PlainLayout>

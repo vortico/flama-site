@@ -14,7 +14,7 @@ function Logo() {
         aria-label="Flama logo"
       >
         <FlamaIcon className="h-5 w-5 md:h-6 md:w-6" />
-        <span className="align-baseline text-xl lg:text-2xl">Flama</span>
+        <span className="text-xl md:text-2xl">Flama</span>
       </a>
     </Link>
   )

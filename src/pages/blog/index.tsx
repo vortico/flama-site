@@ -3,6 +3,7 @@ import { Blog as IBlog } from '@/contentlayer/types'
 import { NextSeo } from 'next-seo'
 import PlainLayout from '@/layouts/plain'
 import { ChevronRightIcon } from '@heroicons/react/solid'
+import Footer from '@/components/home/Footer'
 
 interface BlogPreviewProps {
   blog: IBlog
@@ -55,11 +56,12 @@ export default function Blog() {
             All the latest news about Flama directly from the team.
           </p>
         </header>
-        <main className="mx-auto max-w-5xl space-y-16">
+        <main className="mx-auto mb-20 max-w-5xl space-y-16 sm:mb-32 md:mb-40">
           {allBlogs.map((blog, i) => (
             <BlogPreview key={i} blog={blog} />
           ))}
         </main>
+        <Footer />
       </PlainLayout>
     </>
   )
