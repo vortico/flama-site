@@ -1,11 +1,11 @@
-import Menu from '@/components/header/Menu'
+import Menu from '@/components/Menu'
 import React, { ReactNode, useEffect, useState } from 'react'
 
 interface MainHeaderProps {
   children?: ReactNode
 }
 
-export default function MainHeader({ children }: MainHeaderProps) {
+export default function Header({ children }: MainHeaderProps) {
   const [isOpaque, setIsOpaque] = useState<boolean>(false)
 
   useEffect(() => {

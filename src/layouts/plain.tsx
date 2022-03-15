@@ -1,5 +1,5 @@
 import React, { ReactNode } from 'react'
-import MainHeader from '@/components/header/MainHeader'
+import Header from '@/components/Header'
 
 export interface PlainLayoutProps {
   menuChildren?: ReactNode
@@ -12,7 +12,7 @@ export default function PlainLayout({
 }: PlainLayoutProps) {
   return (
     <>
-      <MainHeader>{menuChildren}</MainHeader>
+      <Header>{menuChildren}</Header>
       <div className="mx-auto max-w-[90rem] overflow-hidden px-4 sm:px-6 md:px-8">
         {children}
       </div>
