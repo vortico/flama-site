@@ -1,6 +1,6 @@
 import { FlamaIcon } from '@/components/icons'
 import React from 'react'
-import Link from 'next/link'
+import Link from '@/components/Link'
 
 const links = [
   {
@@ -54,13 +54,7 @@ export default function Footer() {
             <ul className="mt-3 space-y-2">
               {category.links.map((link, j) => (
                 <li key={j}>
-                  {link.url.startsWith('/') ? (
-                    <Link href={link.url}>
-                      <a>{link.name}</a>
-                    </Link>
-                  ) : (
-                    <a href={link.url}>{link.name}</a>
-                  )}
+                  <Link href={link.url}>{link.name}</Link>
                 </li>
               ))}
             </ul>

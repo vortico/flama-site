@@ -3,10 +3,14 @@ import { SearchButton } from '@/components/Search'
 import { SearchIcon } from '@heroicons/react/outline'
 
 export function QuickSearchButton({
+  className,
   ...props
 }: React.ComponentProps<'button'>) {
   return (
-    <SearchButton {...props}>
+    <SearchButton
+      {...props}
+      className={`dark:highlight-white/5 flex flex-1 items-center gap-x-3 rounded-full bg-white px-4 text-left shadow-sm ring-1 ring-brand-900/10 hover:ring-brand-300 focus:outline-none focus:ring-2 focus:ring-brand-500 dark:bg-primary-700 dark:ring-0 dark:hover:bg-primary-600 ${className}`}
+    >
       {({ actionKey }) => (
         <>
           <SearchIcon className="h-6 w-6 flex-none text-brand-500" />

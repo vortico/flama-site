@@ -1,6 +1,7 @@
 import Link from 'next/link'
 import React from 'react'
 import { QuickSearchButton } from '@/components/QuickSearchButton'
+import LinkButton from '@/components/LinkButton'
 
 export function Hero() {
   return (
@@ -13,12 +14,12 @@ export function Hero() {
         Maecenas in pharetra dolor. Nunc vitae arcu in est euismod feugiat.
       </p>
       <div className="mt-10 flex justify-center gap-6 text-sm sm:mt-10">
-        <Link href="/docs/">
-          <a className="dark:highlight-white/20 flex h-12 w-auto items-center justify-center rounded-full bg-brand-500 px-6 font-semibold text-primary-100 hover:bg-brand-700 focus:outline-none focus:ring-2 focus:ring-brand-400 focus:ring-offset-2 focus:ring-offset-brand-50 dark:bg-brand-500 dark:hover:bg-brand-400">
-            <span className="text-sm">Get Started</span>
-          </a>
-        </Link>
-        <QuickSearchButton className="dark:highlight-white/5 hidden h-12 w-72 items-center space-x-3 rounded-full bg-white px-4 text-left shadow-sm ring-1 ring-brand-900/10 hover:ring-brand-300 focus:outline-none focus:ring-2 focus:ring-brand-500 dark:bg-primary-700 dark:ring-0 dark:hover:bg-primary-600 sm:flex" />
+        <div className="h-12 w-auto">
+          <LinkButton text="Get Started" href="/docs" className="px-10" />
+        </div>
+        <div className="hidden h-12 w-72 sm:flex">
+          <QuickSearchButton />
+        </div>
       </div>
     </section>
   )

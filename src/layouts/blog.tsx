@@ -3,7 +3,7 @@ import { Blog as IBlog } from '@/contentlayer/types'
 import PlainLayout from '@/layouts/plain'
 import { BlogContext } from '@/components/blog/Context'
 import { Menu } from '@/components/blog/Menu'
-import Footer from '@/components/home/Footer'
+import Footer from '@/components/Footer'
 
 interface BlogLayoutProps {
   blog: IBlog

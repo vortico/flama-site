@@ -3,7 +3,7 @@ import React from 'react'
 import { Hero } from '@/components/home/Hero'
 import { DeployModels } from '@/components/home/DeployModels'
 import PlainLayout from '@/layouts/plain'
-import Footer from '@/components/home/Footer'
+import Footer from '@/components/Footer'
 
 function Construction() {
   return (
