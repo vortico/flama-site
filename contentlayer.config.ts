@@ -11,7 +11,6 @@ import remarkSectionize from 'remark-sectionize'
 import rehypeSlug from 'rehype-slug'
 import rehypeCodeTitles from 'rehype-code-titles'
 import rehypeAutolinkHeadings from 'rehype-autolink-headings'
-import rehypePrism from 'rehype-prism-plus'
 import rehypeTOC from 'rehype-toc'
 import { h } from 'hastscript'
 
@@ -59,7 +58,6 @@ const mdxOptions: MDXOptions = {
     rehypeSlug,
     rehypeCodeTitles,
     [rehypeTOC, tocOptions],
-    rehypePrism,
     [rehypeAutolinkHeadings, autoLinkHeadingsOptions],
   ],
 }

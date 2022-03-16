@@ -3,6 +3,7 @@
 /*! purgecss start ignore */
 @import 'docsearch.css';
 @import 'scrollbar.css';
+@import 'prism.css';
 /*! purgecss end ignore */
 
 :root {

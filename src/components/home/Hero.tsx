@@ -1,26 +1,79 @@
-import Link from 'next/link'
-import React from 'react'
+import React, { useState } from 'react'
 import { QuickSearchButton } from '@/components/QuickSearchButton'
 import LinkButton from '@/components/LinkButton'
+import CodeWindow, { CodeWindowProps } from '@/components/CodeWindow'
+import { ChevronRightIcon } from '@heroicons/react/solid'
 
-export function Hero() {
+export interface Sample {
+  title: string
+  code: CodeWindowProps
+}
+
+interface SamplesProps {
+  samples: Sample[]
+}
+
+function Samples({ samples }: SamplesProps) {
+  const [selected, setSelected] = useState<number>(0)
+
   return (
-    <section className="mx-auto max-w-5xl px-6 pt-20 text-center sm:pt-24 md:px-8 lg:pt-32">
-      <h1 className="text-5xl font-extrabold text-primary-700 dark:text-primary-200 sm:text-6xl lg:text-7xl">
-        Lorem ipsum dolor sit amet, consectetur adipiscing elit.
-      </h1>
-      <p className="mx-auto mt-10 max-w-3xl text-lg">
-        Quisque ut ultrices diam, id lobortis justo. Maecenas in pharetra dolor.
-        Maecenas in pharetra dolor. Nunc vitae arcu in est euismod feugiat.
-      </p>
-      <div className="mt-10 flex justify-center gap-6 text-sm sm:mt-10">
-        <div className="h-12 w-auto">
-          <LinkButton text="Get Started" href="/docs" className="px-10" />
-        </div>
-        <div className="hidden h-12 w-72 sm:flex">
-          <QuickSearchButton />
-        </div>
+    <div className="flex flex-col items-center justify-start gap-y-10 lg:flex-row lg:justify-center">
+      <div className="flex h-12 w-full basis-full justify-around lg:block lg:h-full lg:basis-1/3 lg:space-y-6 lg:pl-9">
+        {samples.map(({ title }, i) => (
+          <button
+            key={i}
+            className="flex items-center"
+            onClick={() => setSelected(i)}
+          >
+            {selected === i && (
+              <ChevronRightIcon className="-ml-8 inline h-8 text-brand-500 sm:-ml-9 sm:h-9" />
+            )}
+            <span
+              className={`text-lg font-bold tracking-tight sm:text-3xl ${
+                selected === i
+                  ? 'text-primary-600 underline decoration-brand-500 decoration-4 underline-offset-8 dark:text-primary-300'
+                  : 'text-primary-500'
+              }`}
+            >
+              {title}
+            </span>
+          </button>
+        ))}
       </div>
-    </section>
+      <div className="h-full min-h-[17.5rem] w-full basis-full lg:basis-2/3">
+        <CodeWindow {...samples[selected].code} />
+      </div>
+    </div>
+  )
+}
+
+export interface HeroProps {
+  samples: Sample[]
+}
+
+export function Hero({ samples }: HeroProps) {
+  return (
+    <>
+      <section className="mx-auto max-w-5xl px-6 pt-20 text-center sm:pt-24 md:px-8 lg:pt-32">
+        <h1 className="text-4xl font-extrabold text-primary-700 dark:text-primary-200 sm:text-5xl lg:text-6xl">
+          Productionalize your machine learning models seamlessly
+        </h1>
+        <p className="mx-auto mt-10 max-w-3xl text-lg">
+          A data-science oriented framework and service to build modern machine
+          learning APIs with the convenience of ‘flama’ CLI commands in seconds.
+        </p>
+        <div className="mt-10 flex justify-center gap-6 text-sm">
+          <div className="h-12 w-auto">
+            <LinkButton text="Get Started" href="/docs" className="px-10" />
+          </div>
+          <div className="hidden h-12 w-72 sm:flex">
+            <QuickSearchButton />
+          </div>
+        </div>
+      </section>
+      <section className="mx-auto mt-20 max-w-6xl sm:mt-24 lg:mt-32">
+        <Samples samples={samples} />
+      </section>
+    </>
   )
 }

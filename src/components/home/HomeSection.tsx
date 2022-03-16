@@ -1,6 +1,4 @@
-import Link from 'next/link'
 import React, { ReactNode } from 'react'
-import { ChevronRightIcon } from '@heroicons/react/solid'
 import LinkButton from '@/components/LinkButton'
 
 interface HomeSectionProps extends React.ComponentProps<'section'> {

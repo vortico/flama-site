@@ -1,9 +1,40 @@
+import fs from 'fs'
 import { useRouter } from 'next/router'
 import React from 'react'
-import { Hero } from '@/components/home/Hero'
+import { Hero, Sample } from '@/components/home/Hero'
 import { DeployModels } from '@/components/home/DeployModels'
 import PlainLayout from '@/layouts/plain'
 import Footer from '@/components/Footer'
+
+export async function getStaticProps() {
+  const heroSamples = [
+    {
+      title: 'As Framework',
+      code: {
+        code: (await fs.promises.readFile('src/samples/home/as_framework.py'))
+          .toString()
+          .trim(),
+        language: 'python',
+        lineNumbers: true,
+      },
+    },
+    {
+      title: 'As Application',
+      code: {
+        code: fs
+          .readFileSync('src/samples/home/as_application.sh')
+          .toString()
+          .trim(),
+        language: 'bash',
+        lineNumbers: '>',
+      },
+    },
+  ]
+
+  return {
+    props: { heroSamples },
+  }
+}
 
 function Construction() {
   return (
@@ -21,7 +52,11 @@ function Construction() {
   )
 }
 
-export default function Home() {
+interface HomeProps {
+  heroSamples: Sample[]
+}
+
+export default function Home({ heroSamples }: HomeProps) {
   const { query } = useRouter()
 
   return (
@@ -31,7 +66,7 @@ export default function Home() {
       ) : (
         <>
           <header>
-            <Hero />
+            <Hero samples={heroSamples} />
           </header>
           <main className="mb-20 space-y-20 pt-20 sm:mb-32 sm:space-y-32 sm:pt-32 md:mb-40 md:space-y-40 md:pt-40">
             <DeployModels />
