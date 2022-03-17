@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useCallback, useState } from 'react'
 import { QuickSearchButton } from '@/components/QuickSearchButton'
 import LinkButton from '@/components/LinkButton'
 import CodeWindow, { CodeWindowProps } from '@/components/CodeWindow'
@@ -16,15 +16,16 @@ interface SamplesProps {
 function Samples({ samples }: SamplesProps) {
   const [selected, setSelected] = useState<number>(0)
 
+  const onSelect = useCallback(
+    (value) => () => setSelected(value),
+    [setSelected]
+  )
+
   return (
     <div className="flex flex-col items-center justify-start gap-y-10 lg:flex-row lg:justify-center">
       <div className="flex h-12 w-full basis-full justify-around lg:block lg:h-full lg:basis-1/3 lg:space-y-6 lg:pl-9">
         {samples.map(({ title }, i) => (
-          <button
-            key={i}
-            className="flex items-center"
-            onClick={() => setSelected(i)}
-          >
+          <button key={i} className="flex items-center" onClick={onSelect(i)}>
             {selected === i && (
               <ChevronRightIcon className="-ml-8 inline h-8 text-brand-500 sm:-ml-9 sm:h-9" />
             )}
@@ -41,7 +42,10 @@ function Samples({ samples }: SamplesProps) {
         ))}
       </div>
       <div className="h-full min-h-[17.5rem] w-full basis-full lg:basis-2/3">
-        <CodeWindow {...samples[selected].code} />
+        <CodeWindow
+          {...samples[selected].code}
+          title={samples[selected].title}
+        />
       </div>
     </div>
   )

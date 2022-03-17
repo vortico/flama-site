@@ -13,8 +13,8 @@ function Logo() {
         className="flex items-center justify-start gap-2 text-brand-500"
         aria-label="Flama logo"
       >
-        <FlamaIcon className="h-5 w-5 md:h-6 md:w-6" />
-        <span className="text-xl md:text-2xl">Flama</span>
+        <FlamaIcon className="h-5 w-5 lg:h-6 lg:w-6" />
+        <span className="text-xl lg:text-2xl">Flama</span>
       </a>
     </Link>
   )
@@ -108,7 +108,7 @@ export default function Menu() {
         <div className="flex justify-start lg:w-1 lg:flex-1">
           <Logo />
         </div>
-        <div className="hidden items-center justify-between md:flex">
+        <div className="hidden items-center justify-between lg:flex">
           <nav className="pr-16">
             <NavList className="flex flex-row gap-10 text-lg font-medium text-primary-600 dark:text-primary-400" />
           </nav>
@@ -116,7 +116,7 @@ export default function Menu() {
             <SocialList />
           </div>
         </div>
-        <div className="flex items-center justify-end gap-5 md:hidden">
+        <div className="flex items-center justify-end gap-5 lg:hidden">
           <SearchButton
             className="block text-primary-400 hover:text-primary-500 dark:text-primary-600 dark:hover:text-primary-500"
             aria-label="Search"
