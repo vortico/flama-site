@@ -64,7 +64,8 @@ export function Hero({ samples }: HeroProps) {
         </h1>
         <p className="mx-auto mt-10 max-w-3xl text-lg">
           A data-science oriented framework and service to build modern machine
-          learning APIs with the convenience of ‘flama’ CLI commands in seconds.
+          learning APIs with the convenience of{' '}
+          <span className="text-brand-500">flama</span> CLI commands in seconds.
         </p>
         <div className="mt-10 flex justify-center gap-6 text-sm">
           <div className="h-12 w-auto">
