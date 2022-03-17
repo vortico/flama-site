@@ -26,7 +26,7 @@ function Window({
 }: WindowProps) {
   return (
     <>
-      <div className="flex h-8 w-full items-center justify-between px-4 text-primary-400 dark:text-primary-500">
+      <div className="-mb-px flex h-8 w-full items-center justify-between border-b border-primary-500/30 px-4 text-primary-400 dark:text-primary-500">
         <span className="truncate">{title}</span>
         <div className="flex items-center justify-end gap-x-2">
           <button className="h-4 w-4" onClick={onMinimize}>
@@ -40,7 +40,7 @@ function Window({
           </button>
         </div>
       </div>
-      <div className="-mt-px border-t border-primary-500/30 p-4">
+      <div className="p-4">
         <CodeBlock code={code} language={language} lineNumbers={lineNumbers} />
       </div>
     </>
