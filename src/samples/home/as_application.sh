@@ -1,1 +1,1 @@
-flama run path/to/your_model_file
+flama run tensorflow path/to/your_model_file

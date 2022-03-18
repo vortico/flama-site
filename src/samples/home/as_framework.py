@@ -3,7 +3,7 @@ from flama import Flama
 
 app = Flama()
 
-app.models.add_model("/", "path/to/your_model_file")
+app.models.add_tensorflow_model("/", "path/to/your_model_file")
 
 if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000)
