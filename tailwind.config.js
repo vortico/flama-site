@@ -66,6 +66,7 @@ module.exports = {
               fontWeight: theme('fontWeight.semibold'),
               textDecoration: 'none',
               borderBottom: 'none',
+              scrollMarginTop: '7rem',
               '&:hover': {
                 color: theme('colors.brand.500'),
               },
