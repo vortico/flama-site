@@ -63,9 +63,12 @@ export function Hero({ samples }: HeroProps) {
           Productionalize your machine learning models seamlessly
         </h1>
         <p className="mx-auto mt-10 max-w-3xl text-lg">
-          A data-science oriented framework and service to build modern machine
-          learning APIs with the convenience of{' '}
-          <span className="text-brand-500">flama</span> CLI commands in seconds.
+          <span className="text-brand-500">Flama</span> is a data-science
+          oriented framework to rapidly build modern and robust machine learning
+          APIs. With <span className="text-brand-500">flama</span> application
+          you will be able to deploy models in seconds.
+          <br />
+          Fire up your team with the flame 🔥
         </p>
         <div className="mt-10 flex justify-center gap-6 text-sm">
           <div className="h-12 w-auto">

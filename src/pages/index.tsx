@@ -9,7 +9,7 @@ import Footer from '@/components/Footer'
 export async function getStaticProps() {
   const heroSamples = [
     {
-      title: 'As Framework',
+      title: 'Framework',
       code: {
         code: (await fs.promises.readFile('src/samples/home/as_framework.py'))
           .toString()
@@ -19,7 +19,7 @@ export async function getStaticProps() {
       },
     },
     {
-      title: 'As Application',
+      title: 'Application',
       code: {
         code: fs
           .readFileSync('src/samples/home/as_application.sh')
