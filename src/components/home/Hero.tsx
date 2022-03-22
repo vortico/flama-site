@@ -1,12 +1,13 @@
 import React, { useCallback, useState } from 'react'
 import { QuickSearchButton } from '@/components/QuickSearchButton'
 import LinkButton from '@/components/LinkButton'
-import CodeWindow, { CodeWindowProps } from '@/components/CodeWindow'
+import Window from '@/components/Window'
 import { ChevronRightIcon } from '@heroicons/react/solid'
+import CodeBlock, { CodeBlockProps } from '@/components/CodeBlock'
 
 export interface Sample {
   title: string
-  code: CodeWindowProps
+  code: CodeBlockProps
 }
 
 interface SamplesProps {
@@ -42,10 +43,9 @@ function Samples({ samples }: SamplesProps) {
         ))}
       </div>
       <div className="h-full min-h-[17.5rem] w-full basis-full lg:basis-2/3">
-        <CodeWindow
-          {...samples[selected].code}
-          title={samples[selected].title}
-        />
+        <Window title={samples[selected].title}>
+          <CodeBlock {...samples[selected].code} />
+        </Window>
       </div>
     </div>
   )

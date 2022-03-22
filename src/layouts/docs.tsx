@@ -44,7 +44,10 @@ export function DocsLayout({ docs, children }: DocLayoutProps) {
                 ~ {Math.round(docs.readingTime.minutes)} min read
               </span>
             </div>
-            <h1 id={docs.titleSlug} className="scroll-mt-[var(--scroll-mt)]">
+            <h1
+              id={docs.titleSlug}
+              className="scroll-mt-28 text-4xl font-bold text-primary-600 dark:text-primary-300"
+            >
               {docs.title}
             </h1>
           </section>

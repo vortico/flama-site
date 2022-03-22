@@ -12,7 +12,7 @@ function DocsMenuCategoryItem({ link }: DocsMenuCategoryItemProps) {
   const [hasMounted, setHasMounted] = React.useState(false)
   const router = useRouter()
   const isActive = useMemo<boolean>(
-    () => router.asPath == link.url,
+    () => router.asPath.match(/([^#?]+)([#?].+)*/)?.[1] == link.url,
     [router.asPath, link.url]
   )
 
@@ -29,7 +29,7 @@ function DocsMenuCategoryItem({ link }: DocsMenuCategoryItemProps) {
           className={`-ml-px block border-l border-transparent pl-4 ${
             isActive
               ? 'border-current font-semibold text-brand-500 dark:text-brand-400'
-              : 'text-primary-700 hover:border-primary-400 hover:text-primary-900 dark:text-primary-400 dark:hover:border-primary-500 dark:hover:text-primary-300'
+              : 'text-primary-500 hover:border-primary-400 hover:text-primary-900 dark:text-primary-400 dark:hover:border-primary-500 dark:hover:text-primary-200'
           }`}
         >
           {link.title}

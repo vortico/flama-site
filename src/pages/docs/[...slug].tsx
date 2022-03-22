@@ -3,8 +3,10 @@ import { allDocs } from '@/contentlayer'
 import type { Docs as IDocs } from '@/contentlayer/types'
 import { useMDXComponent } from 'next-contentlayer/hooks' // eslint-disable-line import/no-unresolved
 import { withTOC } from '@/components/mdx/toc'
-import { withHeader } from '@/components/mdx/header'
+import { H1, H2, H3, H4, H5, H6 } from '@/components/mdx/header'
+import { Code, Pre } from '@/components/mdx/code'
 import { NextSeo } from 'next-seo'
+import React from 'react'
 
 export async function getStaticPaths() {
   return {
@@ -45,12 +47,14 @@ export default function Docs({ docs }: DocsProps) {
               titleSlug: docs.titleSlug,
               activeClassNames: '!text-brand-500',
             }),
-            h1: withHeader({ level: 1 }),
-            h2: withHeader({ level: 2 }),
-            h3: withHeader({ level: 3 }),
-            h4: withHeader({ level: 4 }),
-            h5: withHeader({ level: 5 }),
-            h6: withHeader({ level: 6 }),
+            h1: H1,
+            h2: H2,
+            h3: H3,
+            h4: H4,
+            h5: H5,
+            h6: H6,
+            pre: Pre,
+            code: Code,
           }}
         />
       </DocsLayout>
