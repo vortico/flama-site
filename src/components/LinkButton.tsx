@@ -18,7 +18,7 @@ export default function LinkButton({
   return (
     <Link
       {...props}
-      className={`dark:highlight-white/20 inline-flex h-full items-center rounded-full bg-brand-500 px-4 font-semibold text-primary-100 hover:bg-brand-700 focus:outline-none focus:ring-2 focus:ring-brand-400 focus:ring-offset-2 focus:ring-offset-brand-50 dark:bg-brand-500 dark:hover:bg-brand-400 ${
+      className={`inline-flex h-full items-center rounded-full bg-brand-50 px-4 font-semibold text-brand-600 hover:bg-brand-200 hover:text-brand-700 focus:outline-none focus:ring-2 focus:ring-brand-600 dark:bg-primary-700 dark:text-primary-100 dark:hover:bg-primary-600 dark:hover:text-primary-50 dark:focus:ring-primary-500 ${
         leftIcon && 'pl-2'
       } ${rightIcon && 'pr-2'} ${className}`}
     >

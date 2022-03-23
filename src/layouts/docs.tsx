@@ -36,9 +36,9 @@ export function DocsLayout({ docs, children }: DocLayoutProps) {
   return (
     <DocsContext.Provider value={{ docs, isOpen, onOpen, onClose }}>
       <SidebarLayout sidebar={<Sidebar />} menuChildren={<Breadcrumbs />}>
-        <article className="prose dark:prose-dark">
+        <article className="prose pr-4 dark:prose-dark sm:pr-6 md:pr-8 lg:mr-64">
           <section>
-            <div className="my-2 flex items-center justify-between">
+            <div className="mb-2 flex items-center justify-between">
               <span className="font-semibold text-brand-500">{docs.group}</span>
               <span className="italic">
                 ~ {Math.round(docs.readingTime.minutes)} min read

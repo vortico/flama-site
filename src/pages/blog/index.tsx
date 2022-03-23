@@ -43,7 +43,7 @@ export default function Blog() {
     <>
       <NextSeo title="Blog" canonical="https://flama.dev/blog" />
       <PlainLayout>
-        <header className="space-y-4 pt-16 pb-9 sm:pb-16 sm:text-center">
+        <header className="space-y-4 px-4 pt-16 pb-9 sm:px-6 sm:pb-16 sm:text-center md:px-8">
           <h1 className="text-3xl font-extrabold tracking-tight text-primary-700 dark:text-primary-200 sm:text-4xl">
             Blog
           </h1>
@@ -51,7 +51,7 @@ export default function Blog() {
             All the latest news about Flama directly from the team.
           </p>
         </header>
-        <main className="mx-auto mb-20 max-w-5xl space-y-16 sm:mb-32 md:mb-40">
+        <main className="mx-auto mb-20 max-w-5xl space-y-16 px-4 sm:mb-32 sm:px-6 md:mb-40 md:px-8">
           {allBlogs.map((blog, i) => (
             <BlogPreview key={i} blog={blog} />
           ))}

@@ -4,7 +4,7 @@ import React from 'react'
 
 export function Sidebar() {
   return (
-    <div className="relative px-8 pb-10">
+    <div className="relative pb-10">
       <div className="sticky inset-0">
         <div className="bg-primary-100 pb-px pt-8 dark:bg-primary-800">
           <div className="flex h-8 w-full">

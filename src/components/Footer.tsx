@@ -44,7 +44,7 @@ const links = [
 
 export default function Footer() {
   return (
-    <footer className="space-y-16 divide-y divide-primary-300 pb-16 pt-8 text-sm leading-6 dark:divide-primary-700">
+    <footer className="mx-auto max-w-[90rem] space-y-16 divide-y divide-primary-300 px-4 pb-16 pt-8 text-sm leading-6 dark:divide-primary-700 sm:px-6 md:px-8">
       <div className="grid grid-cols-2 gap-x-20 gap-y-10 md:grid-cols-4">
         {links.map((category, i) => (
           <div key={i}>

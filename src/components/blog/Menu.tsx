@@ -22,17 +22,14 @@ export function Menu() {
           </a>
         </Link>
       </div>
-      <div className="space-y-4 sm:flex sm:flex-wrap sm:justify-center xl:block">
+      <div className="justify-center space-y-4">
         <div>
           <h5 className="mb-4 text-primary-700 dark:text-primary-200">{`${
             blog?.authors && blog?.authors.length > 1 ? 'Authors' : 'Author'
           }`}</h5>
           <div className="space-y-4">
             {blog?.authors.map((author, i) => (
-              <div
-                key={i}
-                className="flex-col items-center pl-4 font-medium sm:mx-3 xl:mx-0"
-              >
+              <div key={i} className="flex-col items-center pl-4 font-medium">
                 {author.url ? (
                   <a href={author.url}>{author.name}</a>
                 ) : (

@@ -38,7 +38,7 @@ export default function Window({ title, className, children }: WindowProps) {
       <div
         className={`relative overflow-hidden rounded-xl bg-primary-800 shadow-xl dark:ring-1 dark:ring-inset dark:ring-white/10 dark:backdrop-blur ${
           state === 'closed' &&
-          'h-fit max-h-8 transition-all duration-500 dark:bg-primary-900/70'
+          'h-fit max-h-[31px] transition-all duration-500 dark:bg-primary-900/70'
         } ${
           state === 'full' &&
           'h-full max-h-screen transition-none dark:bg-primary-900'
@@ -61,7 +61,7 @@ export default function Window({ title, className, children }: WindowProps) {
             </button>
           </div>
         </div>
-        {children}
+        <div className="overflow-auto">{children}</div>
       </div>
     </div>
   )

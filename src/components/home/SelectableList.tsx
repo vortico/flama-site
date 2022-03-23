@@ -53,7 +53,7 @@ export function SelectableList({
   onSelect,
 }: SelectableListProps) {
   return (
-    <ul className="inline-grid w-full grid-cols-4 items-center md:mx-10 md:grid-cols-6 lg:mx-4 lg:grid-cols-8 xl:grid-cols-10">
+    <ul className="inline-grid w-full grid-cols-4 items-center">
       {items.map(({ id, name, icon }) => (
         <li key={name}>
           <SelectableItem

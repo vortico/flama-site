@@ -13,9 +13,8 @@ export default function PlainLayout({
   return (
     <>
       <Header>{menuChildren}</Header>
-      <div className="mx-auto max-w-[90rem] overflow-hidden px-4 sm:px-6 md:px-8">
-        {children}
-      </div>
+      <div className="overflow-hidden px-4 sm:px-6 md:px-8"></div>
+      {children}
     </>
   )
 }

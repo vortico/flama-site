@@ -4,7 +4,14 @@ export default function ScikitLearnIcon({
   ...props
 }: React.ComponentProps<'svg'>) {
   return (
-    <svg viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg" {...props}>
+    <svg
+      viewBox="0 0 48 48"
+      xmlns="http://www.w3.org/2000/svg"
+      fill="currentColor"
+      stroke="currentColor"
+      strokeWidth="2"
+      {...props}
+    >
       <g transform="matrix(.17309 0 0 .17309 -20.758 -27.46)">
         <path d="m333.32 347.35c33.869-33.867 39.498-83.146 12.572-110.07-26.922-26.921-76.199-21.293-110.07 12.572-33.867 33.866-24.07 98.568-12.57 110.07 9.293 9.293 76.199 21.293 110.06-12.572z" />
         <path d="m194.35 298.41c-19.648-19.648-48.242-22.919-63.867-7.295-15.621 15.622-12.355 44.22 7.297 63.865 19.652 19.654 57.195 13.969 63.863 7.295 5.396-5.387 12.361-44.215-7.293-63.865z" />

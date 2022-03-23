@@ -41,7 +41,7 @@ interface LineNumbersProps {
 function LineNumbers({ lines, token }: LineNumbersProps) {
   return (
     <div
-      className="hidden flex-none select-none text-right text-primary-500 md:block"
+      className="hidden flex-none select-none py-4 pl-4 text-right text-primary-500 md:block"
       aria-hidden="true"
     >
       {Array.from(Array(lines).keys()).map((line) => (
@@ -70,7 +70,7 @@ function CodeWrapper({
 }: CodeWrapperProps) {
   return (
     <pre
-      className={`group flex min-h-full gap-x-4 overflow-auto whitespace-pre p-4 text-left text-sm leading-6 ${className}`}
+      className={`group flex min-h-full gap-x-4 overflow-auto whitespace-pre text-left text-sm leading-6 ${className}`}
     >
       {token && (
         <LineNumbers
@@ -78,7 +78,7 @@ function CodeWrapper({
           token={typeof token === 'string' ? token : undefined}
         />
       )}
-      <code className="relative block flex-auto overflow-auto text-primary-200">
+      <code className="relative block flex-auto py-4 pr-4 text-primary-200">
         {children}
       </code>
       {copyButton && <ClipboardButton code={code} />}

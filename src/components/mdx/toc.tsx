@@ -109,7 +109,7 @@ export function withTOC({ title, titleSlug, activeClassNames }: withTOCProps) {
     return (
       <nav
         {...props}
-        className="not-prose prose-toc fixed top-20 bottom-0 right-[max(0px,calc(50%-45rem))] z-20 hidden w-[19.5rem] overflow-y-auto px-8 xl:block"
+        className="not-prose prose-toc fixed top-20 bottom-0 right-[max(0px,calc(50%-45rem))] z-20 hidden w-72 overflow-y-auto px-8 lg:block"
       >
         <h5 className="mb-4 mt-8 text-sm font-semibold text-primary-900 dark:text-primary-100">
           On this page

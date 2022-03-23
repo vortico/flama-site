@@ -14,16 +14,20 @@ export function BlogLayout({ blog, children }: BlogLayoutProps) {
   return (
     <BlogContext.Provider value={{ blog }}>
       <PlainLayout>
-        <header className="space-y-4 pt-16 pb-9 sm:pb-16 sm:text-center">
+        <header className="mb-9 px-4 pt-16 sm:mb-16 sm:px-6 sm:text-center md:px-8">
           <h1 className="text-3xl font-extrabold tracking-tight text-primary-700 dark:text-primary-200 sm:text-4xl">
             {blog.title}
           </h1>
-          <p className="text-lg">{blog.description}</p>
+          <p className="mt-4 text-lg">{blog.description}</p>
         </header>
-        <main className="mx-auto mb-20 max-w-5xl space-y-16 sm:mb-32 md:mb-40">
-          <article className="relative mx-auto max-w-3xl xl:grid xl:max-w-none xl:grid-cols-[1fr_50rem] xl:gap-x-8 xl:pt-10">
-            <Menu />
-            <div className="prose dark:prose-dark">{children}</div>
+        <main className="mx-auto mb-20 max-w-[90rem] space-y-16 sm:mb-32 md:mb-40">
+          <article className="relative xl:flex">
+            <div className="w-72 px-4 sm:px-6 md:px-8 xl:flex-none">
+              <Menu />
+            </div>
+            <div className="prose px-4 dark:prose-dark sm:px-6 md:px-8">
+              {children}
+            </div>
           </article>
         </main>
         <Footer />

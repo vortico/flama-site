@@ -28,6 +28,9 @@ module.exports = {
         },
         primary: colors.zinc,
       },
+      maxWidth: {
+        '8xl': '90rem',
+      },
       typography: (theme) => ({
         DEFAULT: {
           css: {
