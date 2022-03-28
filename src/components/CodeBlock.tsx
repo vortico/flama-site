@@ -1,7 +1,7 @@
 import Highlight, { defaultProps } from 'prism-react-renderer'
 import type { Language } from 'prism-react-renderer'
 import { CheckIcon, DuplicateIcon } from '@heroicons/react/outline'
-import { useCallback, useState } from 'react'
+import React, { useCallback, useState } from 'react'
 
 interface ClipboardButtonProps {
   code: string
@@ -78,7 +78,7 @@ function CodeWrapper({
           token={typeof token === 'string' ? token : undefined}
         />
       )}
-      <code className="relative block flex-auto py-4 pr-4 text-primary-200">
+      <code className="relative block flex-auto p-4 text-primary-200 md:pl-0">
         {children}
       </code>
       {copyButton && <ClipboardButton code={code} />}
