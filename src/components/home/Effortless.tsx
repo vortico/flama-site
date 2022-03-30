@@ -89,11 +89,13 @@ export default function Effortless({ samples }: EffortlessProps) {
       <div className="ml-auto -mt-16 w-full max-w-3xl">
         {selectedSample && (
           <Window title={selectedSample.title}>
-            <CodeBlock
-              code={selectedSample.code}
-              language={selectedSample.language}
-              lineNumbers={selectedSample.lineNumbers}
-            />
+            <div className="max-h-64">
+              <CodeBlock
+                code={selectedSample.code}
+                language={selectedSample.language}
+                lineNumbers={selectedSample.lineNumbers}
+              />
+            </div>
           </Window>
         )}
       </div>

@@ -70,7 +70,7 @@ function CodeWrapper({
 }: CodeWrapperProps) {
   return (
     <pre
-      className={`group flex min-h-full gap-x-4 overflow-auto whitespace-pre text-left text-sm leading-6 ${className}`}
+      className={`group flex h-fit w-fit gap-x-4 overflow-hidden whitespace-pre text-left text-sm leading-6 ${className}`}
     >
       {token && (
         <LineNumbers

@@ -5,7 +5,7 @@ import CodeBlock from '@/components/CodeBlock'
 import CodeInline from '@/components/CodeInline'
 
 export function Pre({ children }: React.ComponentProps<'pre'>) {
-  return <Window className="not-prose">{children}</Window>
+  return <Window>{children}</Window>
 }
 
 export function Code({ children, className }: React.ComponentProps<'code'>) {
@@ -18,6 +18,8 @@ export function Code({ children, className }: React.ComponentProps<'code'>) {
       <CodeInline code={code} language={language} />
     </span>
   ) : (
-    <CodeBlock code={code} language={language} />
+    <div className="not-prose max-h-80">
+      <CodeBlock code={code} language={language} />
+    </div>
   )
 }

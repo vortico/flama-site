@@ -9,26 +9,25 @@ export interface WindowProps extends React.ComponentProps<'div'> {
   title?: string
 }
 
-export default function Window({ title, children }: WindowProps) {
+export default function Window({ title, className, children }: WindowProps) {
   const [state, setState] = useState<string>('open')
 
-  const onMinimize = useCallback(() => setState('open'), [setState])
+  const onMinimize = useCallback(
+    () => setState(state === 'open' ? 'closed' : 'open'),
+    [state, setState]
+  )
   const onMaximize = useCallback(() => setState('full'), [setState])
   const onClose = useCallback(() => setState('closed'), [setState])
 
-  const floatProps = {
-    className:
-      'fixed inset-0 z-[200] min-h-screen w-screen py-[5vh] px-4 sm:px-6 md:px-8',
-    'aria-modal': true,
-    role: 'dialog',
-  }
-
-  const relativeProps = {
-    className: 'relative',
-  }
-
   return (
-    <div {...(state === 'full' ? floatProps : relativeProps)}>
+    <div
+      className={
+        state === 'full'
+          ? 'fixed inset-0 z-[200] h-screen w-screen'
+          : 'relative h-full w-full'
+      }
+      {...(state === 'full' && { 'aria-modal': true, role: 'dialog' })}
+    >
       {state === 'full' && (
         <div
           className="fixed inset-0 bg-black/20 backdrop-blur-sm dark:bg-primary-900/80"
@@ -37,13 +36,17 @@ export default function Window({ title, children }: WindowProps) {
         />
       )}
       <div
-        className={`relative overflow-hidden rounded-xl bg-primary-800 shadow-xl dark:ring-1 dark:ring-inset dark:ring-white/10 dark:backdrop-blur ${
-          state === 'closed' &&
-          'h-fit transition-all duration-500 dark:bg-primary-900/70'
-        } ${state === 'full' && 'h-fit transition-none dark:bg-primary-900'} ${
-          state === 'open' &&
-          'h-fit transition-all duration-500 dark:bg-primary-900/70'
-        }`}
+        className={`overflow-hidden rounded-xl bg-primary-800 shadow-xl dark:ring-1 dark:ring-inset dark:ring-white/10 dark:backdrop-blur ${
+          state === 'closed'
+            ? 'relative max-h-[31px] dark:bg-primary-900/70'
+            : ''
+        } ${
+          state === 'full'
+            ? 'fixed inset-x-4 inset-y-[5vh] max-h-[90vh] dark:bg-primary-900 sm:inset-x-6 md:inset-x-8'
+            : ''
+        } ${
+          state === 'open' ? 'relative max-h-full dark:bg-primary-900/70' : ''
+        } ${className}`}
       >
         <div className="-mb-px flex h-8 w-full items-center justify-between border-b border-primary-500 px-4 text-primary-400 dark:border-primary-500/30 dark:text-primary-500">
           <span className="truncate">{title}</span>
@@ -59,13 +62,7 @@ export default function Window({ title, children }: WindowProps) {
             </button>
           </div>
         </div>
-        <div
-          className={`max-w-full overflow-auto duration-500 ${
-            state === 'closed' ? 'max-h-0 transition-all ' : ''
-          } ${
-            state === 'full' ? 'max-h-[calc(90vh-31px)] transition-none' : ''
-          } ${state === 'open' ? 'max-h-[50vh] transition-all' : ''}`}
-        >
+        <div className="h-[calc(100%-31px)] w-full overflow-auto">
           {children}
         </div>
       </div>

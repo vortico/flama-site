@@ -44,7 +44,7 @@ export default function HomeSection({
           <div className="mt-8 max-w-xl">{selectableList}</div>
         )}
       </div>
-      <div className="mt-16  border-t border-brand-500/50 bg-gradient-to-b from-brand-500/10 py-8">
+      <div className="mt-16 border-t border-brand-500/50 bg-gradient-to-b from-brand-500/10 py-8">
         <div className="mx-auto max-w-8xl px-4 sm:px-6 md:px-8">{children}</div>
       </div>
     </section>

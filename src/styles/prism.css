@@ -1,6 +1,7 @@
 code[class*='language-'],
 pre[class*='language-'] {
   color: theme('colors.primary.200');
+  background-color: inherit;
 
   -webkit-hyphens: none;
   -moz-hyphens: none;

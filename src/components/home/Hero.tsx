@@ -46,11 +46,13 @@ function Samples({ samples }: SamplesProps) {
       <div className="h-full min-h-[17.5rem] w-full basis-full lg:basis-2/3">
         {selectedSample && (
           <Window title={selectedSample.title}>
-            <CodeBlock
-              code={selectedSample.code}
-              language={selectedSample.language}
-              lineNumbers={selectedSample.lineNumbers}
-            />
+            <div className="max-h-64">
+              <CodeBlock
+                code={selectedSample.code}
+                language={selectedSample.language}
+                lineNumbers={selectedSample.lineNumbers}
+              />
+            </div>
           </Window>
         )}
       </div>
