@@ -49,15 +49,29 @@ export default function Window({ title, className, children }: WindowProps) {
         } ${className}`}
       >
         <div className="-mb-px flex h-8 w-full items-center justify-between border-b border-primary-500 px-4 text-primary-400 dark:border-primary-500/30 dark:text-primary-500">
-          <span className="truncate">{title}</span>
+          <span className="truncate font-semibold text-primary-400">
+            {title}
+          </span>
           <div className="flex items-center justify-end gap-x-2">
-            <button className="h-4 w-4" onClick={onMinimize}>
+            <button
+              className="h-4 w-4"
+              onClick={onMinimize}
+              aria-label="Minimize Window"
+            >
               <MinusCircleIcon />
             </button>
-            <button className="h-4 w-4" onClick={onMaximize}>
+            <button
+              className="h-4 w-4"
+              onClick={onMaximize}
+              aria-label="Maximize Window"
+            >
               <PlusCircleIcon />
             </button>
-            <button className="h-4 w-4" onClick={onClose}>
+            <button
+              className="h-4 w-4"
+              onClick={onClose}
+              aria-label="Close Window"
+            >
               <XCircleIcon />
             </button>
           </div>

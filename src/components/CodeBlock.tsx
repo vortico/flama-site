@@ -22,7 +22,7 @@ function ClipboardButton({ code }: ClipboardButtonProps) {
         copied ? 'ring-brand-500/50' : 'ring-primary-500/50'
       }`}
     >
-      <button onClick={onCopy}>
+      <button onClick={onCopy} aria-label="Copy to Clipboard">
         {copied ? (
           <CheckIcon className="h-6 w-6 text-brand-500" />
         ) : (

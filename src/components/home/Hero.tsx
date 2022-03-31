@@ -34,8 +34,8 @@ function Samples({ samples }: SamplesProps) {
             <span
               className={`text-lg font-bold tracking-tight sm:text-3xl ${
                 selected === id
-                  ? 'text-primary-700 underline decoration-brand-500 decoration-4 underline-offset-8 dark:text-primary-300'
-                  : 'text-primary-500 hover:text-primary-700 dark:hover:text-primary-300'
+                  ? 'text-primary-700 underline decoration-brand-500 decoration-4 underline-offset-8 dark:text-primary-200'
+                  : 'text-primary-500 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-200'
               }`}
             >
               {title}
@@ -72,10 +72,11 @@ export default function Hero({ samples }: HeroProps) {
           Productionalize your machine learning models seamlessly
         </h1>
         <p className="mx-auto mt-10 max-w-3xl text-lg">
-          <span className="text-brand-500">Flama</span> is a data-science
-          oriented framework to rapidly build modern and robust machine learning
-          APIs. With <span className="text-brand-500">flama</span> application
-          you will be able to deploy models in seconds.
+          <span className="text-brand-600 dark:text-brand-400">Flama</span> is a
+          data-science oriented framework to rapidly build modern and robust
+          machine learning APIs. With{' '}
+          <span className="text-brand-600 dark:text-brand-400">flama</span>{' '}
+          application you will be able to deploy models in seconds.
           <br />
           Fire up your team with the flame 🔥
         </p>
@@ -83,9 +84,11 @@ export default function Hero({ samples }: HeroProps) {
           <div className="h-12 w-auto">
             <Link
               href="/docs"
-              className="inline-flex h-full items-center rounded-full bg-brand-400 px-10 font-semibold text-primary-50 hover:bg-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-600 dark:bg-brand-600 dark:text-primary-300 dark:hover:bg-brand-500 dark:focus:ring-brand-300"
+              className="inline-flex h-full items-center rounded-full bg-brand-500 px-10 text-white hover:bg-brand-600 focus:outline-none focus:ring-2 focus:ring-brand-600 dark:bg-brand-600 dark:text-primary-100 dark:hover:bg-brand-500 dark:focus:ring-brand-300"
             >
-              <span className="text-left text-sm">Get Started</span>
+              <span className="text-left text-lg font-semibold">
+                Get Started
+              </span>
             </Link>
           </div>
           <div className="hidden h-12 w-72 sm:flex">

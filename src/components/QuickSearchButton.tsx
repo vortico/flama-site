@@ -14,12 +14,14 @@ export function QuickSearchButton({
       {({ actionKey }) => (
         <>
           <SearchIcon className="h-6 w-6 flex-none text-brand-500" />
-          <span className="flex-auto">Quick search...</span>
+          <span className="flex-auto text-primary-500 dark:text-primary-300">
+            Quick search...
+          </span>
           {actionKey && (
             <kbd className="font-sans font-semibold text-brand-500">
               <abbr
                 title={actionKey[1]}
-                className="text-primary-500 no-underline dark:text-primary-400"
+                className="text-primary-500 no-underline dark:text-primary-300"
               >
                 {actionKey[0]}
               </abbr>{' '}

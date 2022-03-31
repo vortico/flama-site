@@ -18,12 +18,12 @@ export default function LinkButton({
   return (
     <Link
       {...props}
-      className={`inline-flex h-full items-center rounded-full bg-brand-50 px-4 font-semibold text-brand-600 hover:bg-brand-200 hover:text-brand-700 focus:outline-none focus:ring-2 focus:ring-brand-600 dark:bg-primary-700 dark:text-primary-100 dark:hover:bg-primary-600 dark:hover:text-primary-50 dark:focus:ring-primary-500 ${
+      className={`inline-flex h-full items-center rounded-full bg-brand-50 px-4 text-brand-700 hover:bg-brand-200 hover:text-brand-700 focus:outline-none focus:ring-2 focus:ring-brand-600 dark:bg-primary-700 dark:text-primary-100 dark:hover:bg-primary-600 dark:hover:text-primary-50 dark:focus:ring-primary-500 ${
         leftIcon && 'pl-2'
       } ${rightIcon && 'pr-2'} ${className}`}
     >
       {leftIcon && <ChevronLeftIcon className="h-4 pr-2" />}
-      <span className="text-left text-sm">{text}</span>
+      <span className="text-left text-sm font-semibold">{text}</span>
       {rightIcon && <ChevronRightIcon className="h-4 pl-2" />}
     </Link>
   )

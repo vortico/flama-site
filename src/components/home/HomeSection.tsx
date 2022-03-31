@@ -37,7 +37,7 @@ export default function HomeSection({
         </div>
         {docRef && (
           <div className="mt-8 h-8 max-w-3xl">
-            <LinkButton href={docRef} text="Learn More" rightIcon />
+            <LinkButton href={docRef} text="Learn more in our Docs" rightIcon />
           </div>
         )}
         {selectableList && (
