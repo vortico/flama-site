@@ -1,28 +1,35 @@
-export interface TOCLink {
+export interface TOCLink<T> {
   title: string
   url: string
   order: number
+  content: T
 }
 
-interface GroupedTOCLink extends TOCLink {
+interface GroupedTOCLink<T> extends TOCLink<T> {
   path: string
   group: string
 }
 
-export interface TOC {
-  links: TOCLink[]
-  categories: TOCCategory[]
+export interface TOC<T> {
+  links: TOCLink<T>[]
+  categories: TOCCategory<T>[]
 }
 
-export interface TOCCategory extends TOC {
+export interface TOCCategory<T> extends TOC<T> {
   name: string
   order: number
 }
 
-function _tableOfContent(
-  rawLinks: { path: string; title: string; url: string; order: number }[],
+function _tableOfContent<T>(
+  rawLinks: {
+    path: string
+    title: string
+    url: string
+    order: number
+    content: T
+  }[],
   rawName: string
-): TOCCategory {
+): TOCCategory<T> {
   const nameMatch = rawName.match(/^(\d+)-(.*)/)
   const name = nameMatch?.[2] || ''
   const order = parseInt(nameMatch?.[1] || '')
@@ -35,20 +42,24 @@ function _tableOfContent(
         const group = rest.length !== 0 ? first : ''
         return { ...link, path, group }
       })
-      .reduce((rv: { [key: string]: GroupedTOCLink[] }, x: GroupedTOCLink) => {
-        ;(rv[x.group] = rv[x.group] || []).push(x)
-        return rv
-      }, {})
+      .reduce(
+        (rv: { [key: string]: GroupedTOCLink<T>[] }, x: GroupedTOCLink<T>) => {
+          ;(rv[x.group] = rv[x.group] || []).push(x)
+          return rv
+        },
+        {}
+      )
   )
 
   const links =
     groups
       .find(([group]) => group === '')?.[1]
-      .map((link) => ({
-        title: link.title,
-        path: link.path,
-        url: link.url,
-        order: link.order,
+      .map(({ title, path, url, order, content }) => ({
+        title,
+        path,
+        url,
+        order,
+        content,
       })) || []
 
   const categories = groups
@@ -58,9 +69,15 @@ function _tableOfContent(
   return { name, links, categories, order }
 }
 
-export function tableOfContent(
-  rawLinks: { path: string; title: string; url: string; order: number }[]
-): TOC {
+export function tableOfContent<T>(
+  rawLinks: {
+    path: string
+    title: string
+    url: string
+    order: number
+    content: T
+  }[]
+): TOC<T> {
   const toc = _tableOfContent(rawLinks, '')
   return { categories: toc.categories, links: toc.links }
 }

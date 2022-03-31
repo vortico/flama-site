@@ -3,9 +3,10 @@ import { useRouter } from 'next/router'
 import Link from 'next/link'
 import { tableOfContent, TOC, TOCCategory, TOCLink } from '@/lib/toc'
 import { allDocs } from '@/contentlayer'
+import { Docs } from '@/contentlayer/types'
 
 interface DocsMenuCategoryItemProps {
-  link: TOCLink
+  link: TOCLink<Docs>
 }
 
 function DocsMenuCategoryItem({ link }: DocsMenuCategoryItemProps) {
@@ -26,13 +27,24 @@ function DocsMenuCategoryItem({ link }: DocsMenuCategoryItemProps) {
     <li>
       <Link href={link.url}>
         <a
-          className={`-ml-px block border-l border-transparent pl-4 ${
+          className={`-ml-px flex items-center border-l border-transparent pl-4 ${
             isActive
               ? 'border-current font-semibold text-brand-500 dark:text-brand-400'
               : 'text-primary-500 hover:border-primary-400 hover:text-primary-900 dark:text-primary-400 dark:hover:border-primary-500 dark:hover:text-primary-200'
           }`}
         >
-          {link.title}
+          <span>{link.title}</span>
+          {link.content.wip && (
+            <span
+              className={`ml-3 rounded-sm px-1.5 py-0.5 text-xs shadow-xl ring-1 ring-inset ${
+                isActive
+                  ? 'text-brand-500 ring-brand-500 dark:text-brand-400 dark:ring-brand-400'
+                  : 'text-primary-500 ring-primary-500 dark:text-primary-400 dark:ring-primary-400'
+              }`}
+            >
+              WIP
+            </span>
+          )}
         </a>
       </Link>
     </li>
@@ -40,7 +52,7 @@ function DocsMenuCategoryItem({ link }: DocsMenuCategoryItemProps) {
 }
 
 interface DocsMenuCategoryProps {
-  category: TOCCategory
+  category: TOCCategory<Docs>
 }
 
 function DocsMenuCategory({ category }: DocsMenuCategoryProps) {
@@ -66,8 +78,9 @@ export function DocsMenu() {
     path: docs.path,
     url: `/docs/${docs.slug}`,
     order: docs.order,
+    content: docs,
   }))
-  const toc = useMemo<TOC>(() => tableOfContent(links), [links])
+  const toc = useMemo<TOC<Docs>>(() => tableOfContent(links), [links])
 
   return (
     <ul className="space-y-12 lg:space-y-8">
