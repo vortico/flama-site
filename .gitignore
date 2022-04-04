@@ -40,3 +40,7 @@ yarn-error.log*
 # Sitemap
 public/robots.txt
 public/sitemap*
+
+# PWA
+public/service-worker*
+public/workbox*
