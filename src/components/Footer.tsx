@@ -35,7 +35,7 @@ const links = [
   {
     name: 'About Flama',
     links: [
-      { name: 'Github', url: 'https://github.com/perdy/flama' },
+      { name: 'GitHub', url: 'https://github.com/perdy/flama' },
       { name: 'Releases', url: 'https://github.com/perdy/flama/releases' },
       { name: 'Issues', url: 'https://github.com/perdy/flama/issues' },
     ],

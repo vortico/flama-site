@@ -29,7 +29,7 @@ export async function getStaticProps() {
   const effortlessSamples = [
     {
       id: 'tf',
-      title: 'Tensorflow',
+      title: 'TensorFlow',
       code: await loadSample('home/tensorflow_application.sh'),
       language: 'bash',
       lineNumbers: '>',
@@ -60,7 +60,7 @@ export async function getStaticProps() {
   const machineLearningResponsiveSamples = [
     {
       id: 'tf',
-      title: 'Tensorflow',
+      title: 'TensorFlow',
       code: await loadSample('home/tensorflow_framework.py'),
       language: 'python',
       lineNumbers: true,

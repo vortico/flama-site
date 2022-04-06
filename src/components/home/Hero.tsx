@@ -5,6 +5,7 @@ import { ChevronRightIcon } from '@heroicons/react/solid'
 import CodeBlock from '@/components/CodeBlock'
 import Link from '@/components/Link'
 import { Sample } from '@/lib/samples'
+import FlamaName from '@/components/FlamaName'
 
 interface SamplesProps {
   samples: Sample[]
@@ -72,10 +73,8 @@ export default function Hero({ samples }: HeroProps) {
           Productionalize your machine learning models seamlessly
         </h1>
         <p className="mx-auto mt-10 max-w-3xl text-lg">
-          <span className="text-brand-600 dark:text-brand-400">Flama</span> is a
-          data-science oriented framework to rapidly build modern and robust
-          machine learning APIs. With{' '}
-          <span className="text-brand-600 dark:text-brand-400">flama</span>{' '}
+          <FlamaName /> is a data-science oriented framework to rapidly build
+          modern and robust machine learning APIs. With <FlamaName />{' '}
           application you will be able to deploy models in seconds.
           <br />
           Fire up your team with the flame 🔥
