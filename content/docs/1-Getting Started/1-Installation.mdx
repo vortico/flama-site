@@ -3,6 +3,47 @@ title: Installation
 wip: true
 ---
 
+import FlamaName from '@/components/FlamaName'
+import PythonName from '@/components/PythonName'
+
+## Python version
+
+<FlamaName /> is perfectly compatible with <PythonName /> `3.7` and newer
+versions. If you do not have any preference, we recommend the use of the latest
+version.
+
+As a first step, check that the version of your active <PythonName /> environment
+is `3.7` or newer:
+
+```commandline
+    $ python --version
+    Python 3.7.6
+```
+
+In case your version is older, we strongly recommend you to create a virtual environment
+with the latest <PythonName /> version.
+
+### Creating a virtual environment
+
+This section is not a comprehensive guide about the management of <PythonName /> environments.
+We encourage users to learn more about [pyenv](https://github.com/pyenv/pyenv) or [conda](https://docs.conda.io/en/latest/)
+for a better understanding on how to manage virtual environments.
+
+##### Creation of virtual environment with conda
+
+```commandline
+$ conda create --name flama-dev python=3.8 --yes
+$ conda activate flama-dev
+```
+
+##### Creation of virtual environment with pyenv
+
+```commandline
+$ pyenv install 3.8.0
+$ pyenv virtualenv 3.8.0 flama-dev
+$ pyenv local flama-dev
+```
+
 ## An h2 header
 
 Paragraphs are separated by a blank line.
