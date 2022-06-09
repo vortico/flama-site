@@ -1,6 +1,6 @@
 ---
 title: Installation
-wip: true
+wip: false
 ---
 
 import FlamaName from '@/components/FlamaName'
@@ -16,8 +16,8 @@ As a first step, check that the version of your active <PythonName /> environmen
 is `3.7` or newer:
 
 ```commandline
-    $ python --version
-    Python 3.7.6
+> python --version
+  Python 3.7.6
 ```
 
 In case your version is older, we strongly recommend you to create a virtual environment
@@ -25,156 +25,101 @@ with the latest <PythonName /> version.
 
 ### Creating a virtual environment
 
-This section is not a comprehensive guide about the management of <PythonName /> environments.
-We encourage users to learn more about [pyenv](https://github.com/pyenv/pyenv) or [conda](https://docs.conda.io/en/latest/)
-for a better understanding on how to manage virtual environments.
+This section is not a comprehensive guide about the management of <PythonName /> virtual
+environments. We encourage users to learn more about
+[venv](https://docs.python.org/3/library/venv.html#module-venv),
+[pyenv](https://github.com/pyenv/pyenv) or
+[conda](https://docs.conda.io/en/latest/) for a better understanding on how to manage
+virtual environments. Virtual environments allow the user to isolate dependencies,
+which plays a crucial role to avoid breaking compatibility between different projects.
+
+To create and activate a virtual environment with a compatible <PythonName /> version
+you can take the following code snippets. Before you start working on a new project,
+it is very important to activate the corresponding environment. The last command line
+in both code snippets precisely activate the environment with `conda` or `pyenv`,
+respectively.
 
 ##### Creation of virtual environment with conda
 
 ```commandline
-$ conda create --name flama-dev python=3.8 --yes
-$ conda activate flama-dev
+> conda create --name flama-dev python=3.8 --yes
+> conda activate flama-dev
 ```
 
 ##### Creation of virtual environment with pyenv
 
 ```commandline
-$ pyenv install 3.8.0
-$ pyenv virtualenv 3.8.0 flama-dev
-$ pyenv local flama-dev
+> pyenv install 3.8.0
+> pyenv virtualenv 3.8.0 flama-dev
+> pyenv local flama-dev
 ```
 
-## An h2 header
+## Install Flama
 
-Paragraphs are separated by a blank line.
+### Core
 
-2nd paragraph. _Italic_, **bold**, and `monospace`. Itemized lists
-look like:
+<FlamaName /> is a <PythonName /> library [hosted on
+PyPI](https://pypi.org/project/flama/), and can be easily installed with
+[pip](https://pip.pypa.io/en/stable/) (the package installer for Python). Within
+the previously created and activated virtual environment, run the following
+command:
 
-- this one
-- that one
-- the other one
-
-Note that --- not considering the asterisk --- the actual text
-content starts at 4-columns in.
-
-> Block quotes are
-> written like so.
-
-They can span multiple paragraphs,
-
-> if you like.
-
-Use 3 dashes for an em-dash. Use 2 dashes for ranges (ex., "it's all
-in chapters 12--14"). Three dots ... will be converted to an ellipsis.
-Unicode is supported. ☺
-
-### An h3 header
-
-Here's a numbered list:
-
-1.  first item
-2.  second item
-3.  third item
-
-### Another h3 header
-
-Note again how the actual text starts at 4 columns in (4 characters
-from the left side). Here's a code sample:
-
-```
-    # Let me re-iterate ...
-    for i in 1 .. 10 { do-something(i) }
+```commandline
+> pip install flama
+.
 ```
 
-As you probably guessed, indented 4 spaces. By the way, instead of
-indenting the block, you can use delimited blocks, if you like:
+Now you have <FlamaName /> installed and ready to be used in your project.
 
+### Extras
+
+You have installed the core functionality of <FlamaName /> already.
+However, you might need some extra functionality when working in your project:
+
+- [Typesystem](https://www.encode.io/typesystem/):
+  A comprehensive library for data validation typically used
+  to define typed data schemas which provides data validation and
+  object serialization & deserialization tools.
+
+- [Marshmallow](https://marshmallow.readthedocs.io/en/stable/quickstart.html#):
+  An alternative library to `typesystem` for data validation.
+
+- [Forge (python)](https://python-forge.readthedocs.io/en/latest/):
+  An elegant library for revising function signatures at runtime.
+
+- [SQlAlchemy](https://www.sqlalchemy.org/):
+  SQL toolkit and Object Relational Mapper that gives application developers
+  the full power and flexibility of SQL.
+
+These dependencies are required if you want to use typed data schemas
+(`typesystems` or `marshmallow`), or if you are going to use pagination (`python-forge`),
+or if you need to include a database (`sqlalchemy`) in your project.
+
+If you use `typesystem` schemas, run:
+
+```commandline
+> pip install flama[typesystem, pagination, database]
+.
 ```
-define foobar() {
-    print "Welcome to flavor country!";
-}
+
+If you use `marshmallow` schemas instead, run:
+
+```commandline
+> pip install flama[marshmallow, pagination, database]
+.
 ```
 
-(which makes copying & pasting easier). You can optionally mark the
-delimited block for Pandoc to syntax highlight it:
+### Development
 
-```python
-import time
-# Quick, count to ten!
-for i in range(10):
-    # (but not *too* quick)
-    time.sleep(0.5)
-    print i
+If you want to contribute to <FlamaName /> development, you will need to install it
+from the local folder where you have cloned the repository. Run the following command
+if this is your case:
+
+```commandline
+> git clone git@github.com:perdy/flama.git \
+  && cd flama \
+  make install
 ```
 
-## Another h2 header
-
-Now a nested list:
-
-1.  First, get these ingredients:
-
-- carrots
-- celery
-- lentils
-
-2.  Boil some water.
-
-3.  Dump everything in the pot and follow
-    this algorithm:
-
-        find wooden spoon
-        uncover pot
-        stir
-        cover pot
-        balance wooden spoon precariously on pot handle
-        wait 10 minutes
-        goto first step (or shut off burner when done)
-
-Do not bump wooden spoon or it will fall.
-
-Notice again how text always lines up on 4-space indents (including
-that last line which continues item 3 above).
-
-### A third h3 header
-
-This is the section under h3
-
-#### An h4 header
-
-This is the section under h4
-
-##### An h5 header
-
-This is the section under h5
-
-###### An h6 header
-
-This is the section under h6
-
-Here's a link to [a website](http://foo.bar), to a [local
-doc](local-doc.html), and to a [section heading in the current
-doc](#an-h2-header). Here's a footnote [^1].
-
-[^1]: Footnote text goes here.
-
-Tables can look like this:
-
-| Tables   |      Are      |  Cool |
-| -------- | :-----------: | ----: |
-| col 1 is | left-aligned  | $1600 |
-| col 2 is |   centered    |   $12 |
-| col 3 is | right-aligned |    $1 |
-
----
-
-A horizontal rule follows.
-
----
-
-And images can be specified like so:
-
-![example image](https://i.gifer.com/3zMk.gif 'An exemplary image')
-
-And note that you can backslash-escape any punctuation characters
-which you wish to be displayed literally, ex.: \`foo\`, \*bar\*, etc.
+<FlamaName /> is now installed. Check out the
+[Quickstart](/docs/getting-started/quickstart).
