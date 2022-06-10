@@ -29,8 +29,8 @@ export async function getStaticProps({ params }: StaticProps) {
   return {
     props: {
       docs: allDocs[docsIndex],
-      next: allDocs[docsIndex + 1] || null,
-      prev: allDocs[docsIndex - 1] || null,
+      next: docsIndex < allDocs.length - 1 ? allDocs[docsIndex + 1] : null,
+      prev: docsIndex > 0 ? allDocs[docsIndex - 1] : null,
     },
   }
 }

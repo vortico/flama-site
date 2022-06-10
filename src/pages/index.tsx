@@ -41,20 +41,6 @@ export async function getStaticProps() {
       language: 'bash',
       lineNumbers: '>',
     },
-    {
-      id: 'pytorch',
-      title: 'PyTorch',
-      code: await loadSample('home/pytorch_application.sh'),
-      language: 'bash',
-      lineNumbers: '>',
-    },
-    {
-      id: 'pycaret',
-      title: 'PyCaret',
-      code: await loadSample('home/pycaret_application.sh'),
-      language: 'bash',
-      lineNumbers: '>',
-    },
   ]
 
   const machineLearningResponsiveSamples = [
@@ -69,20 +55,6 @@ export async function getStaticProps() {
       id: 'sklearn',
       title: 'Scikit Learn',
       code: await loadSample('home/sklearn_framework.py'),
-      language: 'python',
-      lineNumbers: true,
-    },
-    {
-      id: 'pytorch',
-      title: 'PyTorch',
-      code: await loadSample('home/pytorch_framework.py'),
-      language: 'python',
-      lineNumbers: true,
-    },
-    {
-      id: 'pycaret',
-      title: 'PyCaret',
-      code: await loadSample('home/pycaret_framework.py'),
       language: 'python',
       lineNumbers: true,
     },
