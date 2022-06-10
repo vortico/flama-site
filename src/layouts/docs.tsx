@@ -7,13 +7,16 @@ import { Breadcrumbs } from '@/components/docs/Breadcrumbs'
 import { useRouter } from 'next/router'
 import { Sidebar } from '@/components/docs/Sidebar'
 import { FloatMenu } from '@/components/docs/FloatMenu'
+import { PrevNextNavigation } from '@/components/PrevNextNavigation'
 
 interface DocLayoutProps {
   docs: IDocs
+  next: IDocs
+  prev: IDocs
   children: ReactNode
 }
 
-export function DocsLayout({ docs, children }: DocLayoutProps) {
+export function DocsLayout({ docs, next, prev, children }: DocLayoutProps) {
   const [isOpen, setIsOpen] = useState<boolean>(false)
   const router = useRouter()
 
@@ -52,6 +55,12 @@ export function DocsLayout({ docs, children }: DocLayoutProps) {
             </h1>
           </section>
           {children}
+          <PrevNextNavigation
+            prevTitle={prev?.title}
+            prevHref={`/docs/${prev?.slug}`}
+            nextTitle={next?.title}
+            nextHref={`/docs/${next?.slug}`}
+          />
         </article>
       </SidebarLayout>
       {isOpen && createPortal(<FloatMenu />, document.body)}

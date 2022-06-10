@@ -22,15 +22,26 @@ interface StaticProps {
 }
 
 export async function getStaticProps({ params }: StaticProps) {
-  const docs = allDocs.find((docs) => docs.slug === params.slug.join('/'))
-  return { props: { docs } }
+  const docsIndex = allDocs.findIndex(
+    (docs) => docs.slug === params.slug.join('/')
+  )
+
+  return {
+    props: {
+      docs: allDocs[docsIndex],
+      next: allDocs[docsIndex + 1] || null,
+      prev: allDocs[docsIndex - 1] || null,
+    },
+  }
 }
 
 interface DocsProps {
   docs: IDocs
+  next: IDocs
+  prev: IDocs
 }
 
-export default function Docs({ docs }: DocsProps) {
+export default function Docs({ docs, next, prev }: DocsProps) {
   const Component = useMDXComponent(docs.body.code)
 
   return (
@@ -39,7 +50,7 @@ export default function Docs({ docs }: DocsProps) {
         title={docs.title}
         canonical={`https://flama.dev/docs/${docs.slug}`}
       />
-      <DocsLayout docs={docs}>
+      <DocsLayout docs={docs} next={next} prev={prev}>
         <Component
           components={{
             nav: withTOC({

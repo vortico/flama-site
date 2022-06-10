@@ -14,12 +14,16 @@ export function Code({ children, className }: React.ComponentProps<'code'>) {
   const language = className?.match(/language-(\w+)/)?.[1] as Language
 
   return lines === 1 ? (
-    <span className="not-prose">
+    <span className="not-prose bg-primary-300 dark:bg-primary-600/50">
       <CodeInline code={code} language={language} />
     </span>
   ) : (
     <div className="not-prose max-h-80">
-      <CodeBlock code={code} language={language} />
+      <CodeBlock
+        code={code}
+        language={language}
+        lineNumbers={(language as string) === 'commandline' ? '>' : true}
+      />
     </div>
   )
 }

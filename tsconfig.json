@@ -3,8 +3,8 @@
     "baseUrl": ".",
     "paths": {
       "@/app-public/*": ["./public/*"],
-      "@/contentlayer": [".contentlayer/generated"],
-      "@/contentlayer/*": [".contentlayer/generated/*"],
+      "@/contentlayer": ["./.contentlayer/generated"],
+      "@/contentlayer/*": ["./.contentlayer/generated/*"],
       "@/*": ["src/*"]
     },
     "target": "es5",
