@@ -6,45 +6,42 @@ wip: true
 import FlamaName from '@/components/FlamaName'
 import PythonName from '@/components/PythonName'
 
-## Hello Flama
+## Hello 🔥
 
 The way to start getting familiarised with <FlamaName /> is by example.
-Let's start coding a simple `Hello World` application:
+Let's start coding the simplest application:
 
 ```python
-import uvicorn
-
 from flama import Flama
 
 app = Flama()
 
 @app.route("/")
 def home():
-    return {"hello": "flama 🔥"}
-
-if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=8000)
+    return {"message": "Hello 🔥"}
 ```
 
 The code does the following:
 
-- Import <FlamaName /> and creates an instance of this class, `app`.
-- Add the `route()` decorator to a user-defined function, `home`. This decorator
-  specifies that the function `home` will be called when a request to the route `"/"` is made.
-  This will return the dictionary `{"hello": "flama 🔥"}`.
-- Define the host URL (`http://0.0.0.0`) and port (`8080`) where the `app` will be served.
+- Imports <FlamaName /> and creates the instance `app` of this class.
+- Adds the `route()` decorator to the user-defined function `home`. This decorator
+  specifies that the function `home` will be called when a request to the route `/` is made.
+  This will return the dictionary `{"message": "Hello 🔥"}`.
+  [ comment ] - Defines the host URL (`http://0.0.0.0`) and port (`8080`) where the `app` will be served.
 
 You can download this code in your `examples` folder by running:
 
 ```commandline
-$ cd examples && \
-  wget https://raw.githubusercontent.com/perdy/flama/master/examples/hello_world.py
+> cd examples
+> wget https://raw.githubusercontent.com/perdy/flama/master/examples/hello_flama.py
 ```
+
+### Flama run
 
 To run your first <FlamaName /> application:
 
 ```commandline
-$ uvicorn examples.hello_world:app
+> flama run examples.hello_world:app
 
 INFO:     Started server process [78260]
 INFO:     Waiting for application startup.
@@ -52,5 +49,21 @@ INFO:     Application startup complete.
 INFO:     Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
 ```
 
-If you click now on [http://127.0.0.0:8000](http://127.0.0.0:8000), you should see
-the `flama `
+This command runs the [uvicorn](https://www.uvicorn.org/) web server.
+If there is another service already using the port `8000` you will see an
+error like:
+
+```commandline
+> flama run examples.hello_flama:app
+
+INFO:     Started server process [54203]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+ERROR:    [Errno 48] error while attempting to bind on address ('127.0.0.1', 8000):
+          address already in use
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+```
+
+If you click now on [`http://127.0.0.0:8000`](http://127.0.0.0:8000), you should see
+the greeting message `{"message": "Hello 🔥"}` on your browser.
