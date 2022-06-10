@@ -1,6 +1,6 @@
 import { DocsLayout } from '@/layouts/docs'
 import { allDocs } from '@/contentlayer'
-import type { Docs as IDocs } from '@/contentlayer/types'
+import type { Docs as IDocs } from '@/contentlayer'
 import { useMDXComponent } from 'next-contentlayer/hooks' // eslint-disable-line import/no-unresolved
 import { withTOC } from '@/components/mdx/toc'
 import { H1, H2, H3, H4, H5, H6 } from '@/components/mdx/header'

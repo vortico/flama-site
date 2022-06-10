@@ -1,6 +1,5 @@
 import { BlogLayout } from '@/layouts/blog'
-import { allBlogs } from '@/contentlayer'
-import type { Blog as IBlog } from '@/contentlayer/types'
+import { allBlogs, Blog as IBlog } from '@/contentlayer'
 import { useMDXComponent } from 'next-contentlayer/hooks' // eslint-disable-line import/no-unresolved
 import { H1, H2, H3, H4, H5, H6 } from '@/components/mdx/header'
 import { Code, Pre } from '@/components/mdx/code'

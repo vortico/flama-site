@@ -11,18 +11,18 @@ export function Pre({ children }: React.ComponentProps<'pre'>) {
 export function Code({ children, className }: React.ComponentProps<'code'>) {
   const code = React.Children.toArray(children)[0].toString().trim()
   const lines = code.split('\n').length
-  const language = className?.match(/language-(\w+)/)?.[1] as Language
+  const language = className?.match(/language-(\w+)/)?.[1]
 
-  return lines === 1 ? (
+  return !language && lines == 1 ? (
     <span className="not-prose bg-primary-300 dark:bg-primary-600/50">
-      <CodeInline code={code} language={language} />
+      <CodeInline code={code} language={language as Language} />
     </span>
   ) : (
     <div className="not-prose max-h-80">
       <CodeBlock
         code={code}
-        language={language}
-        lineNumbers={(language as string) === 'commandline' ? '>' : true}
+        language={language as Language}
+        lineNumbers={language === 'commandline' ? '>' : true}
       />
     </div>
   )

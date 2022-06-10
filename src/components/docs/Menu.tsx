@@ -2,11 +2,10 @@ import React, { useMemo } from 'react'
 import { useRouter } from 'next/router'
 import Link from 'next/link'
 import { tableOfContent, TOC, TOCCategory, TOCLink } from '@/lib/toc'
-import { allDocs } from '@/contentlayer'
-import { Docs } from '@/contentlayer/types'
+import { allDocs, Docs as IDocs } from '@/contentlayer'
 
 interface DocsMenuCategoryItemProps {
-  link: TOCLink<Docs>
+  link: TOCLink<IDocs>
 }
 
 function DocsMenuCategoryItem({ link }: DocsMenuCategoryItemProps) {
@@ -52,7 +51,7 @@ function DocsMenuCategoryItem({ link }: DocsMenuCategoryItemProps) {
 }
 
 interface DocsMenuCategoryProps {
-  category: TOCCategory<Docs>
+  category: TOCCategory<IDocs>
 }
 
 function DocsMenuCategory({ category }: DocsMenuCategoryProps) {
@@ -80,7 +79,7 @@ export function DocsMenu() {
     order: docs.order,
     content: docs,
   }))
-  const toc = useMemo<TOC<Docs>>(() => tableOfContent(links), [links])
+  const toc = useMemo<TOC<IDocs>>(() => tableOfContent(links), [links])
 
   return (
     <ul className="space-y-12 lg:space-y-8">

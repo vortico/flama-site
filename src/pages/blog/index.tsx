@@ -1,5 +1,4 @@
-import { allBlogs } from '@/contentlayer'
-import { Blog as IBlog } from '@/contentlayer/types'
+import { allBlogs, Blog as IBlog } from '@/contentlayer'
 import { NextSeo } from 'next-seo'
 import PlainLayout from '@/layouts/plain'
 import Footer from '@/components/Footer'

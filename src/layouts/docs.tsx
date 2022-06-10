@@ -1,5 +1,5 @@
 import React, { ReactNode, useCallback, useEffect, useState } from 'react'
-import { Docs as IDocs } from '@/contentlayer/types'
+import { Docs as IDocs } from '@/contentlayer'
 import SidebarLayout from '@/layouts/sidebar'
 import { createPortal } from 'react-dom'
 import { DocsContext } from '@/components/docs/Context'
