@@ -22,7 +22,7 @@ export function Code({ children, className }: React.ComponentProps<'code'>) {
       <CodeBlock
         code={code}
         language={language as Language}
-        lineNumbers={language === 'commandline' ? '>' : true}
+        lineNumbers={language !== 'commandline'}
       />
     </div>
   )

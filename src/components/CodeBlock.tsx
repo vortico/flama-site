@@ -70,7 +70,7 @@ function CodeWrapper({
 }: CodeWrapperProps) {
   return (
     <pre
-      className={`group flex h-fit w-fit gap-x-4 overflow-hidden whitespace-pre text-left text-sm leading-6 ${className}`}
+      className={`group flex h-fit w-full overflow-hidden whitespace-pre text-left text-sm leading-6 ${className}`}
     >
       {token && (
         <LineNumbers
@@ -78,7 +78,7 @@ function CodeWrapper({
           token={typeof token === 'string' ? token : undefined}
         />
       )}
-      <code className="relative block flex-auto p-4 text-primary-200 md:pl-0">
+      <code className="relative block flex-auto p-4 text-primary-200">
         {children}
       </code>
       {copyButton && <ClipboardButton code={code} />}
