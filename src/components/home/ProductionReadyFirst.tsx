@@ -34,7 +34,7 @@ export default function ProductionReadyFirst({
   const [selected, setSelected] = useState<string>(items[0].id)
 
   const onSelect = useCallback(
-    (id) => {
+    (id: string) => {
       setSelected(id)
     },
     [setSelected]

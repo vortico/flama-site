@@ -25,7 +25,7 @@ export function SearchProvider({ children }: SearchProviderProps) {
   }, [setIsOpen])
 
   const onInput = useCallback(
-    (e) => {
+    (e: KeyboardEvent) => {
       setIsOpen(true)
       setInitialQuery(e.key)
     },

@@ -4,7 +4,7 @@ export interface ISearchContext {
   isOpen: boolean
   onOpen: () => void
   onClose: () => void
-  onInput: (event?: KeyboardEvent) => void
+  onInput: (event: KeyboardEvent) => void
 }
 
 export const SearchContext = createContext<ISearchContext>({

@@ -46,7 +46,7 @@ export default function Effortless({ samples }: EffortlessProps) {
   const [selected, setSelected] = useState<string>(frameworks[0].id)
 
   const onSelect = useCallback(
-    (id) => {
+    (id: string) => {
       setSelected(id)
     },
     [setSelected]

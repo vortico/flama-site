@@ -15,7 +15,7 @@ function Samples({ samples }: SamplesProps) {
   const [selected, setSelected] = useState<string>(samples[0].id)
 
   const onSelect = useCallback(
-    (value) => () => setSelected(value),
+    (value: string) => () => setSelected(value),
     [setSelected]
   )
 

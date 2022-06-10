@@ -6,7 +6,8 @@ interface ChildrenProps {
   actionKey: ActionKey
 }
 
-interface SearchButtonProps extends React.ComponentProps<'button'> {
+interface SearchButtonProps
+  extends Omit<React.ComponentProps<'button'>, 'children'> {
   children:
     | React.ReactNode
     | (({ actionKey }: ChildrenProps) => React.ReactNode)
