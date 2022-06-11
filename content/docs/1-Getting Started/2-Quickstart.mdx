@@ -51,6 +51,13 @@ INFO:     Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
 ```
 
 This command runs the [uvicorn](https://www.uvicorn.org/) web server.
+If you click now on [`http://127.0.0.0:8000`](http://127.0.0.0:8000), you should see
+the greeting message `{"message": "Hello 🔥"}` on your browser.
+
+#### What if the server does not start?
+
+There are several reasons why the server might not start after running `flama run`.
+
 If there is another service already using the port `8000` you will see an
 error like:
 
@@ -66,12 +73,6 @@ INFO:     Waiting for application shutdown.
 INFO:     Application shutdown complete.
 ```
 
-If you click now on [`http://127.0.0.0:8000`](http://127.0.0.0:8000), you should see
-the greeting message `{"message": "Hello 🔥"}` on your browser.
-
-#### What if the server does not start?
-
-There are several reasons why the server might not start after running `flama run`.
 If you get an error similar to:
 
 ```commandline
