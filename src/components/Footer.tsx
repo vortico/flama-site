@@ -12,26 +12,11 @@ const links = [
   },
   {
     name: 'Core Concepts',
-    links: [
-      { name: 'Foo', url: '/docs/generic-api/foo' },
-      { name: 'Bar', url: '/docs/generic-api/bar' },
-      { name: 'Foo', url: '/docs/restful-api/foo' },
-      { name: 'Bar', url: '/docs/restful-api/bar' },
-      { name: 'Foo', url: '/docs/machine-learning-api/foo' },
-      { name: 'Bar', url: '/docs/machine-learning-api/bar' },
-    ],
+    links: [],
   },
   {
     name: 'Adopting',
-    links: [
-      { name: 'Building', url: '/docs/development-cycle/building' },
-      { name: 'Testing', url: '/docs/development-cycle/testing' },
-      { name: 'Deployment', url: '/docs/development-cycle/deployment' },
-      { name: 'Adopting', url: '/docs/migrating-to-flama/adopting' },
-      { name: 'From Django', url: '/docs/migrating-to-flama/from-django' },
-      { name: 'From FastAPI', url: '/docs/migrating-to-flama/from-fastapi' },
-      { name: 'From Flask', url: '/docs/migrating-to-flama/from-flask' },
-    ],
+    links: [],
   },
   {
     name: 'About Flama',

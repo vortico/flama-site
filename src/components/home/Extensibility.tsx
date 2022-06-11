@@ -4,6 +4,7 @@ import React from 'react'
 import Window from '@/components/Window'
 import CodeBlock from '@/components/CodeBlock'
 import { Sample } from '@/lib/samples'
+import FlamaName from '@/components/FlamaName'
 
 interface ExtensibilityProps {
   samples: Sample[]
@@ -21,17 +22,17 @@ export default function Extensibility({ samples }: ExtensibilityProps) {
       content={
         <>
           <p>
-            Flama consists of a core of functionality for creating, maintaining
-            and deploying ML-APIs. However, the ML arena is constantly changing,
-            with new products for managing ML projects appearing very often.
-            Being able to integrate your API with such third parties is of
-            crucial importance.
+            <FlamaName /> consists of a core of functionality for creating,
+            maintaining and deploying ML-APIs. However, the ML arena is
+            constantly changing, with new products for managing ML projects
+            appearing very often. Being able to integrate your API with such
+            third parties is of crucial importance.
           </p>
           <br />
           <p>
-            Flama is natively an extensible framework. With the ease of Module
-            you will be able to rapidly develop your own plugins and keep
-            improving flama integrability.
+            <FlamaName /> is natively an extensible framework. With the ease of{' '}
+            <code>Module</code> you will be able to rapidly develop your own
+            plugins and keep improving flama integrability.
           </p>
         </>
       }

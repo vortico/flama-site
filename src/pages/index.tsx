@@ -23,7 +23,7 @@ export async function getStaticProps() {
       title: 'Application',
       code: await loadSample('home/hero_application.sh'),
       language: 'commandline',
-      lineNumbers: '>',
+      lineNumbers: false,
     },
   ]
 
@@ -50,7 +50,7 @@ export async function getStaticProps() {
       title: 'Command Line',
       code: await loadSample('home/production_ready_first_cli.sh'),
       language: 'commandline',
-      lineNumbers: '>',
+      lineNumbers: false,
     },
     {
       id: 'python',

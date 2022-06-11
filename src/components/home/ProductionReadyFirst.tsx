@@ -10,6 +10,7 @@ import {
 import { Sample } from '@/lib/samples'
 import { TerminalIcon } from '@heroicons/react/solid'
 import { PythonIcon } from '@/components/icons'
+import FlamaName from '@/components/FlamaName'
 
 const items: ISelectableItem[] = [
   {
@@ -68,14 +69,15 @@ export default function ProductionReadyFirst({
           <p>
             Need your models serving ASAP? It does not feel right to have to
             wait months to see if your models work outside a Jupyter notebook,
-            doesn’t it? Flama makes the deployment of ML models into production
-            as straightforwardly as possible.
+            does it?{' '}
           </p>
           <br />
           <p>
-            With the ease of a single command line your packaged models will be
-            ready to serve via HTTP requests in seconds. Flama transforms any
-            model into an ML-API ready to serve its purpose.
+            <FlamaName /> makes the deployment of ML models into production as
+            straightforwardly as possible. With the ease of a single command
+            line your packaged models will be ready to serve via HTTP requests
+            in seconds. <FlamaName /> transforms any model into an ML-API ready
+            to serve its purpose.
           </p>
         </>
       }

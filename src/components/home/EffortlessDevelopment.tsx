@@ -48,7 +48,7 @@ const samples = [
           the endpoint function, and <FlamaName /> will take the burden off you.{' '}
           The <code>@paginator</code> decorator will automatically include
           required parameters in the function signature, and turn the API
-          response as paginated result.
+          response as paginated results.
         </p>
       </>
     ),

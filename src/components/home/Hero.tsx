@@ -77,7 +77,7 @@ export default function Hero({ samples }: HeroProps) {
           modern and robust machine learning APIs. With <FlamaName />{' '}
           application you will be able to deploy models in seconds.
           <br />
-          Fire up your team with the flame 🔥
+          Fire up your models with the flame 🔥
         </p>
         <div className="mt-10 flex justify-center gap-6 text-sm">
           <div className="h-12 w-auto">
