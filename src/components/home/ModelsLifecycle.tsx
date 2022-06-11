@@ -4,6 +4,7 @@ import React from 'react'
 import Window from '@/components/Window'
 import CodeBlock from '@/components/CodeBlock'
 import { Sample } from '@/lib/samples'
+import FlamaName from '@/components/FlamaName'
 
 interface ModelsLifecycleProps {
   samples: Sample[]
@@ -27,8 +28,8 @@ export default function ModelsLifecycle({ samples }: ModelsLifecycleProps) {
           </p>
           <br />
           <p>
-            Flama provides a clean solution to the problem via <b>Components</b>
-            , which load models seamlessly.
+            <FlamaName /> provides a clean solution to the problem via{' '}
+            <b>Components</b>, which load models seamlessly.
           </p>
         </>
       }

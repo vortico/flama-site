@@ -32,7 +32,7 @@ export default function Extensibility({ samples }: ExtensibilityProps) {
           <p>
             <FlamaName /> is natively an extensible framework. With the ease of{' '}
             <code>Module</code> you will be able to rapidly develop your own
-            plugins and keep improving flama integrability.
+            plugins and keep improving <FlamaName /> integrability.
           </p>
         </>
       }
