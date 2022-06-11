@@ -1,1 +1,1 @@
-flama run tensorflow path/to/your_model_file
+flama serve path/to/puppy_model.flm

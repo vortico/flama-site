@@ -6,14 +6,10 @@ import {
   ISelectableItem,
   SelectableList,
 } from '@/components/home/SelectableList'
-import {
-  PyCaretIcon,
-  PyTorchIcon,
-  ScikitLearnIcon,
-  TensorFlowIcon,
-} from '@/components/icons'
+import { ScikitLearnIcon, TensorFlowIcon } from '@/components/icons'
 import CodeBlock from '@/components/CodeBlock'
 import { Sample } from '@/lib/samples'
+import FlamaName from '@/components/FlamaName'
 
 const frameworks: ISelectableItem[] = [
   {
@@ -25,16 +21,6 @@ const frameworks: ISelectableItem[] = [
     id: 'sklearn',
     name: 'scikit-learn',
     icon: <ScikitLearnIcon fillOpacity=".8" />,
-  },
-  {
-    id: 'pytorch',
-    name: 'PyTorch',
-    icon: <PyTorchIcon fillOpacity=".8" />,
-  },
-  {
-    id: 'pycaret',
-    name: 'PyCaret',
-    icon: <PyCaretIcon fillOpacity=".8" />,
   },
 ]
 
@@ -75,16 +61,16 @@ export default function MachineLearningResponsive({
       content={
         <>
           <p>
-            Spending time in adapting (by copy-pasting and tinkering) existing
-            code to the particularities of the library in which the model was
-            built to take your ML model into production is unproductive and
-            annoying, seriously!
+            Let’s face it, there isn’t a single ML framework. Models developed
+            in such different frameworks should be easily integrated together in
+            a single API. However this integration presents a technical
+            challenge, typically unproductive and annoying for a data scientist.
           </p>
           <br />
           <p>
-            Flama resources make it possible to easily integrate models built in
-            any of the mainstream data-science libraries, making your ML-API
-            easily adapt to any ML framework.
+            <FlamaName /> is thought from the very beginning to be compatible
+            with the mainstream data-science frameworks, and it makes easy and
+            simple the packaging of ML models to be integrated together.
           </p>
         </>
       }
@@ -92,7 +78,7 @@ export default function MachineLearningResponsive({
       <div className="ml-auto -mt-16 w-full max-w-3xl">
         {selectedSample && (
           <Window title={selectedSample.title}>
-            <div className="max-h-64">
+            <div className="">
               <CodeBlock
                 code={selectedSample.code}
                 language={selectedSample.language}

@@ -7,6 +7,7 @@ const links = [
     name: 'Getting Started',
     links: [
       { name: 'Installation', url: '/docs/getting-started/installation' },
+      { name: 'Quickstart', url: '/docs/getting-started/quickstart' },
     ],
   },
   {

@@ -1,6 +1,6 @@
 import React from 'react'
 
-export default function PyCaretIcon({ ...props }: React.ComponentProps<'svg'>) {
+export default function DockerIcon({ ...props }: React.ComponentProps<'svg'>) {
   return (
     <svg
       version="1.1"

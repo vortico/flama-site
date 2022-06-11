@@ -8,8 +8,8 @@ import {
   SelectableList,
 } from '@/components/home/SelectableList'
 import { Sample } from '@/lib/samples'
-import { DockerIcon } from '@/components/icons'
 import { TerminalIcon } from '@heroicons/react/solid'
+import { PythonIcon } from '@/components/icons'
 
 const items: ISelectableItem[] = [
   {
@@ -18,10 +18,15 @@ const items: ISelectableItem[] = [
     icon: <TerminalIcon fillOpacity=".8" />,
   },
   {
-    id: 'docker',
-    name: 'Docker',
-    icon: <DockerIcon fillOpacity=".8" />,
+    id: 'python',
+    name: 'Python',
+    icon: <PythonIcon fillOpacity=".8" />,
   },
+  // {
+  //   id: 'docker',
+  //   name: 'Docker',
+  //   icon: <DockerIcon fillOpacity=".8" />,
+  // },
 ]
 
 interface ProductionReadyFirstProps {
@@ -59,12 +64,20 @@ export default function ProductionReadyFirst({
         />
       }
       content={
-        <p>
-          Need your models serving ASAP? It does not feel right to have to wait
-          months to see if your models work outside a Jupyter notebook, doesn’t
-          it? Flama API has been thought from the beginning to deploy ML models
-          into production as straightforwardly as possible.
-        </p>
+        <>
+          <p>
+            Need your models serving ASAP? It does not feel right to have to
+            wait months to see if your models work outside a Jupyter notebook,
+            doesn’t it? Flama makes the deployment of ML models into production
+            as straightforwardly as possible.
+          </p>
+          <br />
+          <p>
+            With the ease of a single command line your packaged models will be
+            ready to serve via HTTP requests in seconds. Flama transforms any
+            model into an ML-API ready to serve its purpose.
+          </p>
+        </>
       }
     >
       <div className="ml-auto -mt-16 w-full max-w-3xl">
