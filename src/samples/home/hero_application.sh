@@ -1,9 +1,6 @@
 > flama serve path/to/puppy_model.flm
 
-INFO:     Started server process [54203]
+INFO:     Started server process [78260]
 INFO:     Waiting for application startup.
 INFO:     Application startup complete.
-ERROR:    [Errno 48] error while attempting to bind on address ('127.0.0.1', 8000):
-          address already in use
-INFO:     Waiting for application shutdown.
-INFO:     Application shutdown complete.
+INFO:     Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
