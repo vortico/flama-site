@@ -1,13 +1,7 @@
-/*const Algolia = {
-  APP_ID: 'YUUQN5CWS6',
-  API_KEY: '629b8d6e0ed18a1cffdd01b2f8b3f178',
-  INDEX_NAME: 'flama',
-}*/
-
 const Algolia = {
-  APP_ID: 'R2IYF7ETH7',
-  API_KEY: '599cec31baffa4868cae4e79f180729b',
-  INDEX_NAME: 'docsearch',
+  APP_ID: '0LTRH2291Q',
+  API_KEY: '80a1c3136243fbd4f895f3c8fa9a32a4',
+  INDEX_NAME: 'flama',
 }
 
 export default Algolia
