@@ -24,6 +24,7 @@ const links = [
       { name: 'GitHub', url: 'https://github.com/perdy/flama' },
       { name: 'Releases', url: 'https://github.com/perdy/flama/releases' },
       { name: 'Issues', url: 'https://github.com/perdy/flama/issues' },
+      { name: 'Contribute', url: '/docs/contributing/how-to-contribute' },
     ],
   },
 ]
