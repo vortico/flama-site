@@ -2,3 +2,57 @@
 title: Packaging models
 wip: true
 ---
+
+## Introduction
+
+Any ML model built using one of the mainstream data-science frameworks, e.g. Scikit-Learn
+or TensorFlow, can be served using Flama. For the sake of convenience and speeding up
+the process of integrating these models into a Flama API, comes with the functionality
+required to serialise and package them, automatically adding important metadata which will
+make the resulting files operational within Flama seamlessly. In this section we will introduce
+the methods required for this purpose:
+
+- `flama.dump`
+- `flama.load`
+
+**Remark**: Flama's dump method uses optimal compression with the aim of making the process more
+efficient and faster.
+
+**Remark 2**: The dump step can live completely out of any Flama API. Indeed, the natural place where
+you will be running it will be at the model building stage (very likely in you Jupyter notebook).
+
+## Example of serialising TensorFlow models
+
+```python
+import flama
+import tensorflow as tf
+
+model = tf.keras.models.Sequential([
+    tf.keras.layers.Flatten(input_shape=(28, 28)),
+    tf.keras.layers.Dense(128, activation='relu'),
+    tf.keras.layers.Dropout(0.2),
+    tf.keras.layers.Dense(10, activation='softmax')
+])
+model.compile(
+    optimizer='adam',
+    loss='sparse_categorical_crossentropy',
+    metrics=['accuracy']
+)
+model.fit(x_train, y_train, epochs=5)
+
+with open("tf_model.flm", "wb") as f:
+    flama.dump("tensorflow", model, f)
+```
+
+## Example of serialising Scikit-Learn models
+
+```python
+import flama
+from sklearn.linear_model import LogisticRegression
+
+model = LogisticRegression()
+model.fit(x_train, y_train)
+
+with open("sk_model.flm", "wb") as f:
+    flama.dump("sklearn", model, f)
+```
