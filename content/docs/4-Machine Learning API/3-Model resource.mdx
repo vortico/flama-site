@@ -2,3 +2,118 @@
 title: Model resources
 wip: true
 ---
+
+import FlamaName from '@/components/FlamaName'
+
+Adding models to a <FlamaName /> App in the way introduced in the [previous section](/docs/machine-learning-api/add-models)
+involves the creation of a `Resource` object (specifically, a `ModelResource`) automatically
+for you, which represents an API resource, in the REST sense of the word.
+This `ModelResource` defines the default way of interaction with the ML model
+itself by providing **predict** and **inspect** (P&I) methods.
+
+However, the convenience of `add_models` might not be sufficient for your purposes for the
+following reasons:
+
+- You need to customise the P&I methods
+- You need to define new methods for the resource
+
+In what follows you will learn how to add model resources in a more customised way with the
+class `ModelResource`.
+
+## The ModelResource class
+
+### Predict
+
+Explain the following meta-example:
+
+```python
+class MyModel(ModelResource, metaclass=ModelResourceType):
+    name = "my_model"
+    verbose_name = "My ML model"
+    model_path = "path/to/your_model_file.flm"
+
+    @resource_method("/predict", methods=["POST"], name="model-predict")
+    def predict(self, x):
+        return self.model.predict(x).tolist()
+```
+
+### Inspect
+
+Explain the following meta-example:
+
+```python
+class MyModel(ModelResource, metaclass=ModelResourceType):
+    name = "my_model"
+    verbose_name = "My ML model"
+    model_path = "path/to/your_model_file.flm"
+
+    @resource_method("/inspect", methods=["GET"], name="model-inspect")
+    def inspect(self) -> typing.Any:
+        return self.model.get_params()
+```
+
+### Custom methods
+
+Explain the following meta-example:
+
+```python
+class MyModel(ModelResource, metaclass=ModelResourceType):
+    name = "my_model"
+    verbose_name = "My ML model"
+    model_path = "path/to/your_model_file.flm"
+
+    @resource_method("/custom-method", methods=["GET"], name="model-custom-method")
+    def custom_method(self):
+        """
+        summary:
+            A custom method which returns the verbose name of the model.
+        description:
+            This is a more detailed description of the method itself.
+            Here we can give all the details required and they will appear
+            automatically in the auto-generated docs.
+        responses:
+            200:
+                description: Verbose name of the ML model.
+        """
+        return {"name": self.verbose_name}
+```
+
+## Adding the resource
+
+### Explicit
+
+```python
+class MySKLearnModel(ModelResource, metaclass=ModelResourceType):
+    ...
+
+app.models.add_model_resource(path="/model", resource=MySKLearnModel)
+```
+
+### Decorator
+
+```python
+@app.models.model("/model")
+class MySKLearnModel(ModelResource, metaclass=ModelResourceType):
+    ...
+```
+
+## Examples
+
+### Scikit-Learn
+
+```python
+class MySKLearnModel(ModelResource, metaclass=ModelResourceType):
+    name = "sk_model"
+    verbose_name = "SK-Learn Logistic Regression"
+    model_path = "path/to/your_model_file.flm"
+
+    @resource_method("/info", methods=["GET"], name="model-info")
+    def info(self):
+        return {"name": self.verbose_name}
+```
+
+### TensorFlow
+
+(TBD)
+
+**Remark**: Show SWAGER docs for all combinations
