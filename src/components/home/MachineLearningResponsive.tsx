@@ -6,21 +6,30 @@ import {
   ISelectableItem,
   SelectableList,
 } from '@/components/home/SelectableList'
-import { ScikitLearnIcon, TensorFlowIcon } from '@/components/icons'
+import {
+  PyTorchIcon,
+  ScikitLearnIcon,
+  TensorFlowIcon,
+} from '@/components/icons'
 import CodeBlock from '@/components/CodeBlock'
 import { Sample } from '@/lib/samples'
 import FlamaName from '@/components/FlamaName'
 
 const frameworks: ISelectableItem[] = [
   {
+    id: 'sklearn',
+    name: 'scikit-learn',
+    icon: <ScikitLearnIcon fillOpacity=".8" />,
+  },
+  {
     id: 'tf',
     name: 'TensorFlow',
     icon: <TensorFlowIcon fillOpacity=".8" />,
   },
   {
-    id: 'sklearn',
-    name: 'scikit-learn',
-    icon: <ScikitLearnIcon fillOpacity=".8" />,
+    id: 'pytorch',
+    name: 'PyTorch',
+    icon: <PyTorchIcon fillOpacity=".8" />,
   },
 ]
 

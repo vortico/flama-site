@@ -42,6 +42,13 @@ export async function getStaticProps() {
       language: 'python',
       lineNumbers: true,
     },
+    {
+      id: 'pytorch',
+      title: 'PyTorch',
+      code: await loadSample('home/ml_responsive_pytorch.py'),
+      language: 'python',
+      lineNumbers: true,
+    },
   ]
 
   const productionReadyFirstSamples = [
