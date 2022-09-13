@@ -20,11 +20,30 @@ found in the section [packaging models](/docs/machine-learning-api/packaging-mod
 
 ### Example
 
-The best way of seeing the power of `flama serve` is by example. Although we have not seen yet how
-to produce the ML file, we can use any of the examples in [here]()
+The best way of seeing the power of **serve** is by example. Although we have not seen yet how
+to produce the ML file needed (go to [packaging models](/docs/machine-learning-api/packaging-models) to learn
+how), we can use any of the following examples:
 
-The advantage of having flama CLI is the possibility of deploying an already trained-tested ML model as an API
-ready to receive requests and return estimations.
+- [Scikit Learn model](/models/sklearn_model.flm)
+- [TensorFlow model](/models/tensorflow_model.flm)
+- [PyTorch model](/models/pytorch_model.flm)
+
+Once you have downloaded any of the files, you are ready to serve your first ML model codeless.
+For instance:
+
+```commandline
+> flama serve sklearn_model.flm
+
+INFO:     Started server process [15822]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
+```
+
+As you can see, this time we have not written a single line of code.
+This is the codeless approach of <FlamaName /> to ML models deployment,
+which makes possible the deployment of an already trained-tested ML model as an API
+ready to receive requests and return estimations almost without any effort.
 
 Here we present the endpoints and documentation (SWAGER) auto-geneated, besides any other optional flag we might
 be able to pass to uvicorn, either as parameter, option or ENV. Examples:
