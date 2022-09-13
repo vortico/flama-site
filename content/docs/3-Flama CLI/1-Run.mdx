@@ -1,15 +1,103 @@
 ---
 title: Run
-wip: true
+wip: false
 ---
 
 import FlamaName from '@/components/FlamaName'
 import PythonName from '@/components/PythonName'
 
-## Run a Flama App
+## Running an App
 
-Continue from where Quickstar left talking about Flama (i.e. flama run), and do a deeper dive into the follwing topics
-per sections:
+### Introducting Flama CLI
 
-- Folder structure and naming convention (following quickstart)
-- Flags that can be passed to UVICORN are Flama compliant [https://www.uvicorn.org/settings/](https://www.uvicorn.org/settings/)
+We have already seen how to use the command line to run an **app** in the
+[Quickstart](/docs/getting-started/quickstart), but we didn't do a proper introduction of the
+command line interface (CLI). <FlamaName /> CLI is a convenient tool which
+is installed automatically with the package, and reduces the hurdles of serving your app.
+
+Once you have a developed app that you want to serve, you need to choose and configure
+a web server, e.g. [gunicorn]() or [uvicorn](), and that eventually becomes a repetitive task.
+
+<FlamaName /> CLI precisely aims at reducing the effort invested in this step to
+the bare minimum, so that you can focus on developing your app.
+
+### App path
+
+To be able to serve an app, you need to have a file where you have the following lines:
+
+```python
+from flama import Flama
+
+app = Flama()
+
+...
+```
+
+As we did in the [Quickstart](/docs/getting-started/quickstart), let's assume that the file containing these
+lines is **main.py**, which is located at:
+
+```commandLine
+project_folder/
+└── src
+    └── main.py
+        └── app
+```
+
+For <FlamaName /> to be able to run the app, it needs to know the exact path to the **app** variable.
+If we run directly `flama run`, this will use the environment variable **FLAMA_APP** as the route of the app.
+For instance, if we run it inside `project_folder` (following the previous example of folder structure):
+
+```commandLine
+> export FLAMA_APP=src.main:app
+> flama run
+
+INFO:     Started server process [3267]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
+```
+
+Another option is the passing of the path as an argument of the command line:
+
+```commandLine
+> flama run src.main:app
+
+INFO:     Started server process [3267]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
+```
+
+### Development mode
+
+If you run your app as specified above, everything will be running with the code as it was at the moment you run
+the command. However, more often than not, you might need to make some changes in the code of your app, which would
+require you to stop and rerun it again for the changes to take effect. In such scenario, you might be interested in
+running the app in _development mode_. When running in development mode, the webserver will autodetect changes in
+the underlying code, and will reload the app automatically for you.
+
+For this, we only need to run one of the following two options:
+
+#### Using environment variable
+
+```commandLine
+> export FLAMA_DEV=True
+> flama run
+```
+
+#### Using option argument
+
+```commandLine
+> flama run --dev
+```
+
+The convenience of this mode of execution does not stop here. Running in development mode also brings
+useful tools which make the debugging of the code easier, e.g. highly-detailed error messages,
+and interactive error webpages.
+
+### Further options
+
+<FlamaName /> CLI uses **uvicorn** as webserver, and it is because of this that
+it accepts every argument of the uvicorn CLI. For the exhaustive list of
+arguments you can pass, and their usage, we recommend you to check
+[here](https://www.uvicorn.org/settings/).
