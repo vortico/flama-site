@@ -8,6 +8,21 @@ import PythonName from '@/components/PythonName'
 
 ## Serve machine-learning models
 
+In the previous section we have introduced the command **run** of <FlamaName /> CLI.
+The **run** command allowed us to serve any <FlamaName /> app, being possible to adapt the configuration
+of the app using the standard **uvicorn** arguments. But this is not the end of the story.
+
+The command **serve** comes to the rescue of those who are looking for an instantaneous serving of
+an ML model without having to write an app. This command, as we are about to see, only
+requires the ML model to be served. The model will have be saved as a binary file beforehand using
+the tools offered by <FlamaName />. The details about how to save the models properly can be
+found in the section [packaging models](/docs/machine-learning-api/packaging-models).
+
+### Example
+
+The best way of seeing the power of `flama serve` is by example. Although we have not seen yet how
+to produce the ML file, we can use any of the examples in [here]()
+
 The advantage of having flama CLI is the possibility of deploying an already trained-tested ML model as an API
 ready to receive requests and return estimations.
 
