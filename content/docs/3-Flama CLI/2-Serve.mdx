@@ -14,22 +14,27 @@ of the app using the standard **uvicorn** arguments. But this is not the end of 
 
 The command **serve** comes to the rescue of those who are looking for an instantaneous serving of
 an ML model without having to write an app. This command, as we are about to see, only
-requires the ML model to be served. The model will have be saved as a binary file beforehand using
-the tools offered by <FlamaName />. The details about how to save the models properly can be
+requires the ML model to be served. The model will have to be saved as a binary file beforehand by using
+the tools offered by <FlamaName />. The details about how to properly save the models can be
 found in the section [packaging models](/docs/machine-learning-api/packaging-models).
 
-### Example
+### Example files
 
-The best way of seeing the power of **serve** is by example. Although we have not seen yet how
+The best way of seeing the power of **serve** is by example. Although we have not yet seen how
 to produce the ML file needed (go to [packaging models](/docs/machine-learning-api/packaging-models) to learn
-how), we can use any of the following examples:
+how), we can use any of the following example files for the sake of learning:
 
 - [Scikit Learn model](/models/sklearn_model.flm)
 - [TensorFlow model](/models/tensorflow_model.flm)
 - [PyTorch model](/models/pytorch_model.flm)
 
-Once you have downloaded any of the files, you are ready to serve your first ML model codeless.
-For instance:
+Once you have downloaded any of the files listed above, you will be able to serve your first ML
+model codeless.
+
+### Codeless serving
+
+Let's pick up one of the example model files we have just introduced in the previous section, say
+**sklearn_model.flm**. Now, let's run:
 
 ```commandline
 > flama serve sklearn_model.flm
@@ -40,13 +45,29 @@ INFO:     Application startup complete.
 INFO:     Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
 ```
 
-As you can see, this time we have not written a single line of code.
-This is the codeless approach of <FlamaName /> to ML models deployment,
+Does it seem familiar? Yup, indeed, as you can see we have a <FlamaName /> app up and
+running on **http://127.0.0.1** and listening via the port **8000**.
+But, this time we have not written a single line of code!
+This is the **codeless approach** of <FlamaName /> to ML models deployment,
 which makes possible the deployment of an already trained-tested ML model as an API
 ready to receive requests and return estimations almost without any effort.
 
-Here we present the endpoints and documentation (SWAGER) auto-geneated, besides any other optional flag we might
-be able to pass to uvicorn, either as parameter, option or ENV. Examples:
+#### How do we interact with the model?
+
+So, we have an app which is running an ML model. The natural question to ask
+now is, how do I interact with that model? All models serve with **flama serve**
+come with the following end points for free:
+
+- **/model** POST
+- **/model** GET
+- **/schema**
+
+When use **serve**, there is some magic that happens under the hood which eventually
+leads to having...
+
+Here we present the endpoints and documentation (SWAGER) auto-geneated,
+besides any other optional flag we might be able to pass to uvicorn,
+either as parameter, option or environment variable. Examples:
 
 - FLAMA_APP
 - FLAMA_MODEL
