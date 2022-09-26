@@ -58,9 +58,10 @@ So, we have an app which is running an ML model. The natural question to ask
 now is, how do I interact with that model? All models serve with **flama serve**
 come with the following end points for free:
 
-- **/model** POST
-- **/model** GET
-- **/schema**
+- **POST /model/predict/**
+- **GET /model/**
+- **GET /schema/**
+- **GET /docs/**
 
 When use **serve**, there is some magic that happens under the hood which eventually
 leads to having...

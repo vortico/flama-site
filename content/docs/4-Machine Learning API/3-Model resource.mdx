@@ -99,12 +99,25 @@ class MySKLearnModel(ModelResource, metaclass=ModelResourceType):
 
 ## Examples
 
+### PyTorch
+
+```python
+class MyTorchModel(ModelResource, metaclass=ModelResourceType):
+    name = "torch_model"
+    verbose_name = "PyTorch Model"
+    model_path = "path/to/your_model_file.flm"
+
+    @resource_method("/info", methods=["GET"], name="model-info")
+    def info(self):
+        return {"name": self.verbose_name}
+```
+
 ### Scikit-Learn
 
 ```python
 class MySKLearnModel(ModelResource, metaclass=ModelResourceType):
     name = "sk_model"
-    verbose_name = "SK-Learn Logistic Regression"
+    verbose_name = "SK-Learn Model"
     model_path = "path/to/your_model_file.flm"
 
     @resource_method("/info", methods=["GET"], name="model-info")
@@ -114,6 +127,15 @@ class MySKLearnModel(ModelResource, metaclass=ModelResourceType):
 
 ### TensorFlow
 
-(TBD)
+```python
+class MySKLearnModel(ModelResource, metaclass=ModelResourceType):
+    name = "tf_model"
+    verbose_name = "TensorFlow Model"
+    model_path = "path/to/your_model_file.flm"
 
-**Remark**: Show SWAGER docs for all combinations
+    @resource_method("/info", methods=["GET"], name="model-info")
+    def info(self):
+        return {"name": self.verbose_name}
+```
+
+**Remark**: Show SWAGGER docs for all combinations

@@ -8,6 +8,44 @@ wip: true
 Once you have your ML models packaged in _flm_ format, they can be exposed as resources
 of a Flama App. This is what constitutes what we refer to as a _Flama ML API_.
 
+## Example of adding a PyTorch model
+
+```python
+import typing
+
+from flama import Flama
+
+app = Flama()
+
+app.models.add_model(
+    path="/torch_model",
+    model="path/to/your_model_file.flm",
+    name="name_of_the_torch_model",
+)
+```
+
+- **GET /torch_model**: Returns _resource_, i.e. the schema with `get_params()`
+- **POST /torch_model/predict**: Returns prediction of model
+
+## Example of adding a SKLearn model
+
+```python
+import typing
+
+from flama import Flama
+
+app = Flama()
+
+app.models.add_model(
+    path="/sk_model",
+    model="path/to/your_model_file.flm",
+    name="name_of_the_sk_model",
+)
+```
+
+- **GET /sk_model**: Returns _resource_, i.e. the schema with `get_params()`
+- **POST /sk_model/predict**: Returns prediction of model
+
 ## Example of adding a TensorFlow model
 
 ```python
@@ -26,27 +64,8 @@ app.models.add_model(
 
 If you run this code, you will get an API with the following endpoints:
 
-- `/tf_model`: Returns _resource_, i.e. the schema with `get_params()` (`GET`)
-- `/tf_models/predict`: Returns prediction of model (`POST`)
-
-## Example of adding a TensorFlow model
-
-```python
-import typing
-
-from flama import Flama
-
-app = Flama()
-
-app.models.add_model(
-    path="/sk_model",
-    model="path/to/your_model_file.flm",
-    name="name_of_the_sk_model",
-)
-```
-
-- `/sk_model`: Returns _resource_, i.e. the schema with `get_params()` (`GET`)
-- `/sk_models/predict`: Returns prediction of model (`POST`)
+- **GET /tf_model**: Returns _resource_, i.e. the schema with `get_params()`
+- **POST /tf_model/predict**: Returns prediction of model
 
 ## Example of adding multiple ML models
 
@@ -56,6 +75,12 @@ import typing
 from flama import Flama
 
 app = Flama()
+
+app.models.add_model(
+    path="/torch_model",
+    model="path/to/your_model_file.flm",
+    name="name_of_the_torch_model",
+)
 
 app.models.add_model(
     path="/sk_model",
@@ -70,9 +95,11 @@ app.models.add_model(
 )
 ```
 
-- `/sk_model`: Returns _resource_, i.e. the schema with `get_params()` (`GET`)
-- `/sk_models/predict`: Returns prediction of model (`POST`)
-- `/tf_model`: Returns _resource_, i.e. the schema with `get_params()` (`GET`)
-- `/tf_models/predict`: Returns prediction of model (`POST`)
+- **GET /tf_model**: Returns _resource_, i.e. the schema with `get_params()`
+- **POST /tf_model/predict**: Returns prediction of model
+- **GET /sk_model**: Returns _resource_, i.e. the schema with `get_params()`
+- **POST /sk_model/predict**: Returns prediction of model
+- **GET /torch_model**: Returns _resource_, i.e. the schema with `get_params()`
+- **POST /torch_model/predict**: Returns prediction of model
 
-**Remark**: Show SWAGER docs for all combinations
+**Remark**: Show SWAGGER docs for all combinations
