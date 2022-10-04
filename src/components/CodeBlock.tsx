@@ -1,6 +1,6 @@
 import Highlight, { defaultProps } from 'prism-react-renderer'
 import type { Language } from 'prism-react-renderer'
-import { CheckIcon, DuplicateIcon } from '@heroicons/react/outline'
+import { CheckIcon, DocumentDuplicateIcon } from '@heroicons/react/24/outline'
 import React, { useCallback, useState } from 'react'
 
 interface ClipboardButtonProps {
@@ -26,7 +26,7 @@ function ClipboardButton({ code }: ClipboardButtonProps) {
         {copied ? (
           <CheckIcon className="h-6 w-6 text-brand-500" />
         ) : (
-          <DuplicateIcon className="h-6 w-6 text-primary-500" />
+          <DocumentDuplicateIcon className="h-6 w-6 text-primary-500" />
         )}
       </button>
     </div>

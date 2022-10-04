@@ -1,5 +1,5 @@
 import HomeSection from '@/components/home/HomeSection'
-import { ChipIcon } from '@heroicons/react/outline'
+import { CpuChipIcon } from '@heroicons/react/24/outline'
 import React, { useCallback, useMemo, useState } from 'react'
 import Window from '@/components/Window'
 import {
@@ -57,7 +57,7 @@ export default function MachineLearningResponsive({
   return (
     <HomeSection
       id="machine-learning-responsive"
-      icon={<ChipIcon />}
+      icon={<CpuChipIcon />}
       title="Machine Learning Responsive"
       docRef="/docs/"
       selectableList={

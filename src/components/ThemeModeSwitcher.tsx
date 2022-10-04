@@ -1,6 +1,6 @@
 import { useTheme } from 'next-themes'
 import React, { useCallback, useEffect, useState } from 'react'
-import { MoonIcon, SunIcon } from '@heroicons/react/outline'
+import { MoonIcon, SunIcon } from '@heroicons/react/24/outline'
 
 export default function ThemeModeSwitcher({
   ...props

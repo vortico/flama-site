@@ -1,5 +1,5 @@
 import HomeSection from '@/components/home/HomeSection'
-import { PuzzleIcon } from '@heroicons/react/outline'
+import { PuzzlePieceIcon } from '@heroicons/react/24/outline'
 import React from 'react'
 import Window from '@/components/Window'
 import CodeBlock from '@/components/CodeBlock'
@@ -16,7 +16,7 @@ export default function Extensibility({ samples }: ExtensibilityProps) {
   return (
     <HomeSection
       id="extensibility"
-      icon={<PuzzleIcon />}
+      icon={<PuzzlePieceIcon />}
       title="Extensibility"
       docRef="/docs/"
       content={

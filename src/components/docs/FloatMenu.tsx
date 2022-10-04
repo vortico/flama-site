@@ -1,6 +1,6 @@
 import React, { useContext } from 'react'
 import { DocsContext } from '@/components/docs/Context'
-import { XIcon } from '@heroicons/react/outline'
+import { XMarkIcon } from '@heroicons/react/24/outline'
 import { DocsMenu } from '@/components/docs/Menu'
 
 export function FloatMenu() {
@@ -23,7 +23,7 @@ export function FloatMenu() {
           onClick={onClose}
           aria-label="Close menu"
         >
-          <XIcon className="h-5 w-6" />
+          <XMarkIcon className="h-5 w-6" />
         </button>
         <nav className="px-6">
           <DocsMenu />

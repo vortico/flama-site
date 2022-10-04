@@ -1,5 +1,5 @@
 import HomeSection from '@/components/home/HomeSection'
-import { SparklesIcon } from '@heroicons/react/outline'
+import { SparklesIcon } from '@heroicons/react/24/outline'
 import React, { useCallback, useMemo, useState } from 'react'
 import Window from '@/components/Window'
 import CodeBlock from '@/components/CodeBlock'
@@ -8,7 +8,7 @@ import {
   SelectableList,
 } from '@/components/home/SelectableList'
 import { Sample } from '@/lib/samples'
-import { TerminalIcon } from '@heroicons/react/solid'
+import { CommandLineIcon } from '@heroicons/react/24/solid'
 import { PythonIcon } from '@/components/icons'
 import FlamaName from '@/components/FlamaName'
 
@@ -16,7 +16,7 @@ const items: ISelectableItem[] = [
   {
     id: 'cli',
     name: 'Command Line',
-    icon: <TerminalIcon fillOpacity=".8" />,
+    icon: <CommandLineIcon fillOpacity=".8" />,
   },
   {
     id: 'python',

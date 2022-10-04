@@ -1,7 +1,7 @@
 import HomeSection from '@/components/home/HomeSection'
-import { LightningBoltIcon } from '@heroicons/react/outline'
+import { BoltIcon } from '@heroicons/react/24/outline'
 import React, { useCallback, useMemo, useState } from 'react'
-import { ChevronRightIcon } from '@heroicons/react/solid'
+import { ChevronRightIcon } from '@heroicons/react/24/solid'
 import FlamaName from '@/components/FlamaName'
 
 const samples = [
@@ -139,7 +139,7 @@ export default function EffortlessDevelopment() {
   return (
     <HomeSection
       id="effortless-development"
-      icon={<LightningBoltIcon />}
+      icon={<BoltIcon />}
       title="Effortless Development"
       docRef="/docs/"
       content={

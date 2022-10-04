@@ -1,6 +1,6 @@
 import React from 'react'
 import { SearchButton } from '@/components/Search'
-import { SearchIcon } from '@heroicons/react/outline'
+import { MagnifyingGlassIcon } from '@heroicons/react/24/outline'
 
 export function QuickSearchButton({
   className,
@@ -13,7 +13,7 @@ export function QuickSearchButton({
     >
       {({ actionKey }) => (
         <>
-          <SearchIcon className="h-6 w-6 flex-none text-brand-500" />
+          <MagnifyingGlassIcon className="h-6 w-6 flex-none text-brand-500" />
           <span className="flex-auto text-primary-500 dark:text-primary-300">
             Quick search...
           </span>

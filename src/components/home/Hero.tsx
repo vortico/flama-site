@@ -1,7 +1,7 @@
 import React, { useCallback, useMemo, useState } from 'react'
 import { QuickSearchButton } from '@/components/QuickSearchButton'
 import Window from '@/components/Window'
-import { ChevronRightIcon } from '@heroicons/react/solid'
+import { ChevronRightIcon } from '@heroicons/react/24/solid'
 import CodeBlock from '@/components/CodeBlock'
 import Link from '@/components/Link'
 import { Sample } from '@/lib/samples'

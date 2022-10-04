@@ -1,5 +1,5 @@
 import HomeSection from '@/components/home/HomeSection'
-import { RefreshIcon } from '@heroicons/react/outline'
+import { ArrowPathIcon } from '@heroicons/react/24/outline'
 import React from 'react'
 import Window from '@/components/Window'
 import CodeBlock from '@/components/CodeBlock'
@@ -16,7 +16,7 @@ export default function ModelsLifecycle({ samples }: ModelsLifecycleProps) {
   return (
     <HomeSection
       id="models-lifecycle"
-      icon={<RefreshIcon />}
+      icon={<ArrowPathIcon />}
       title="Models Lifecycle"
       docRef="/docs/"
       content={

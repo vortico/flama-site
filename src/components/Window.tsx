@@ -2,7 +2,7 @@ import {
   MinusCircleIcon,
   PlusCircleIcon,
   XCircleIcon,
-} from '@heroicons/react/solid'
+} from '@heroicons/react/24/solid'
 import React, { useCallback, useState } from 'react'
 
 export interface WindowProps extends React.ComponentProps<'div'> {

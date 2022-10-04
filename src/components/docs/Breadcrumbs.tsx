@@ -1,6 +1,6 @@
 import React from 'react'
 import { DocsContext } from '@/components/docs/Context'
-import { ChevronRightIcon, MenuIcon } from '@heroicons/react/outline'
+import { ChevronRightIcon, Bars3Icon } from '@heroicons/react/24/outline'
 
 export function Breadcrumbs() {
   const { docs, onOpen } = React.useContext(DocsContext)
@@ -12,7 +12,7 @@ export function Breadcrumbs() {
         onClick={onOpen}
         aria-label="Open docs menu"
       >
-        <MenuIcon />
+        <Bars3Icon />
       </button>
       <div className="flex items-center space-x-1 text-sm">
         <span>{docs?.group}</span>

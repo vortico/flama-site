@@ -1,7 +1,7 @@
 import React, { useContext } from 'react'
 import { BlogContext } from '@/components/blog/Context'
 import Link from 'next/link'
-import { ChevronDoubleLeftIcon } from '@heroicons/react/solid'
+import { ChevronDoubleLeftIcon } from '@heroicons/react/24/solid'
 
 export function Menu() {
   const dateFormatter = Intl.DateTimeFormat(['en'], {

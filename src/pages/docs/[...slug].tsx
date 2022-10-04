@@ -1,12 +1,10 @@
 import { DocsLayout } from '@/layouts/docs'
 import { allDocs } from '@/contentlayer'
 import type { Docs as IDocs } from '@/contentlayer'
-import { useMDXComponent } from 'next-contentlayer/hooks' // eslint-disable-line import/no-unresolved
 import { withTOC } from '@/components/mdx/toc'
-import { H1, H2, H3, H4, H5, H6 } from '@/components/mdx/header'
-import { Code, Pre } from '@/components/mdx/code'
 import { NextSeo } from 'next-seo'
 import React from 'react'
+import MDXComponent from '@/components/mdx/MDXComponent'
 
 export async function getStaticPaths() {
   return {
@@ -42,8 +40,6 @@ interface DocsProps {
 }
 
 export default function Docs({ docs, next, prev }: DocsProps) {
-  const Component = useMDXComponent(docs.body.code)
-
   return (
     <>
       <NextSeo
@@ -51,21 +47,14 @@ export default function Docs({ docs, next, prev }: DocsProps) {
         canonical={`https://flama.dev/docs/${docs.slug}`}
       />
       <DocsLayout docs={docs} next={next} prev={prev}>
-        <Component
+        <MDXComponent
+          code={docs.body.code}
           components={{
             nav: withTOC({
               title: docs.title,
               titleSlug: docs.titleSlug,
               activeClassNames: '!text-brand-500',
             }),
-            h1: H1,
-            h2: H2,
-            h3: H3,
-            h4: H4,
-            h5: H5,
-            h6: H6,
-            pre: Pre,
-            code: Code,
           }}
         />
       </DocsLayout>

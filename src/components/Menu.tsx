@@ -1,7 +1,11 @@
 import Link from 'next/link'
 import { FlamaIcon, GithubIcon } from '@/components/icons'
 import ThemeModeSwitcher from '@/components/ThemeModeSwitcher'
-import { MenuIcon, SearchIcon, XIcon } from '@heroicons/react/outline'
+import {
+  Bars3Icon,
+  MagnifyingGlassIcon,
+  XMarkIcon,
+} from '@heroicons/react/24/outline'
 import { SearchButton } from '@/components/Search'
 import React, { useCallback, useState } from 'react'
 import { createPortal } from 'react-dom'
@@ -74,7 +78,7 @@ function FloatMenu({ onClose }: FloatMenuProps) {
       />
       <div className="relative rounded bg-primary-100 py-6 text-base font-semibold text-primary-600 shadow-lg dark:bg-primary-800 dark:text-primary-400">
         <button className="absolute top-5 right-5 flex h-8 w-8 items-center justify-center text-primary-400 hover:text-primary-500 dark:text-primary-600 dark:hover:text-primary-500">
-          <XIcon
+          <XMarkIcon
             className="h-5 w-5"
             onClick={onClose}
             aria-label="close menu"
@@ -121,14 +125,14 @@ export default function Menu() {
             className="block text-primary-400 hover:text-primary-500 dark:text-primary-600 dark:hover:text-primary-500"
             aria-label="Search"
           >
-            <SearchIcon className="h-5 w-5" />
+            <MagnifyingGlassIcon className="h-5 w-5" />
           </SearchButton>
           <button
             className="block text-primary-400 hover:text-primary-500 dark:text-primary-600 dark:hover:text-primary-500"
             onClick={onOpen}
             aria-label="Open menu"
           >
-            <MenuIcon className="h-5 w-5" />
+            <Bars3Icon className="h-5 w-5" />
           </button>
         </div>
       </div>
