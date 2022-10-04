@@ -52,7 +52,7 @@ export default function Label({ color = 'primary', children }: LabelProps) {
 
   return (
     <span
-      className={`ml-3 rounded-sm px-1.5 py-0.5 text-xs shadow-xl ring-1 ring-inset ${classColor}`}
+      className={`rounded-sm px-2 py-1 align-middle text-xs shadow-xl ring-1 ring-inset ${classColor}`}
     >
       {children}
     </span>

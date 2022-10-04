@@ -55,13 +55,86 @@ So, we have an app which is running an ML model. The natural question to ask
 now is, how do we interact with that model? All models serve with **flama serve**
 come with the following end points for free:
 
-- **http://127.0.0.1:8000/predict/** <Label color="1">POST</Label> This path expects the input data to be passed as input argument of the
-- **http://127.0.0.1:8000/model/**
-- **GET /schema/**
-- **GET /docs/**
+- <Label color="green">GET</Label> **http://127.0.0.1:8000/docs/**: Returns an interactive
+  HTML documentation which allows us to interact with the model in our web browser.
+  This is the recommended way to start interacting with the model, as it informs
+  us about all the routes available, and helps us to figure how to programmatically
+  interact with all other routes.
+- <Label color="green">GET</Label> **http://127.0.0.1:8000/schema/**: Returns a JSON
+  which represents the model being served.
+- <Label color="blue">POST</Label> **http://127.0.0.1:8000/predict/** Expects the
+  input data (observations) to be passed as argument to predict their output.
 
-When use **serve**, there is some magic that happens under the hood which eventually
-leads to having...
+#### Interactive and intuitive documentation
+
+As mentioned in the previous section, we recommend inspecting the documentation route (`/docs/`) as soon as we have
+the model serving. To do that you only need to **flama serve** whatever model which you have packaged previously,
+and you'll get something like:
+
+<Image
+  src="/images/docs/docs-schema-get.png"
+  alt="docs-get-schema"
+  width="800"
+  height="200"
+/>
+
+As you can see, the documentation page not only gives you a handy way to interact with the different endpoints
+available, but also gives you the equivalent `curl` statement. For instance, in order to get the schema of the model:
+
+```commandLine
+$ curl --request GET \
+  --url http://127.0.0.1:8000/ \
+  --header 'Content-Type: application/json'
+
+{
+  "C": 1,
+  "class_weight": null,
+  "dual": false,
+  "fit_intercept": true,
+  "intercept_scaling": 1,
+  "l1_ratio": null,
+  "max_iter": 100,
+  "multi_class": "auto",
+  "n_jobs": null,
+  "penalty": "l2",
+  "random_state": null,
+  "solver": "lbfgs",
+  "tol": 0.0001,
+  "verbose": 0,
+  "warm_start": false
+}
+```
+
+Or, in case we want to make a prediction:
+
+<Image
+  src="/images/docs/docs-predict-post.png"
+  alt="docs-post-predict"
+  width="800"
+  height="380"
+/>
+
+```commandLine
+curl --request POST \
+  --url http://127.0.0.1:8000/predict/ \
+  --header 'Content-Type: application/json' \
+  --data '{"input": [[1,2,3], [1,2,3]]}'
+
+{
+  "output": [
+    0,
+    0
+  ]
+}
+```
+
+Awesome! Now, not only you have your model serving, but you also made predictions with it programmatically.
+The cool thing about this is that this way of interacting with your model via _requests_ is the same, no matter where
+the model is deployed. And, this is a huge step towards the productionalization of your model.
+Now, we have a reproducible problem, which is key to understand and replicate the behaviour of our models
+in a production environment, since it'll be the same as we observe in local.
+
+#### Optional parameters
 
 Here we present the endpoints and documentation (SWAGER) auto-geneated,
 besides any other optional flag we might be able to pass to uvicorn,
