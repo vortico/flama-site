@@ -5,6 +5,7 @@ wip: true
 
 import FlamaName from '@/components/FlamaName'
 import PythonName from '@/components/PythonName'
+import Label from '@/components/Label'
 
 ## Serve machine-learning models
 
@@ -55,11 +56,11 @@ ready to receive requests and return estimations almost without any effort.
 #### How do we interact with the model?
 
 So, we have an app which is running an ML model. The natural question to ask
-now is, how do I interact with that model? All models serve with **flama serve**
+now is, how do we interact with that model? All models serve with **flama serve**
 come with the following end points for free:
 
-- **POST /model/predict/**
-- **GET /model/**
+- **http://127.0.0.1:8000/predict/** <Label color="1">POST</Label> This path expects the input data to be passed as input argument of the
+- **http://127.0.0.1:8000/model/**
 - **GET /schema/**
 - **GET /docs/**
 
