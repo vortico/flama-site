@@ -9,6 +9,10 @@ pre[class*='language-'] {
   hyphens: none;
 }
 
+.token-line-selected {
+  background-color: theme('colors.brand.700');
+}
+
 .token {
   &.comment,
   &.block-comment,
