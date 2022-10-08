@@ -1,8 +1,6 @@
 import HomeSection from '@/components/home/HomeSection'
 import { SparklesIcon } from '@heroicons/react/24/outline'
 import React, { useCallback, useMemo, useState } from 'react'
-import Window from '@/components/Window'
-import CodeBlock from '@/components/CodeBlock'
 import {
   ISelectableItem,
   SelectableList,
@@ -11,6 +9,7 @@ import { Sample } from '@/lib/samples'
 import { CommandLineIcon } from '@heroicons/react/24/solid'
 import { PythonIcon } from '@/components/icons'
 import FlamaName from '@/components/FlamaName'
+import CodeWindow from '@/components/CodeWindow'
 
 const items: ISelectableItem[] = [
   {
@@ -84,15 +83,13 @@ export default function ProductionReadyFirst({
     >
       <div className="ml-auto -mt-16 w-full max-w-3xl">
         {selectedSample && (
-          <Window title={selectedSample.title}>
-            <div className="max-h-64">
-              <CodeBlock
-                code={selectedSample.code}
-                language={selectedSample.language}
-                lineNumbers={selectedSample.lineNumbers}
-              />
-            </div>
-          </Window>
+          <CodeWindow
+            title={selectedSample.title}
+            code={selectedSample.code}
+            language={selectedSample.language}
+            lineNumbers={selectedSample.lineNumbers}
+            className="max-h-64"
+          />
         )}
       </div>
     </HomeSection>

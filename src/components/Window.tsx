@@ -3,13 +3,19 @@ import {
   PlusCircleIcon,
   XCircleIcon,
 } from '@heroicons/react/24/solid'
-import React, { useCallback, useState } from 'react'
+import React, { MutableRefObject, useCallback, useState } from 'react'
 
 export interface WindowProps extends React.ComponentProps<'div'> {
   title?: string
+  contentRef?: MutableRefObject<HTMLDivElement | null>
 }
 
-export default function Window({ title, className, children }: WindowProps) {
+export default function Window({
+  title,
+  contentRef,
+  className,
+  children,
+}: WindowProps) {
   const [state, setState] = useState<string>('open')
 
   const onMinimize = useCallback(
@@ -44,7 +50,7 @@ export default function Window({ title, className, children }: WindowProps) {
             : ''
         } ${state === 'open' ? 'relative max-h-full' : ''} ${className || ''}`}
       >
-        <div className="-mb-px flex h-8 w-full items-center justify-between border-b border-primary-500 px-4 text-primary-400">
+        <div className="flex h-8 w-full items-center justify-between border-b border-primary-500 px-4 text-primary-400">
           <span className="truncate font-semibold text-primary-400">
             {title}
           </span>
@@ -72,7 +78,10 @@ export default function Window({ title, className, children }: WindowProps) {
             </button>
           </div>
         </div>
-        <div className="h-[calc(100%-31px)] w-full overflow-auto">
+        <div
+          ref={contentRef}
+          className="mt-px h-[calc(100%-31px)] w-full overflow-auto"
+        >
           {children}
         </div>
       </div>

@@ -1,7 +1,7 @@
-import Highlight, { defaultProps } from 'prism-react-renderer'
 import type { Language } from 'prism-react-renderer'
+import Highlight, { defaultProps } from 'prism-react-renderer'
 import ClipboardButton from '@/components/ClipboardButton'
-import React from 'react'
+import React, { MutableRefObject } from 'react'
 
 interface LineNumbersProps {
   lines: number
@@ -40,7 +40,7 @@ function CodeWrapper({
 }: CodeWrapperProps) {
   return (
     <pre
-      className={`group flex h-fit w-full overflow-hidden whitespace-pre text-left text-sm leading-6 ${className}`}
+      className={`group relative flex h-fit w-full overflow-hidden whitespace-pre text-left text-sm leading-6 ${className}`}
     >
       {token && (
         <LineNumbers
@@ -59,15 +59,17 @@ function CodeWrapper({
 export interface CodeBlockProps {
   code: string
   language?: Language
-  selectedLine?: number
   lineNumbers?: string | boolean
   copyButton?: boolean
+  selectedLine?: number
+  selectedLineRef?: MutableRefObject<HTMLDivElement | null>
 }
 
 export default function CodeBlock({
   code,
   language,
   selectedLine,
+  selectedLineRef,
   lineNumbers = true,
   copyButton = true,
 }: CodeBlockProps) {
@@ -95,6 +97,7 @@ export default function CodeBlock({
             return (
               <div
                 key={lineKey}
+                ref={selectedLine === i + 1 ? selectedLineRef : undefined}
                 className={`${lineClassName} ${
                   selectedLine === i + 1 ? 'token-line-selected' : ''
                 }`}

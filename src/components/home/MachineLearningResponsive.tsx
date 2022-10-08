@@ -1,7 +1,6 @@
 import HomeSection from '@/components/home/HomeSection'
 import { CpuChipIcon } from '@heroicons/react/24/outline'
 import React, { useCallback, useMemo, useState } from 'react'
-import Window from '@/components/Window'
 import {
   ISelectableItem,
   SelectableList,
@@ -11,9 +10,9 @@ import {
   ScikitLearnIcon,
   TensorFlowIcon,
 } from '@/components/icons'
-import CodeBlock from '@/components/CodeBlock'
 import { Sample } from '@/lib/samples'
 import FlamaName from '@/components/FlamaName'
+import CodeWindow from '@/components/CodeWindow'
 
 const frameworks: ISelectableItem[] = [
   {
@@ -86,15 +85,12 @@ export default function MachineLearningResponsive({
     >
       <div className="ml-auto -mt-16 w-full max-w-3xl">
         {selectedSample && (
-          <Window title={selectedSample.title}>
-            <div className="">
-              <CodeBlock
-                code={selectedSample.code}
-                language={selectedSample.language}
-                lineNumbers={selectedSample.lineNumbers}
-              />
-            </div>
-          </Window>
+          <CodeWindow
+            title={selectedSample.title}
+            code={selectedSample.code}
+            language={selectedSample.language}
+            lineNumbers={selectedSample.lineNumbers}
+          />
         )}
       </div>
     </HomeSection>

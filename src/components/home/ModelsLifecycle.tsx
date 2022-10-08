@@ -1,10 +1,9 @@
 import HomeSection from '@/components/home/HomeSection'
 import { ArrowPathIcon } from '@heroicons/react/24/outline'
 import React from 'react'
-import Window from '@/components/Window'
-import CodeBlock from '@/components/CodeBlock'
 import { Sample } from '@/lib/samples'
 import FlamaName from '@/components/FlamaName'
+import CodeWindow from '@/components/CodeWindow'
 
 interface ModelsLifecycleProps {
   samples: Sample[]
@@ -35,15 +34,12 @@ export default function ModelsLifecycle({ samples }: ModelsLifecycleProps) {
       }
     >
       <div className="ml-auto -mt-16 w-full max-w-3xl">
-        <Window title={selectedSample.title}>
-          <div>
-            <CodeBlock
-              code={selectedSample.code}
-              language={selectedSample.language}
-              lineNumbers={selectedSample.lineNumbers}
-            />
-          </div>
-        </Window>
+        <CodeWindow
+          title={selectedSample.title}
+          code={selectedSample.code}
+          language={selectedSample.language}
+          lineNumbers={selectedSample.lineNumbers}
+        />
       </div>
     </HomeSection>
   )

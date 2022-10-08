@@ -1,11 +1,10 @@
 import React, { useCallback, useMemo, useState } from 'react'
 import { QuickSearchButton } from '@/components/QuickSearchButton'
-import Window from '@/components/Window'
 import { ChevronRightIcon } from '@heroicons/react/24/solid'
-import CodeBlock from '@/components/CodeBlock'
 import Link from '@/components/Link'
 import { Sample } from '@/lib/samples'
 import FlamaName from '@/components/FlamaName'
+import CodeWindow from '@/components/CodeWindow'
 
 interface SamplesProps {
   samples: Sample[]
@@ -46,15 +45,13 @@ function Samples({ samples }: SamplesProps) {
       </div>
       <div className="h-full min-h-[17.5rem] w-full basis-full lg:basis-2/3">
         {selectedSample && (
-          <Window title={selectedSample.title}>
-            <div className="max-h-64">
-              <CodeBlock
-                code={selectedSample.code}
-                language={selectedSample.language}
-                lineNumbers={selectedSample.lineNumbers}
-              />
-            </div>
-          </Window>
+          <CodeWindow
+            title={selectedSample.title}
+            code={selectedSample.code}
+            language={selectedSample.language}
+            lineNumbers={selectedSample.lineNumbers}
+            className="max-h-64"
+          />
         )}
       </div>
     </div>
