@@ -1,6 +1,6 @@
 ---
 title: Serve
-wip: true
+wip: false
 ---
 
 ## Serve machine-learning models
@@ -128,18 +128,67 @@ curl --request POST \
 }
 ```
 
-Awesome! Now, not only you have your model serving, but you also made predictions with it programmatically.
-The cool thing about this is that this way of interacting with your model via _requests_ is the same, no matter where
+🥳 Awesome! Now, not only you have your model serving, but you also made predictions by interacting with it programmatically.
+The cool thing about this, is that this way of interacting with your model via _requests_ is the same, no matter where
 the model is deployed. And, this is a huge step towards the productionalization of your model.
 Now, we have a reproducible problem, which is key to understand and replicate the behaviour of our models
 in a production environment, since it'll be the same as we observe in local.
 
 #### Optional parameters
 
-Here we present the endpoints and documentation (SWAGER) auto-geneated,
-besides any other optional flag we might be able to pass to uvicorn,
-either as parameter, option or environment variable. Examples:
+Although the default usage of **flama serve** is already very convenient, you might be interested in customise a bit
+the result. For instance, you might want to serve the model at a different route (i.e., not at the default **/**),
+or the name of the model (i.e., not **model**), and so on. Such a customisation is possible thanks to the different
+optional inputs of the CLI:
 
-- FLAMA_APP
-- FLAMA_MODEL
-- FLAMA_URL
+```commandline
+> flama serve --help
+
+Usage: flama serve [OPTIONS] MODEL_PATH
+
+  Serve the ML model file at <MODEL_PATH> within a Flama Application.
+
+Options:
+  --model-url TEXT        Route of the model  [default: /]
+  --model-name TEXT       Name of the model  [default: model]
+  --app-name TEXT         Name of the application  [default: Flama]
+  --app-version TEXT      Version of the application  [default: 0.1.0]
+  --app-description TEXT  Description of the application  [default: Fire up
+                          with the flame]
+```
+
+Each of these options can be passed directly to the CLI by using `--<option-name> <value>`, or by utilising the equivalent
+environment variable, i.e. `export <OPTION_NAME>=<VALUE>`. For instance, if we want to change the route where the model
+is served we can do it by any of the following two equivalent ways:
+
+```commandline
+> flama serve sklearn_model.flm --model-url=/logreg
+```
+
+or, by using the equivalent environment variable:
+
+```commandline
+> export MODEL_URL=/logreg
+> flama serve sklearn_model.flm
+```
+
+As a complete example:
+
+```commanline
+> flama serve sklearn_model.flm \
+    --model-url="/logreg" \
+    --model-name="Logistic Regression" \
+    --app-name="ML API" \
+    --app-version="1.0.0" \
+    --app-description="Logistic Regression model serving for predictions"
+```
+
+With these changes, the documentation at **http://http://127.0.0.1:8000/docs/**
+will look like:
+
+<Image
+  src="/images/docs/docs-serve-params.png"
+  alt="docs-post-predict"
+  width="800"
+  height="456"
+/>
