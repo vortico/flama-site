@@ -134,7 +134,7 @@ the model is deployed. And, this is a huge step towards the productionalization 
 Now, we have a reproducible problem, which is key to understand and replicate the behaviour of our models
 in a production environment, since it'll be the same as we observe in local.
 
-#### Optional parameters
+#### Parameters
 
 Although the default usage of **flama serve** is already very convenient, you might be interested in customise a bit
 the result. For instance, you might want to serve the model at a different route (i.e., not at the default **/**),
@@ -158,17 +158,22 @@ Options:
 ```
 
 Each of these options can be passed directly to the CLI by using `--<option-name> <value>`, or by utilising the equivalent
-environment variable, i.e. `export <OPTION_NAME>=<VALUE>`. For instance, if we want to change the route where the model
+environment variable, i.e. `FLAMA_<OPTION_NAME>=<VALUE>` (take care, the equivalent environment variable needs
+to have the prefix **FLAMA**, and written in capital letters, and underscored).
+For instance, if we want to change the route where the model
 is served we can do it by any of the following two equivalent ways:
+
+##### Using option argument
 
 ```commandline
 > flama serve sklearn_model.flm --model-url=/logreg
 ```
 
-or, by using the equivalent environment variable:
+##### Using environment variable
 
 ```commandline
-> export MODEL_URL=/logreg
+> export FLAMA_MODEL_PATH=sklearn_model.flm
+> export FLAMA_MODEL_URL=/logreg
 > flama serve sklearn_model.flm
 ```
 
