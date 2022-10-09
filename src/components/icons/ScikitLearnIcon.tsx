@@ -1,8 +1,6 @@
 import React from 'react'
 
-export default function ScikitLearnIcon({
-  ...props
-}: React.ComponentProps<'svg'>) {
+export default function ScikitLearnIcon({ ...props }: React.ComponentProps<'svg'>) {
   return (
     <svg
       viewBox="0 0 48 48"
@@ -25,13 +23,7 @@ export default function ScikitLearnIcon({
         </g>
       </g>
 
-      <text
-        x="26.657518"
-        y="24.847685"
-        fontFamily="Helvetica"
-        fontSize="3.9947px"
-        strokeWidth=".17309"
-      >
+      <text x="26.657518" y="24.847685" fontFamily="Helvetica" fontSize="3.9947px" strokeWidth=".17309">
         scikit
       </text>
     </svg>

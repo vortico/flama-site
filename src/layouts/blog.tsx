@@ -25,9 +25,7 @@ export function BlogLayout({ blog, children }: BlogLayoutProps) {
             <div className="w-72 px-4 sm:px-6 md:px-8 xl:flex-none">
               <Menu />
             </div>
-            <div className="prose px-4 dark:prose-dark sm:px-6 md:px-8">
-              {children}
-            </div>
+            <div className="prose px-4 dark:prose-dark sm:px-6 md:px-8">{children}</div>
           </article>
         </main>
         <Footer />

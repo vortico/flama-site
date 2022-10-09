@@ -5,33 +5,31 @@ wip: false
 
 ## Serve machine-learning models
 
-In the previous section we have introduced the command **run** of <FlamaName /> CLI.
-The **run** command allowed us to serve any <FlamaName /> app, being possible to adapt the configuration
-of the app using the standard **uvicorn** arguments. But this is not the end of the story.
+In the previous section we have introduced the command **run** of <FlamaName /> CLI. The **run** command allowed us to
+serve any <FlamaName /> app, being possible to adapt the configuration of the app using the standard **uvicorn**
+arguments. But this is not the end of the story.
 
-The command **serve** comes to the rescue of those who are looking for an instantaneous serving of
-an ML model without having to write an app. This command, as we are about to see, only
-requires the ML model to be served. The model will have to be saved as a binary file beforehand by using
-the tools offered by <FlamaName />. The details about how to properly save the models can be
-found in the section [packaging models](/docs/machine-learning-api/packaging-models).
+The command **serve** comes to the rescue of those who are looking for an instantaneous serving of an ML model without
+having to write an app. This command, as we are about to see, only requires the ML model to be served. The model will
+have to be saved as a binary file beforehand by using the tools offered by <FlamaName />. The details about how to
+properly save the models can be found in the section [packaging models](/docs/machine-learning-api/packaging-models).
 
 ### Example files
 
-The best way of seeing the power of **serve** is by example. Although we have not yet seen how
-to produce the ML file needed (go to [packaging models](/docs/machine-learning-api/packaging-models) to learn
-how), we can use any of the following example files for the sake of learning:
+The best way of seeing the power of **serve** is by example. Although we have not yet seen how to produce the ML file
+needed (go to [packaging models](/docs/machine-learning-api/packaging-models) to learn how), we can use any of the
+following example files for the sake of learning:
 
 - [Scikit Learn model](/models/sklearn_model.flm)
 - [TensorFlow model](/models/tensorflow_model.flm)
 - [PyTorch model](/models/pytorch_model.flm)
 
-Once you have downloaded any of the files listed above, you will be able to serve your first ML
-model codeless.
+Once you have downloaded any of the files listed above, you will be able to serve your first ML model codeless.
 
 ### Codeless serving
 
-Let's pick up one of the example model files we have just introduced in the previous section, say
-**sklearn_model.flm**. Now, let's run:
+Let's pick up one of the example model files we have just introduced in the previous section, say **sklearn_model.flm**.
+Now, let's run:
 
 ```commandline
 > flama serve sklearn_model.flm
@@ -42,41 +40,30 @@ INFO:     Application startup complete.
 INFO:     Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
 ```
 
-Does it seem familiar? Yup, indeed, as you can see we have a <FlamaName /> app up and
-running on **http://127.0.0.1** and listening via the port **8000**.
-But, this time we have not written a single line of code!
-This is the **codeless approach** of <FlamaName /> to ML models deployment,
-which makes possible the deployment of an already trained-tested ML model as an API
-ready to receive requests and return estimations almost without any effort.
+Does it seem familiar? Yup, indeed, as you can see we have a <FlamaName /> app up and running on **http://127.0.0.1**
+and listening via the port **8000**. But, this time we have not written a single line of code! This is the **codeless
+approach** of <FlamaName /> to ML models deployment, which makes possible the deployment of an already trained-tested ML
+model as an API ready to receive requests and return estimations almost without any effort.
 
 #### How do we interact with the model?
 
-So, we have an app which is running an ML model. The natural question to ask
-now is, how do we interact with that model? All models served with **flama serve**
-come with the following end points for free:
+So, we have an app which is running an ML model. The natural question to ask now is, how do we interact with that model?
+All models served with **flama serve** come with the following end points for free:
 
-- <Label color="green">GET</Label> **http://127.0.0.1:8000/docs/**: Returns an interactive
-  HTML documentation which allows us to interact with the model in our web browser.
-  This is the recommended way to start interacting with the model, as it informs
-  us about all the routes available, and helps us to figure how to programmatically
-  interact with all other routes.
-- <Label color="green">GET</Label> **http://127.0.0.1:8000/schema/**: Returns a JSON
-  which represents the model being served.
-- <Label color="blue">POST</Label> **http://127.0.0.1:8000/predict/** Expects the
-  input data (observations) to be passed as argument to predict their output.
+- <Label color="green">GET</Label> **http://127.0.0.1:8000/docs/**: Returns an interactive HTML documentation which allows
+  us to interact with the model in our web browser. This is the recommended way to start interacting with the model, as it
+  informs us about all the routes available, and helps us to figure how to programmatically interact with all other routes.
+- <Label color="green">GET</Label> **http://127.0.0.1:8000/schema/**: Returns a JSON which represents the model being served.
+- <Label color="blue">POST</Label> **http://127.0.0.1:8000/predict/** Expects the input data (observations) to be passed
+  as argument to predict their output.
 
 #### Interactive and intuitive documentation
 
-As mentioned in the previous section, we recommend inspecting the documentation route (`/docs/`) as soon as we have
-the model serving. To do that you only need to **flama serve** whatever model which you have packaged previously,
-and you'll get something like:
+As mentioned in the previous section, we recommend inspecting the documentation route (`/docs/`) as soon as we have the
+model serving. To do that you only need to **flama serve** whatever model which you have packaged previously, and you'll
+get something like:
 
-<Image
-  src="/images/docs/docs-schema-get.png"
-  alt="docs-get-schema"
-  width="800"
-  height="200"
-/>
+<Image src="/images/docs/docs-schema-get.png" alt="docs-get-schema" width="800" height="200" />
 
 As you can see, the documentation page not only gives you a handy way to interact with the different endpoints
 available, but also gives you the equivalent `curl` statement. For instance, in order to get the schema of the model:
@@ -107,12 +94,7 @@ $ curl --request GET \
 
 Or, in case we want to make a prediction:
 
-<Image
-  src="/images/docs/docs-predict-post.png"
-  alt="docs-post-predict"
-  width="800"
-  height="380"
-/>
+<Image src="/images/docs/docs-predict-post.png" alt="docs-post-predict" width="800" height="380" />
 
 ```commandLine
 curl --request POST \
@@ -128,18 +110,18 @@ curl --request POST \
 }
 ```
 
-🥳 Awesome! Now, not only you have your model serving, but you also made predictions by interacting with it programmatically.
-The cool thing about this, is that this way of interacting with your model via _requests_ is the same, no matter where
-the model is deployed. And, this is a huge step towards the productionalization of your model.
-Now, we have a reproducible problem, which is key to understand and replicate the behaviour of our models
-in a production environment, since it'll be the same as we observe in local.
+🥳 Awesome! Now, not only you have your model serving, but you also made predictions by interacting with it
+programmatically. The cool thing about this, is that this way of interacting with your model via _requests_ is the same,
+no matter where the model is deployed. And, this is a huge step towards the productionalization of your model. Now, we
+have a reproducible problem, which is key to understand and replicate the behaviour of our models in a production
+environment, since it'll be the same as we observe in local.
 
-#### Parameters
+### Parameters
 
-Although the default usage of **flama serve** is already very convenient, you might be interested in customise a bit
-the result. For instance, you might want to serve the model at a different route (i.e., not at the default **/**),
-or the name of the model (i.e., not **model**), and so on. Such a customisation is possible thanks to the different
-optional inputs of the CLI:
+Although the default usage of **flama serve** is already very convenient, you might be interested in customise a bit the
+result. For instance, you might want to serve the model at a different route (i.e., not at the default **/**), or the
+name of the model (i.e., not **model**), and so on. Such a customisation is possible thanks to the different optional
+inputs of the CLI:
 
 ```commandline
 > flama serve --help
@@ -157,19 +139,18 @@ Options:
                           with the flame]
 ```
 
-Each of these options can be passed directly to the CLI by using `--<option-name> <value>`, or by utilising the equivalent
-environment variable, i.e. `FLAMA_<OPTION_NAME>=<VALUE>` (take care, the equivalent environment variable needs
-to have the prefix **FLAMA**, and written in capital letters, and underscored).
-For instance, if we want to change the route where the model
-is served we can do it by any of the following two equivalent ways:
+Each of these options can be passed directly to the CLI by using `--<option-name> <value>`, or by utilising the
+equivalent environment variable, i.e. `FLAMA_<OPTION_NAME>=<VALUE>` (take care, the equivalent environment variable
+needs to have the prefix **FLAMA**, and written in capital letters, and underscored). For instance, if we want to change
+the route where the model is served we can do it by any of the following two equivalent ways:
 
-##### Using option argument
+#### Using option argument
 
 ```commandline
 > flama serve sklearn_model.flm --model-url=/logreg
 ```
 
-##### Using environment variable
+#### Using environment variable
 
 ```commandline
 > export FLAMA_MODEL_PATH=sklearn_model.flm
@@ -188,12 +169,6 @@ As a complete example:
     --app-description="Logistic Regression model serving for predictions"
 ```
 
-With these changes, the documentation at **http://http://127.0.0.1:8000/docs/**
-will look like:
+With these changes, the documentation at **http://http://127.0.0.1:8000/docs/** will look like:
 
-<Image
-  src="/images/docs/docs-serve-params.png"
-  alt="docs-post-predict"
-  width="800"
-  height="456"
-/>
+<Image src="/images/docs/docs-serve-params.png" alt="docs-post-predict" width="800" height="456" />

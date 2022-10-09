@@ -11,7 +11,5 @@ export interface Sample {
 }
 
 export async function loadSample(samplePath: string) {
-  return (await fs.promises.readFile(path.join('src/samples', samplePath)))
-    .toString()
-    .trim()
+  return (await fs.promises.readFile(path.join('src/samples', samplePath))).toString().trim()
 }

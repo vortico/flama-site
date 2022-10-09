@@ -35,9 +35,7 @@ export default function Footer() {
       <div className="grid grid-cols-2 gap-x-20 gap-y-10 md:grid-cols-4">
         {links.map((category, i) => (
           <div key={i}>
-            <h2 className="font-semibold text-primary-700 dark:text-primary-200">
-              {category.name}
-            </h2>
+            <h2 className="font-semibold text-primary-700 dark:text-primary-200">{category.name}</h2>
             <ul className="mt-3 space-y-2">
               {category.links.map((link, j) => (
                 <li key={j}>

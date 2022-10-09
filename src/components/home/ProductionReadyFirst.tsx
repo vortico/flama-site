@@ -1,10 +1,7 @@
 import HomeSection from '@/components/home/HomeSection'
 import { SparklesIcon } from '@heroicons/react/24/outline'
 import React, { useCallback, useMemo, useState } from 'react'
-import {
-  ISelectableItem,
-  SelectableList,
-} from '@/components/home/SelectableList'
+import { ISelectableItem, SelectableList } from '@/components/home/SelectableList'
 import { Sample } from '@/lib/samples'
 import { CommandLineIcon } from '@heroicons/react/24/solid'
 import { PythonIcon } from '@/components/icons'
@@ -33,9 +30,7 @@ interface ProductionReadyFirstProps {
   samples: Sample[]
 }
 
-export default function ProductionReadyFirst({
-  samples,
-}: ProductionReadyFirstProps) {
+export default function ProductionReadyFirst({ samples }: ProductionReadyFirstProps) {
   const [selected, setSelected] = useState<string>(items[0].id)
 
   const onSelect = useCallback(
@@ -45,10 +40,7 @@ export default function ProductionReadyFirst({
     [setSelected]
   )
 
-  const selectedSample = useMemo(
-    () => samples.find(({ id }) => id === selected),
-    [selected, samples]
-  )
+  const selectedSample = useMemo(() => samples.find(({ id }) => id === selected), [selected, samples])
 
   return (
     <HomeSection
@@ -66,17 +58,14 @@ export default function ProductionReadyFirst({
       content={
         <>
           <p>
-            Need your models serving ASAP? It does not feel right to have to
-            wait months to see if your models work outside a Jupyter notebook,
-            does it?{' '}
+            Need your models serving ASAP? It does not feel right to have to wait months to see if your models work
+            outside a Jupyter notebook, does it?{' '}
           </p>
           <br />
           <p>
-            <FlamaName /> makes the deployment of ML models into production as
-            straightforwardly as possible. With the ease of a single command
-            line your packaged models will be ready to serve via HTTP requests
-            in seconds. <FlamaName /> transforms any model into an ML-API ready
-            to serve its purpose.
+            <FlamaName /> makes the deployment of ML models into production as straightforwardly as possible. With the
+            ease of a single command line your packaged models will be ready to serve via HTTP requests in seconds.{' '}
+            <FlamaName /> transforms any model into an ML-API ready to serve its purpose.
           </p>
         </>
       }

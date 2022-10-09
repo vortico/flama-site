@@ -1,11 +1,7 @@
 import Link from 'next/link'
 import { FlamaIcon, GithubIcon } from '@/components/icons'
 import ThemeModeSwitcher from '@/components/ThemeModeSwitcher'
-import {
-  Bars3Icon,
-  MagnifyingGlassIcon,
-  XMarkIcon,
-} from '@heroicons/react/24/outline'
+import { Bars3Icon, MagnifyingGlassIcon, XMarkIcon } from '@heroicons/react/24/outline'
 import { SearchButton } from '@/components/Search'
 import React, { useCallback, useState } from 'react'
 import { createPortal } from 'react-dom'
@@ -13,10 +9,7 @@ import { createPortal } from 'react-dom'
 function Logo() {
   return (
     <Link href="/">
-      <a
-        className="flex items-center justify-start gap-2 text-brand-500"
-        aria-label="Flama logo"
-      >
+      <a className="flex items-center justify-start gap-2 text-brand-500" aria-label="Flama logo">
         <FlamaIcon className="h-5 w-5 lg:h-6 lg:w-6" />
         <span className="text-xl lg:text-2xl">Flama</span>
       </a>
@@ -35,9 +28,7 @@ function NavList({ ...props }: React.ComponentProps<'ul'>) {
       {entries.map((entry) => (
         <li key={entry.href}>
           <Link href={entry.href}>
-            <a className="block hover:text-brand-500 dark:hover:text-brand-400">
-              {entry.title}
-            </a>
+            <a className="block hover:text-brand-500 dark:hover:text-brand-400">{entry.title}</a>
           </Link>
         </li>
       ))}
@@ -78,11 +69,7 @@ function FloatMenu({ onClose }: FloatMenuProps) {
       />
       <div className="relative rounded bg-primary-100 py-6 text-base font-semibold text-primary-600 shadow-lg dark:bg-primary-800 dark:text-primary-400">
         <button className="absolute top-5 right-5 flex h-8 w-8 items-center justify-center text-primary-400 hover:text-primary-500 dark:text-primary-600 dark:hover:text-primary-500">
-          <XMarkIcon
-            className="h-5 w-5"
-            onClick={onClose}
-            aria-label="close menu"
-          />
+          <XMarkIcon className="h-5 w-5" onClick={onClose} aria-label="close menu" />
         </button>
         <nav className="px-6 pb-6">
           <NavList className="flex flex-col gap-6 text-lg font-medium text-primary-600 dark:text-primary-400 " />

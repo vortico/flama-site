@@ -2,9 +2,7 @@ import { useTheme } from 'next-themes'
 import React, { useCallback, useEffect, useState } from 'react'
 import { MoonIcon, SunIcon } from '@heroicons/react/24/outline'
 
-export default function ThemeModeSwitcher({
-  ...props
-}: React.ComponentProps<'button'>) {
+export default function ThemeModeSwitcher({ ...props }: React.ComponentProps<'button'>) {
   const [mounted, setMounted] = useState(false)
   const { theme, setTheme } = useTheme()
 
@@ -17,12 +15,7 @@ export default function ThemeModeSwitcher({
   if (!mounted) return null
 
   return (
-    <button
-      aria-label="Theme Mode Switcher"
-      type="button"
-      {...props}
-      onClick={onSwitch}
-    >
+    <button aria-label="Theme Mode Switcher" type="button" {...props} onClick={onSwitch}>
       {theme === 'light' ? <SunIcon /> : <MoonIcon />}
     </button>
   )

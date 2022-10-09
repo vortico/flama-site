@@ -22,9 +22,7 @@ function BlogPreview({ blog }: BlogPreviewProps) {
           <Link href={`/blog/${blog.slug}`}>{blog.title}</Link>
         </h3>
         <div className="text-sm italic leading-7 dark:text-primary-400 lg:absolute lg:top-0 lg:right-full lg:mr-8 lg:whitespace-nowrap">
-          <time dateTime={blog.date}>
-            {dateFormatter.format(new Date(blog.date))}
-          </time>
+          <time dateTime={blog.date}>{dateFormatter.format(new Date(blog.date))}</time>
         </div>
       </div>
       <div>
@@ -46,9 +44,7 @@ export default function Blog() {
           <h1 className="text-3xl font-extrabold tracking-tight text-primary-700 dark:text-primary-200 sm:text-4xl">
             Blog
           </h1>
-          <p className="text-lg">
-            All the latest news about Flama directly from the team.
-          </p>
+          <p className="text-lg">All the latest news about Flama directly from the team.</p>
         </header>
         <main className="mx-auto mb-20 max-w-5xl space-y-16 px-4 sm:mb-32 sm:px-6 md:mb-40 md:px-8">
           {allBlogs.map((blog, i) => (

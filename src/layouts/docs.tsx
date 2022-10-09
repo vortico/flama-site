@@ -43,14 +43,9 @@ export function DocsLayout({ docs, next, prev, children }: DocLayoutProps) {
           <section>
             <div className="mb-2 flex items-center justify-between">
               <span className="font-semibold text-brand-500">{docs.group}</span>
-              <span className="italic">
-                ~ {Math.round(docs.readingTime.minutes)} min read
-              </span>
+              <span className="italic">~ {Math.round(docs.readingTime.minutes)} min read</span>
             </div>
-            <h1
-              id={docs.titleSlug}
-              className="scroll-mt-28 text-4xl font-bold text-primary-600 dark:text-primary-300"
-            >
+            <h1 id={docs.titleSlug} className="scroll-mt-28 text-4xl font-bold text-primary-600 dark:text-primary-300">
               {docs.title}
             </h1>
           </section>

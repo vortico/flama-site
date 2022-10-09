@@ -13,24 +13,16 @@ interface SamplesProps {
 function Samples({ samples }: SamplesProps) {
   const [selected, setSelected] = useState<string>(samples[0].id)
 
-  const onSelect = useCallback(
-    (value: string) => () => setSelected(value),
-    [setSelected]
-  )
+  const onSelect = useCallback((value: string) => () => setSelected(value), [setSelected])
 
-  const selectedSample = useMemo(
-    () => samples.find(({ id }) => id === selected),
-    [samples, selected]
-  )
+  const selectedSample = useMemo(() => samples.find(({ id }) => id === selected), [samples, selected])
 
   return (
     <div className="flex flex-col items-center justify-start gap-y-10 lg:flex-row lg:justify-center">
       <div className="flex h-12 w-full basis-full justify-around lg:block lg:h-full lg:basis-1/3 lg:space-y-6 lg:pl-9">
         {samples.map(({ id, title }) => (
           <button key={id} className="flex items-center" onClick={onSelect(id)}>
-            {selected === id && (
-              <ChevronRightIcon className="-ml-8 inline h-8 text-brand-500 sm:-ml-9 sm:h-9" />
-            )}
+            {selected === id && <ChevronRightIcon className="-ml-8 inline h-8 text-brand-500 sm:-ml-9 sm:h-9" />}
             <span
               className={`text-lg font-bold tracking-tight sm:text-3xl ${
                 selected === id
@@ -70,9 +62,8 @@ export default function Hero({ samples }: HeroProps) {
           Productionalize your machine learning models seamlessly
         </h1>
         <p className="mx-auto mt-10 max-w-3xl text-lg">
-          <FlamaName /> is a data-science oriented framework to rapidly build
-          modern and robust machine learning APIs. With <FlamaName />{' '}
-          application you will be able to deploy models in seconds.
+          <FlamaName /> is a data-science oriented framework to rapidly build modern and robust machine learning APIs.
+          With <FlamaName /> application you will be able to deploy models in seconds.
           <br />
           Fire up your models with the flame 🔥
         </p>
@@ -82,9 +73,7 @@ export default function Hero({ samples }: HeroProps) {
               href="/docs"
               className="inline-flex h-full items-center rounded-full bg-brand-500 px-10 text-white hover:bg-brand-600 focus:outline-none focus:ring-2 focus:ring-brand-600 dark:bg-brand-600 dark:text-primary-100 dark:hover:bg-brand-500 dark:focus:ring-brand-300"
             >
-              <span className="text-left text-lg font-semibold">
-                Get Started
-              </span>
+              <span className="text-left text-lg font-semibold">Get Started</span>
             </Link>
           </div>
           <div className="hidden h-12 w-72 sm:flex">

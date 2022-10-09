@@ -5,21 +5,19 @@ wip: true
 
 ## Introduction
 
-Any ML model built using one of the mainstream data-science frameworks, e.g. Scikit-Learn
-or TensorFlow, can be served using Flama. For the sake of convenience and speeding up
-the process of integrating these models into a Flama API, comes with the functionality
-required to serialise and package them, automatically adding important metadata which will
-make the resulting files operational within Flama seamlessly. In this section we will introduce
-the methods required for this purpose:
+Any ML model built using one of the mainstream data-science frameworks, e.g. Scikit-Learn or TensorFlow, can be served
+using Flama. For the sake of convenience and speeding up the process of integrating these models into a Flama API, comes
+with the functionality required to serialise and package them, automatically adding important metadata which will make
+the resulting files operational within Flama seamlessly. In this section we will introduce the methods required for this
+purpose:
 
 - `flama.dump`
 - `flama.load`
 
-**Remark**: Flama's dump method uses optimal compression with the aim of making the process more
-efficient and faster.
+**Remark**: Flama's dump method uses optimal compression with the aim of making the process more efficient and faster.
 
-**Remark 2**: The dump step can live completely out of any Flama API. Indeed, the natural place where
-you will be running it will be at the model building stage (very likely in you Jupyter notebook).
+**Remark 2**: The dump step can live completely out of any Flama API. Indeed, the natural place where you will be
+running it will be at the model building stage (very likely in you Jupyter notebook).
 
 ## Example of serialising PyTorch models
 

@@ -40,10 +40,5 @@ export function useDocSearchKeyboardEvents({ isOpen, onOpen, onClose }: Props) {
 function isEditingContent(event: KeyboardEvent) {
   const element = event.target as HTMLElement
   const tagName = element.tagName
-  return (
-    element.isContentEditable ||
-    tagName === 'INPUT' ||
-    tagName === 'SELECT' ||
-    tagName === 'TEXTAREA'
-  )
+  return element.isContentEditable || tagName === 'INPUT' || tagName === 'SELECT' || tagName === 'TEXTAREA'
 }

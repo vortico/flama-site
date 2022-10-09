@@ -14,78 +14,78 @@ pre[class*='language-'] {
 }
 
 .token {
-  &.comment,
-  &.block-comment,
-  &.prolog,
-  &.doctype,
-  &.cdata {
+  & .comment,
+  & .block-comment,
+  & .prolog,
+  & .doctype,
+  & .cdata {
     color: #999;
   }
 
-  &.punctuation {
+  & .punctuation {
     color: #ccc;
   }
 
-  &.tag,
-  &.attr-name,
-  &.namespace,
-  &.deleted {
+  & .tag,
+  & .attr-name,
+  & .namespace,
+  & .deleted {
     color: #e2777a;
   }
 
-  &.function-name {
+  & .function-name {
     color: #6196cc;
   }
 
-  &.boolean,
-  &.number,
-  &.function {
+  & .boolean,
+  & .number,
+  & .function {
     color: #f08d49;
   }
 
-  &.property,
-  &.class-name,
-  &.constant,
-  &.symbol {
+  & .property,
+  & .class-name,
+  & .constant,
+  & .symbol {
     color: #f8c555;
   }
 
-  &.selector,
-  &.important,
-  &.atrule,
-  &.keyword,
-  &.builtin {
+  & .selector,
+  & .important,
+  & .atrule,
+  & .keyword,
+  & .builtin {
     color: #cc99cd;
   }
 
-  &.string,
-  &.char,
-  &.attr-value,
-  &.regex,
-  &.variable {
+  & .string,
+  & .char,
+  & .attr-value,
+  & .regex,
+  & .variable {
     color: #7ec699;
   }
 
-  &.operator,
-  &.entity,
-  &.url {
+  & .operator,
+  & .entity,
+  & .url {
     color: #67cdcc;
   }
 
-  &.inserted {
+  & .inserted {
     color: green;
   }
 
-  &.important,
-  &.bold {
+  & .important,
+  & .bold {
     font-weight: bold;
   }
 
-  &.italic {
+  & .italic {
     font-style: italic;
   }
 
-  &.entity {
+  & .entity {
     cursor: help;
   }
 }

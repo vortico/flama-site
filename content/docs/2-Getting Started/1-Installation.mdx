@@ -5,8 +5,8 @@ wip: false
 
 ## Python version
 
-<FlamaName /> is fully compatible with <PythonName /> 3.7 and newer versions. If
-you do not have any preference, we recommend you to use the latest version.
+<FlamaName /> is fully compatible with <PythonName /> 3.7 and newer versions. If you do not have any preference, we
+recommend you to use the latest version.
 
 As a first step, check the version of your active <PythonName /> environment:
 
@@ -15,24 +15,19 @@ As a first step, check the version of your active <PythonName /> environment:
   Python 3.7.6
 ```
 
-If the version is prior to 3.7, we suggest you to create a virtual environment
-with the latest version.
+If the version is prior to 3.7, we suggest you to create a virtual environment with the latest version.
 
 ### Creating a virtual environment
 
-This section is not a comprehensive guide about the management of <PythonName /> virtual
-environments. We encourage you to learn more about
-[venv](https://docs.python.org/3/library/venv.html#module-venv),
-[pyenv](https://github.com/pyenv/pyenv) or
-[conda](https://docs.conda.io/en/latest/) for a better understanding on how to manage
-virtual environments. Virtual environments allow the isolation of dependencies,
-which plays a crucial role to avoid breaking compatibility between different projects.
+This section is not a comprehensive guide about the management of <PythonName /> virtual environments. We encourage you
+to learn more about [venv](https://docs.python.org/3/library/venv.html#module-venv),
+[pyenv](https://github.com/pyenv/pyenv) or [conda](https://docs.conda.io/en/latest/) for a better understanding on how
+to manage virtual environments. Virtual environments allow the isolation of dependencies, which plays a crucial role to
+avoid breaking compatibility between different projects.
 
-To create and activate a virtual environment with a compatible <PythonName /> version
-you can take the following code snippets. Before you start working on a new project,
-it is very important to activate the corresponding environment. The last command line
-in both code snippets precisely activate the environment with `conda` or `pyenv`,
-respectively.
+To create and activate a virtual environment with a compatible <PythonName /> version you can take the following code
+snippets. Before you start working on a new project, it is very important to activate the corresponding environment. The
+last command line in both code snippets precisely activate the environment with `conda` or `pyenv`, respectively.
 
 ##### Creation of virtual environment with conda
 
@@ -53,11 +48,9 @@ respectively.
 
 ### Core
 
-<FlamaName /> is a <PythonName /> library [hosted on
-PyPI](https://pypi.org/project/flama/), and can be easily installed with
-[pip](https://pip.pypa.io/en/stable/) (the package installer for Python). Within
-the previously created and activated virtual environment, run the following
-command:
+<FlamaName /> is a <PythonName /> library [hosted on PyPI](https://pypi.org/project/flama/), and can be easily installed
+with [pip](https://pip.pypa.io/en/stable/) (the package installer for Python). Within the previously created and
+activated virtual environment, run the following command:
 
 ```commandline
 > pip install flama
@@ -67,27 +60,23 @@ Now you have <FlamaName /> installed and ready to be used in your project.
 
 ### Extras
 
-You have installed the core functionality of <FlamaName /> already.
-However, you might need some extra functionality when working in your project:
+You have installed the core functionality of <FlamaName /> already. However, you might need some extra functionality
+when working in your project:
 
-- [Typesystem](https://www.encode.io/typesystem/):
-  A comprehensive library for data validation typically used
-  to define typed data schemas which provides data validation and
-  object serialization & deserialization tools.
+- [Typesystem](https://www.encode.io/typesystem/): A comprehensive library for data validation typically used to define
+  typed data schemas which provides data validation and object serialization & deserialization tools.
 
-- [Marshmallow](https://marshmallow.readthedocs.io/en/stable/quickstart.html#):
-  An alternative library to `typesystem` for data validation.
+- [Marshmallow](https://marshmallow.readthedocs.io/en/stable/quickstart.html#): An alternative library to `typesystem`
+  for data validation.
 
-- [Forge (python)](https://python-forge.readthedocs.io/en/latest/):
-  An elegant library for revising function signatures at runtime.
+- [Forge (python)](https://python-forge.readthedocs.io/en/latest/): An elegant library for revising function signatures
+  at runtime.
 
-- [SQlAlchemy](https://www.sqlalchemy.org/):
-  SQL toolkit and Object Relational Mapper that gives application developers
+- [SQlAlchemy](https://www.sqlalchemy.org/): SQL toolkit and Object Relational Mapper that gives application developers
   the full power and flexibility of SQL.
 
-These dependencies are required if you want to use typed data schemas
-(`typesystems` or `marshmallow`), or if you are going to use pagination (`python-forge`),
-or if you need to include a database (`sqlalchemy`) in your project.
+These dependencies are required if you want to use typed data schemas (`typesystems` or `marshmallow`), or if you are
+going to use pagination (`python-forge`), or if you need to include a database (`sqlalchemy`) in your project.
 
 If you use `typesystem` schemas, run:
 
@@ -103,9 +92,8 @@ If you use `marshmallow` schemas instead, run:
 
 ### Development
 
-If you want to contribute to <FlamaName /> development, you will need to install it
-from the local folder where you have cloned the repository. Run the following command
-if this is your case:
+If you want to contribute to <FlamaName /> development, you will need to install it from the local folder where you have
+cloned the repository. Run the following command if this is your case:
 
 ```commandline
 > git clone git@github.com:perdy/flama.git
@@ -113,16 +101,13 @@ if this is your case:
 > make install
 ```
 
-To keep learning you can now check out the
-[Quickstart](/docs/getting-started/quickstart).
+To keep learning you can now check out the [Quickstart](/docs/getting-started/quickstart).
 
 ### Flama CLI
 
-After installing <FlamaName /> you will have the <FlamaName />
-command-line interface (CLI) at your disposal.
+After installing <FlamaName /> you will have the <FlamaName /> command-line interface (CLI) at your disposal.
 
-The easiest and more practical way to check that everything was
-correctly installed is by running `flama --help`:
+The easiest and more practical way to check that everything was correctly installed is by running `flama --help`:
 
 ```commandline
 > flama --help
@@ -136,8 +121,6 @@ Options:
 ...
 ```
 
-To check what version of the library you have installed, simply run
-`flama --version`.
+To check what version of the library you have installed, simply run `flama --version`.
 
-You are completely set now, and we recommend you to
-keep reading the documentation.
+You are completely set now, and we recommend you to keep reading the documentation.

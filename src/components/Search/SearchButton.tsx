@@ -6,11 +6,8 @@ interface ChildrenProps {
   actionKey: ActionKey
 }
 
-interface SearchButtonProps
-  extends Omit<React.ComponentProps<'button'>, 'children'> {
-  children:
-    | React.ReactNode
-    | (({ actionKey }: ChildrenProps) => React.ReactNode)
+interface SearchButtonProps extends Omit<React.ComponentProps<'button'>, 'children'> {
+  children: React.ReactNode | (({ actionKey }: ChildrenProps) => React.ReactNode)
 }
 
 export function SearchButton({ children, ...props }: SearchButtonProps) {
@@ -20,11 +17,7 @@ export function SearchButton({ children, ...props }: SearchButtonProps) {
 
   useEffect(() => {
     function onKeyDown(event: KeyboardEvent) {
-      if (
-        searchButtonRef &&
-        searchButtonRef.current === document.activeElement &&
-        onInput
-      ) {
+      if (searchButtonRef && searchButtonRef.current === document.activeElement && onInput) {
         if (/[a-zA-Z0-9]/.test(event.key)) {
           onInput(event)
         }

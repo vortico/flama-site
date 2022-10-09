@@ -1,15 +1,8 @@
 import HomeSection from '@/components/home/HomeSection'
 import { CpuChipIcon } from '@heroicons/react/24/outline'
 import React, { useCallback, useMemo, useState } from 'react'
-import {
-  ISelectableItem,
-  SelectableList,
-} from '@/components/home/SelectableList'
-import {
-  PyTorchIcon,
-  ScikitLearnIcon,
-  TensorFlowIcon,
-} from '@/components/icons'
+import { ISelectableItem, SelectableList } from '@/components/home/SelectableList'
+import { PyTorchIcon, ScikitLearnIcon, TensorFlowIcon } from '@/components/icons'
 import { Sample } from '@/lib/samples'
 import FlamaName from '@/components/FlamaName'
 import CodeWindow from '@/components/CodeWindow'
@@ -36,9 +29,7 @@ interface MachineLearningResponsiveProps {
   samples: Sample[]
 }
 
-export default function MachineLearningResponsive({
-  samples,
-}: MachineLearningResponsiveProps) {
+export default function MachineLearningResponsive({ samples }: MachineLearningResponsiveProps) {
   const [selected, setSelected] = useState<string>(frameworks[0].id)
 
   const onSelect = useCallback(
@@ -48,10 +39,7 @@ export default function MachineLearningResponsive({
     [setSelected]
   )
 
-  const selectedSample = useMemo(
-    () => samples.find(({ id }) => id === selected),
-    [selected, samples]
-  )
+  const selectedSample = useMemo(() => samples.find(({ id }) => id === selected), [selected, samples])
 
   return (
     <HomeSection
@@ -69,16 +57,14 @@ export default function MachineLearningResponsive({
       content={
         <>
           <p>
-            Let’s face it, there isn’t a single ML framework. Models developed
-            in such different frameworks should be easily integrated together in
-            a single API. However this integration presents a technical
-            challenge, typically unproductive and annoying for a data scientist.
+            Let’s face it, there isn’t a single ML framework. Models developed in such different frameworks should be
+            easily integrated together in a single API. However this integration presents a technical challenge,
+            typically unproductive and annoying for a data scientist.
           </p>
           <br />
           <p>
-            <FlamaName /> is thought from the very beginning to be compatible
-            with the mainstream data-science frameworks, and it makes easy and
-            simple the packaging of ML models to be integrated together.
+            <FlamaName /> is thought from the very beginning to be compatible with the mainstream data-science
+            frameworks, and it makes easy and simple the packaging of ML models to be integrated together.
           </p>
         </>
       }

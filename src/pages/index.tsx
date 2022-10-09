@@ -128,9 +128,7 @@ export default function Home({
           <Hero samples={heroSamples} />
         </header>
         <main className="mb-20 space-y-20 pt-20 sm:mb-32 sm:space-y-32 sm:pt-32 md:mb-40 md:space-y-40 md:pt-40">
-          <MachineLearningResponsive
-            samples={machineLearningResponsiveSamples}
-          />
+          <MachineLearningResponsive samples={machineLearningResponsiveSamples} />
           <ProductionReadyFirst samples={productionReadyFirstSamples} />
           <EffortlessDevelopment />
           <ModelsLifecycle samples={modelsLifecycleSamples} />

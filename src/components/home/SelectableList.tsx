@@ -15,20 +15,12 @@ interface SelectableItemsProps {
   onSelect(id: string): void
 }
 
-function SelectableItem({
-  id,
-  name,
-  icon,
-  selected,
-  onSelect,
-}: SelectableItemsProps) {
+function SelectableItem({ id, name, icon, selected, onSelect }: SelectableItemsProps) {
   return (
     <button
       type="button"
       className={`md:text-md group flex w-full flex-col items-center gap-6 text-xs font-semibold ${
-        selected == id
-          ? 'text-brand-600 dark:text-brand-400'
-          : 'text-primary-600 dark:text-primary-400'
+        selected == id ? 'text-brand-600 dark:text-brand-400' : 'text-primary-600 dark:text-primary-400'
       }`}
       onClick={() => {
         onSelect(id)
@@ -47,22 +39,12 @@ interface SelectableListProps {
   onSelect(id: string): void
 }
 
-export function SelectableList({
-  items,
-  selected,
-  onSelect,
-}: SelectableListProps) {
+export function SelectableList({ items, selected, onSelect }: SelectableListProps) {
   return (
     <ul className="inline-grid w-full grid-cols-4 items-center">
       {items.map(({ id, name, icon }) => (
         <li key={name}>
-          <SelectableItem
-            id={id}
-            name={name}
-            icon={icon}
-            selected={selected}
-            onSelect={onSelect}
-          />
+          <SelectableItem id={id} name={name} icon={icon} selected={selected} onSelect={onSelect} />
         </li>
       ))}
     </ul>

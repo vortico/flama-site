@@ -69,21 +69,14 @@ export function SearchProvider({ children }: SearchProviderProps) {
                 router.push(itemUrl)
               },
             }}
-            hitComponent={({ hit, children }) =>
-              Hit({ hit, children } as HitProps)
-            }
+            hitComponent={({ hit, children }) => Hit({ hit, children } as HitProps)}
             transformItems={(items) => {
               return items.map((item, index) => {
                 return {
                   ...item,
                   __is_result: () => true,
-                  __is_parent: () =>
-                    item.type === 'lvl1' && items.length > 1 && index === 0,
-                  __is_child: () =>
-                    item.type !== 'lvl1' &&
-                    items.length > 1 &&
-                    items[0].type === 'lvl1' &&
-                    index !== 0,
+                  __is_parent: () => item.type === 'lvl1' && items.length > 1 && index === 0,
+                  __is_child: () => item.type !== 'lvl1' && items.length > 1 && items[0].type === 'lvl1' && index !== 0,
                   __is_first: () => index === 1,
                   __is_last: () => index === items.length - 1 && index !== 0,
                 }

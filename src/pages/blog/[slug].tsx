@@ -28,10 +28,7 @@ interface BlogProps {
 export default function Blog({ blog }: BlogProps) {
   return (
     <>
-      <NextSeo
-        title={blog.title}
-        canonical={`https://flama.dev/blog/${blog.slug}`}
-      />
+      <NextSeo title={blog.title} canonical={`https://flama.dev/blog/${blog.slug}`} />
       <BlogLayout blog={blog}>
         <MDXComponent
           code={blog.body.code}

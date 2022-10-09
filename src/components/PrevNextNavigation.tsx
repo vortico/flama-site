@@ -9,19 +9,12 @@ interface PrevNextNavigationProps {
   nextHref: string
 }
 
-export function PrevNextNavigation({
-  prevTitle,
-  prevHref,
-  nextTitle,
-  nextHref,
-}: PrevNextNavigationProps) {
+export function PrevNextNavigation({ prevTitle, prevHref, nextTitle, nextHref }: PrevNextNavigationProps) {
   return (
     <div
-      className={`mt-10 flex items-center ${
-        prevTitle && nextTitle ? 'justify-between' : ''
-      } ${prevTitle && !nextTitle ? 'justify-start' : ''} ${
-        !prevTitle && nextTitle ? 'justify-end' : ''
-      }`}
+      className={`mt-10 flex items-center ${prevTitle && nextTitle ? 'justify-between' : ''} ${
+        prevTitle && !nextTitle ? 'justify-start' : ''
+      } ${!prevTitle && nextTitle ? 'justify-end' : ''}`}
     >
       {prevTitle && (
         <Link className="inline-flex h-full items-center pr-2" href={prevHref}>

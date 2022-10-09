@@ -7,31 +7,23 @@ interface TOCItem {
   children?: TOCItem[]
 }
 
-function getItemFromAnchor(
-  anchor: HTMLAnchorElement,
-  children?: TOCItem[]
-): TOCItem {
+function getItemFromAnchor(anchor: HTMLAnchorElement, children?: TOCItem[]): TOCItem {
   return {
     active: false,
     anchor: anchor,
-    section: document.querySelector<HTMLAnchorElement>(`${anchor.hash}`)! // eslint-disable-line @typescript-eslint/no-non-null-assertion
-      .parentElement!,
+    section: document.querySelector<HTMLAnchorElement>(`${anchor.hash}`)!.parentElement!, // eslint-disable-line @typescript-eslint/no-non-null-assertion
     children,
   }
 }
 
 function getTOC() {
   return Array.from(
-    document.querySelectorAll<HTMLAnchorElement>(
-      'nav.prose-toc > a, nav.prose-toc > ol > li > a.prose-toc-link'
-    )
+    document.querySelectorAll<HTMLAnchorElement>('nav.prose-toc > a, nav.prose-toc > ol > li > a.prose-toc-link')
   ).map((firstLevel) =>
     getItemFromAnchor(
       firstLevel,
       Array.from(
-        firstLevel.parentElement?.querySelectorAll<HTMLAnchorElement>(
-          ':scope > ol > li > a.prose-toc-link'
-        ) || []
+        firstLevel.parentElement?.querySelectorAll<HTMLAnchorElement>(':scope > ol > li > a.prose-toc-link') || []
       ).map((secondLevel) => getItemFromAnchor(secondLevel))
     )
   )
@@ -45,13 +37,11 @@ interface withTOCProps {
 
 export function withTOC({ title, titleSlug, activeClassNames }: withTOCProps) {
   function setItemActive(element: HTMLElement) {
-    if (!element.classList.contains(activeClassNames))
-      element.classList.add(activeClassNames)
+    if (!element.classList.contains(activeClassNames)) element.classList.add(activeClassNames)
   }
 
   function setItemInactive(element: HTMLElement) {
-    if (element.classList.contains(activeClassNames))
-      element.classList.remove(activeClassNames)
+    if (element.classList.contains(activeClassNames)) element.classList.remove(activeClassNames)
   }
 
   function TOC({ children, ...props }: React.ComponentProps<'nav'>) {
@@ -61,30 +51,20 @@ export function withTOC({ title, titleSlug, activeClassNames }: withTOCProps) {
       const observer = new IntersectionObserver(
         (entries) => {
           toc.forEach((firstLevel) => {
-            const entry = entries.find(
-              ({ target }) => target === firstLevel.section
-            )
+            const entry = entries.find(({ target }) => target === firstLevel.section)
             firstLevel.active = entry ? entry.isIntersecting : firstLevel.active
             firstLevel.children?.forEach((secondLevel) => {
-              const entry = entries.find(
-                ({ target }) => target === secondLevel.section
-              )
-              secondLevel.active = entry
-                ? entry.isIntersecting
-                : secondLevel.active
+              const entry = entries.find(({ target }) => target === secondLevel.section)
+              secondLevel.active = entry ? entry.isIntersecting : secondLevel.active
             })
           })
 
           const firstLevelActive = toc.find((entry) => entry.active)
-          const secondLevelActive = firstLevelActive?.children?.find(
-            (entry) => entry.active
-          )
+          const secondLevelActive = firstLevelActive?.children?.find((entry) => entry.active)
 
           // Set all entries as active/inactive
           toc.forEach((firstLevel) => {
-            firstLevel === firstLevelActive
-              ? setItemActive(firstLevel.anchor)
-              : setItemInactive(firstLevel.anchor)
+            firstLevel === firstLevelActive ? setItemActive(firstLevel.anchor) : setItemInactive(firstLevel.anchor)
             firstLevel.children?.forEach((secondLevel) => {
               secondLevel === secondLevelActive
                 ? setItemActive(secondLevel.anchor)
@@ -111,9 +91,7 @@ export function withTOC({ title, titleSlug, activeClassNames }: withTOCProps) {
         {...props}
         className="not-prose prose-toc fixed top-20 bottom-0 right-[max(0px,calc(50%-45rem))] z-20 hidden w-72 overflow-y-auto px-8 lg:block"
       >
-        <h5 className="mb-4 mt-8 text-sm font-semibold text-primary-900 dark:text-primary-100">
-          On this page
-        </h5>
+        <h5 className="mb-4 mt-8 text-sm font-semibold text-primary-900 dark:text-primary-100">On this page</h5>
         {titleSlug && (
           <a className="prose-toc-link" href={`#${titleSlug}`}>
             {title}

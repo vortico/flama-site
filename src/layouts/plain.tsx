@@ -6,10 +6,7 @@ export interface PlainLayoutProps {
   children: ReactNode
 }
 
-export default function PlainLayout({
-  menuChildren,
-  children,
-}: PlainLayoutProps) {
+export default function PlainLayout({ menuChildren, children }: PlainLayoutProps) {
   return (
     <>
       <Header>{menuChildren}</Header>

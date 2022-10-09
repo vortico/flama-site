@@ -42,13 +42,10 @@ function _tableOfContent<T>(
         const group = rest.length !== 0 ? first : ''
         return { ...link, path, group }
       })
-      .reduce(
-        (rv: { [key: string]: GroupedTOCLink<T>[] }, x: GroupedTOCLink<T>) => {
-          ;(rv[x.group] = rv[x.group] || []).push(x)
-          return rv
-        },
-        {}
-      )
+      .reduce((rv: { [key: string]: GroupedTOCLink<T>[] }, x: GroupedTOCLink<T>) => {
+        ;(rv[x.group] = rv[x.group] || []).push(x)
+        return rv
+      }, {})
   )
 
   const links =
@@ -62,9 +59,7 @@ function _tableOfContent<T>(
         content,
       })) || []
 
-  const categories = groups
-    .filter(([group]) => group)
-    .map(([group, links]) => _tableOfContent(links, group))
+  const categories = groups.filter(([group]) => group).map(([group, links]) => _tableOfContent(links, group))
 
   return { name, links, categories, order }
 }

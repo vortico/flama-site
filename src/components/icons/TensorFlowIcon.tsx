@@ -1,8 +1,6 @@
 import React from 'react'
 
-export default function TensorFlowIcon({
-  ...props
-}: React.ComponentProps<'svg'>) {
+export default function TensorFlowIcon({ ...props }: React.ComponentProps<'svg'>) {
   return (
     <svg
       viewBox="0 0 1000 1000"

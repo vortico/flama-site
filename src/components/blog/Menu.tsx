@@ -30,30 +30,20 @@ export function Menu() {
           <div className="space-y-4">
             {blog?.authors.map((author, i) => (
               <div key={i} className="flex-col items-center pl-4 font-medium">
-                {author.url ? (
-                  <a href={author.url}>{author.name}</a>
-                ) : (
-                  <div>{author.name}</div>
-                )}
+                {author.url ? <a href={author.url}>{author.name}</a> : <div>{author.name}</div>}
               </div>
             ))}
           </div>
         </div>
         <div>
-          <h5 className="mb-4 text-primary-700 dark:text-primary-200">
-            Publication
-          </h5>
+          <h5 className="mb-4 text-primary-700 dark:text-primary-200">Publication</h5>
           <div className="pl-4">
-            <time dateTime={blog?.date}>
-              {dateFormatter.format(new Date(blog?.date))}
-            </time>
+            <time dateTime={blog?.date}>{dateFormatter.format(new Date(blog?.date))}</time>
           </div>
         </div>
 
         <div>
-          <h5 className="mb-4 text-primary-700 dark:text-primary-200">
-            Reading Time
-          </h5>
+          <h5 className="mb-4 text-primary-700 dark:text-primary-200">Reading Time</h5>
           <div className="pl-4">
             <span>~ {Math.round(blog?.readingTime.minutes)} min read</span>
           </div>

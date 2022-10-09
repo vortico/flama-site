@@ -1,6 +1,6 @@
 import { DocsLayout } from '@/layouts/docs'
-import { allDocs } from '@/contentlayer'
 import type { Docs as IDocs } from '@/contentlayer'
+import { allDocs } from '@/contentlayer'
 import { withTOC } from '@/components/mdx/toc'
 import { NextSeo } from 'next-seo'
 import React from 'react'
@@ -20,9 +20,7 @@ interface StaticProps {
 }
 
 export async function getStaticProps({ params }: StaticProps) {
-  const docsIndex = allDocs.findIndex(
-    (docs) => docs.slug === params.slug.join('/')
-  )
+  const docsIndex = allDocs.findIndex((docs) => docs.slug === params.slug.join('/'))
 
   return {
     props: {
@@ -42,10 +40,7 @@ interface DocsProps {
 export default function Docs({ docs, next, prev }: DocsProps) {
   return (
     <>
-      <NextSeo
-        title={docs.title}
-        canonical={`https://flama.dev/docs/${docs.slug}`}
-      />
+      <NextSeo title={docs.title} canonical={`https://flama.dev/docs/${docs.slug}`} />
       <DocsLayout docs={docs} next={next} prev={prev}>
         <MDXComponent
           code={docs.body.code}

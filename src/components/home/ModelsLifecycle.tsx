@@ -21,14 +21,12 @@ export default function ModelsLifecycle({ samples }: ModelsLifecycleProps) {
       content={
         <>
           <p>
-            Loading ML models in a production application is a demanding and
-            prone-to-error task, which also depends on the specific ML
-            framework.
+            Loading ML models in a production application is a demanding and prone-to-error task, which also depends on
+            the specific ML framework.
           </p>
           <br />
           <p>
-            <FlamaName /> provides a clean solution to the problem via{' '}
-            <b>Components</b>, which load models seamlessly.
+            <FlamaName /> provides a clean solution to the problem via <b>Components</b>, which load models seamlessly.
           </p>
         </>
       }

@@ -19,11 +19,7 @@ export function Code({ children, className }: React.ComponentProps<'code'>) {
     </span>
   ) : (
     <div className="not-prose max-h-80">
-      <CodeBlock
-        code={code}
-        language={language as Language}
-        lineNumbers={language !== 'commandline'}
-      />
+      <CodeBlock code={code} language={language as Language} lineNumbers={language !== 'commandline'} />
     </div>
   )
 }

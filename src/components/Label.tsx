@@ -1,7 +1,6 @@
 import React, { ReactNode } from 'react'
 
-export interface LabelProps
-  extends Omit<React.ComponentProps<'span'>, 'color'> {
+export interface LabelProps extends Omit<React.ComponentProps<'span'>, 'color'> {
   color?: string
   children?: ReactNode
 }

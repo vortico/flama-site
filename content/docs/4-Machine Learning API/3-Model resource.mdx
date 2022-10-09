@@ -3,20 +3,18 @@ title: Model resources
 wip: true
 ---
 
-Adding models to a <FlamaName /> App in the way introduced in the [previous section](/docs/machine-learning-api/add-models)
-involves the creation of a `Resource` object (specifically, a `ModelResource`) automatically
-for you, which represents an API resource, in the REST sense of the word.
-This `ModelResource` defines the default way of interaction with the ML model
-itself by providing **predict** and **inspect** (P&I) methods.
+Adding models to a <FlamaName /> App in the way introduced in the
+[previous section](/docs/machine-learning-api/add-models) involves the creation of a `Resource` object (specifically, a
+`ModelResource`) automatically for you, which represents an API resource, in the REST sense of the word. This
+`ModelResource` defines the default way of interaction with the ML model itself by providing **predict** and **inspect**
+(P&I) methods.
 
-However, the convenience of `add_models` might not be sufficient for your purposes for the
-following reasons:
+However, the convenience of `add_models` might not be sufficient for your purposes for the following reasons:
 
 - You need to customise the P&I methods
 - You need to define new methods for the resource
 
-In what follows you will learn how to add model resources in a more customised way with the
-class `ModelResource`.
+In what follows you will learn how to add model resources in a more customised way with the class `ModelResource`.
 
 ## The ModelResource class
 

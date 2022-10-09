@@ -57,9 +57,7 @@ interface DocsMenuCategoryProps {
 function DocsMenuCategory({ category }: DocsMenuCategoryProps) {
   return (
     <li>
-      <h5 className="mb-8 font-semibold text-primary-800 dark:text-primary-200 lg:mb-3">
-        {category.name}
-      </h5>
+      <h5 className="mb-8 font-semibold text-primary-800 dark:text-primary-200 lg:mb-3">{category.name}</h5>
       <ul className="space-y-6 border-l border-primary-300 dark:border-primary-700 lg:space-y-2">
         {category.links
           .sort((a, b) => a.order - b.order)
