@@ -6,18 +6,66 @@ wip: true
 ## Start with definition files
 
 At this point, you've probably already learned how to quickly serve **flama** applications, and ML models codeless, with
-[run](/docs/flama-cli/run) and [serve](/docs/flama-cli/serve), respectively. But that's not the end of the story.
-Indeed, we could say the fun part is just about to start.
+the [run](/docs/flama-cli/run) and [serve](/docs/flama-cli/serve) methods, respectively. But that's not the end of the
+story. Indeed, we could say the fun part is just about to start.
 
 <FlamaName /> CLI comes with the very convenient command **start**, which builds on top of what we have already seen,
-and take it a step forward. The **run** command is thought for a highly customised way of serving apps and/or models by
-specifying their details and characteristics in *definition files*. A definition file
+and take it to the next level. The **run** command is thought for a highly customised way of serving apps and/or models
+by specifying their details and characteristics in *definition files*, which allows us to have all the specs related
+with the deployment as code. Definition files may be control versioned, which makes the deployment process reproducible
+and resilient.
 
-Definition files allows us to have all the specs related with the deployment of an App, or an ML API, as code.
+A <FlamaName/> definition file consists of a set of blueprints which _explains_ how to build a custom application. This
+file includes the specifics of the base <FlamaName/> application we build on, routes regarding where the documentation
+and schemas will be served, besides the models we wan to add from our local system.
 
-Definition files may be control versioned, which make the deployment process reproducible and resilient.
+As always, the command **flama run** also comes with help:
 
-## Further info
+```commandline
+> flama run --help
+
+Usage: flama start [OPTIONS] [FLAMA_CONFIG]
+
+  Start a Flama Application based on a config file.
+
+Options:
+  --create-config  Create minimal config file.
+  --help           Show this message and exit.
+```
+
+### Your first definition file
+
+The best way to start with definition files is by example. For this purpose, you can simply run:
+
+```commandline
+> flama run --create-config
+```
+
+This command line will produce a simple definition file which will be stored in your current folder as `flama.json`.
+Let's dig into it a bit:
+
+```commandline
+> cat flama.json
+
+{
+    "dev": false,
+    "app": {
+        "title": "API title",
+        "version": "0.1.0",
+        "description": "API description",
+        "schema": "/schema/",
+        "docs": "/docs/",
+        "models": [{"url": "/model-url/", "path": "model-path.flm", "name": "model-name"}],
+    },
+}
+```
+
+### Sections
+
+As you can readily check, the definition file consists of a set of sections which define our application. The first
+section we find is **"dev"**, is a boolean option that will make the app run under development mode or not (which quite
+convenient whilst developing). By default it comes as **False**, i.e. not active. The second section is **"app"**, which
+encapsulates all the options defining an application, including the models and routes that can be served in it.
 
 ## Further info
 
