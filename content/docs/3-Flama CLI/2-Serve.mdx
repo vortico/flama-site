@@ -133,7 +133,7 @@ Usage: flama serve [OPTIONS] MODEL_PATH
 Options:
   --model-url TEXT        Route of the model  [default: /]
   --model-name TEXT       Name of the model  [default: model]
-  --app-name TEXT         Name of the application  [default: Flama]
+  --app-title TEXT        Name of the application  [default: Flama]
   --app-version TEXT      Version of the application  [default: 0.1.0]
   --app-description TEXT  Description of the application  [default: Fire up
                           with the flame]
@@ -164,7 +164,7 @@ As a complete example:
 > flama serve sklearn_model.flm \
     --model-url="/logreg" \
     --model-name="Logistic Regression" \
-    --app-name="ML API" \
+    --app-title="ML API" \
     --app-version="1.0.0" \
     --app-description="Logistic Regression model serving for predictions"
 ```

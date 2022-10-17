@@ -22,7 +22,7 @@ and schemas will be served, besides the models we wan to add from our local syst
 As always, the command **flama run** also comes with help:
 
 ```commandline
-> flama run --help
+> flama start --help
 
 Usage: flama start [OPTIONS] [FLAMA_CONFIG]
 
@@ -38,7 +38,7 @@ Options:
 The best way to start with definition files is by example. For this purpose, you can simply run:
 
 ```commandline
-> flama run --create-config
+> flama start --create-config
 ```
 
 This command line will produce a simple definition file which will be stored in your current folder as `flama.json`.
@@ -63,15 +63,30 @@ Let's dig into it a bit:
 ### Sections
 
 As you can readily check, the definition file consists of a set of sections which define our application. The first
-section we find is **"dev"**, is a boolean option that will make the app run under development mode or not (which quite
-convenient whilst developing). By default it comes as **False**, i.e. not active. The second section is **"app"**, which
-encapsulates all the options defining an application, including the models and routes that can be served in it.
+section we find is **"dev"**, this is a boolean option that will make the app run under development mode or not (which
+quite convenient whilst developing). By default, this option comes as **False**, i.e. not active. The second section you
+will find is **"app"**, which encapsulates all the options defining an application, including the models and routes that
+can be served in it.
 
-## Further info
+Under the **"app"** section, we find the following fields which we can populate according to our needs:
 
-We will introduce here:
+- **Title**: This is the name of the app which will be serving the ML models (e.g., "ML API"). This is the same as the
+  parameter `--app-title` of [serve](/docs/flama-cli/serve)
+- **Version**: Version of the application (e.g., "0.1.0"). This is the same as the parameter `--app-version` of
+  [serve](/docs/flama-cli/serve)
+- **Description**: Description of the application (e.g., "API serving several models"). This is the same as the
+  parameter `--app-description` of [serve](/docs/flama-cli/serve)
+- **Schema**: Route where the API schema will be served (e.g., **/schema/**).
+- **Docs**: Route where the API documentation website will be served (e.g., **/docs/**)
+- **Models**: This represents a list of models that will be served via our API. Each model will be represented by the
+  parameters **url** (e.g., "/model-url/"), **path** (e.g., "model-path.flm"), and **name** (e.g., "model-name").
 
-- The structure of a definition file
-- Examples with different definition files from simpler to more complicated versions
-- Example for a standard Flama API (talk about all flags we discussed in Run)
-- Examples for a ML Flama API
+## Examples
+
+### Serving a single model
+
+(TBC)
+
+### Serving several models
+
+(TBC)
