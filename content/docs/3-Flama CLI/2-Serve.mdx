@@ -63,7 +63,7 @@ As mentioned in the previous section, we recommend inspecting the documentation 
 model serving. To do that you only need to **flama serve** whatever model which you have packaged previously, and you'll
 get something like:
 
-<Image src="/images/docs/docs-schema-get.png" alt="docs-get-schema" width="800" height="200" />
+<Image src="/images/docs/docs-schema-get.png" alt="docs-get-schema" width="1600" height="400" />
 
 As you can see, the documentation page not only gives you a handy way to interact with the different endpoints
 available, but also gives you the equivalent `curl` statement. For instance, in order to get the schema of the model:
@@ -94,7 +94,7 @@ $ curl --request GET \
 
 Or, in case we want to make a prediction:
 
-<Image src="/images/docs/docs-predict-post.png" alt="docs-post-predict" width="800" height="380" />
+<Image src="/images/docs/docs-predict-post.png" alt="docs-post-predict" width="1600" height="760" />
 
 ```commandLine
 curl --request POST \
@@ -174,4 +174,4 @@ As a complete example:
 
 With these changes, the documentation at **http://http://127.0.0.1:8000/docs/** will look like:
 
-<Image src="/images/docs/docs-serve-params.png" alt="docs-post-predict" width="800" height="456" />
+<Image src="/images/docs/docs-serve-params.png" alt="docs-post-predict" width="1600" height="912" />
