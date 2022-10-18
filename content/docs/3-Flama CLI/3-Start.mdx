@@ -1,6 +1,6 @@
 ---
 title: Start
-wip: true
+wip: false
 ---
 
 ## Start with definition files
@@ -49,6 +49,8 @@ Let's dig into it a bit:
 
 {
     "dev": false,
+    "host": "127.0.0.1",
+    "port": 8000,
     "app": {
         "title": "API title",
         "version": "0.1.0",
@@ -66,9 +68,7 @@ As you can readily check, the definition file consists of a set of sections whic
 section we find is **"dev"**, this is a boolean option that will make the app run under development mode or not (which
 quite convenient whilst developing). By default, this option comes as **False**, i.e. not active. The second section you
 will find is **"app"**, which encapsulates all the options defining an application, including the models and routes that
-can be served in it.
-
-Under the **"app"** section, we find the following fields which we can populate according to our needs:
+can be served in it. In particular, we find the following fields, which we can populate according to our needs:
 
 - **Title**: This is the name of the app which will be serving the ML models (e.g., "ML API"). This is the same as the
   parameter `--app-title` of [serve](/docs/flama-cli/serve)
@@ -81,12 +81,113 @@ Under the **"app"** section, we find the following fields which we can populate 
 - **Models**: This represents a list of models that will be served via our API. Each model will be represented by the
   parameters **url** (e.g., "/model-url/"), **path** (e.g., "model-path.flm"), and **name** (e.g., "model-name").
 
+We can refer to this way of specifying the app properties as **import dictionary**. But, there is still another way of
+populating the "app" section of the definition file with a single line, which is the **import string**. Indeed, we have
+already used the import strings when we introduced the command [run](/docs/flama-cli/run), the import string was the
+path to the app object expressed in the format **module:attribute** (e.g. **src.main:app**).
+
 ## Examples
+
+### Serving a Flama App
+
+The easiest way of using definition files is by populating the app field via import string. Let's try the following
+definition:
+
+```json
+{
+  "dev": false,
+  "host": "127.0.0.1",
+  "port": 8000,
+  "app": "examples.hello_flama:app"
+}
+```
+
+Now, we can run the following command (assuming your definition file is named **flama.json**):
+
+```commandline
+> flama start flama.json
+
+INFO:     Started server process [96911]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
+```
+
+Open the browser and check the docs URL **http://127.0.0.1:8000/docs/** for our enjoyment.
+
+<Image src="/images/docs/docs-hello-flama-docs.png" alt="hello-flama-docs" width="800" height="460" />
 
 ### Serving a single model
 
-(TBC)
+Let us start with the simplest example, which is using a definition file which only includes a single ML model:
+
+```json
+{
+  "dev": false,
+  "host": "127.0.0.1",
+  "port": 8000,
+  "app": {
+    "title": "Scikit Learn Model API",
+    "version": "0.1.0",
+    "description": "This API is serving a scikit-learn classifier",
+    "schema": "/schema/",
+    "docs": "/docs/",
+    "models": [{ "url": "/sklearn/", "path": "sklearn_model.flm", "name": "sklearn-classifier" }]
+  }
+}
+```
+
+We only have to run the following command to get it running (assuming your definition file is named **flama.json**):
+
+```commandline
+> flama start flama.json
+
+INFO:     Started server process [94140]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
+```
+
+Open the browser and check the docs URL **http://127.0.0.1:8000/docs/** for our enjoyment.
+
+<Image src="/images/docs/docs-start-simple.png" alt="docs-start-simple" width="800" height="460" />
 
 ### Serving several models
 
-(TBC)
+Now, we can take <FlamaName/> CLI to its maximum potential by specifying how to serve multiple models, and other
+configuration parameters of the app, in a single definition file. Let's try the following example:
+
+```json
+{
+  "dev": false,
+  "host": "127.0.0.1",
+  "port": 8000,
+  "app": {
+    "title": "Multi ML Model API",
+    "version": "0.1.0",
+    "description": "This API is serving multiple machine-learning models codeless",
+    "schema": "/schema/",
+    "docs": "/docs/",
+    "models": [
+      { "url": "/sklearn/", "path": "sklearn_model.flm", "name": "sklearn-classifier" },
+      { "url": "/pytorch/", "path": "pytorch_model.flm", "name": "pytorch-regressor" },
+      { "url": "/tensorflow/", "path": "tensorflow_model.flm", "name": "tf-regressor" }
+    ]
+  }
+}
+```
+
+Now, we can run the following command (assuming your definition file is named **flama.json**):
+
+```commandline
+> flama start flama.json
+
+INFO:     Started server process [96911]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
+```
+
+Open the browser and check the docs URL **http://127.0.0.1:8000/docs/** for our enjoyment.
+
+<Image src="/images/docs/docs-start-multi.png" alt="docs-start-simple" width="800" height="460" />
