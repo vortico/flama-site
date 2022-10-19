@@ -12,7 +12,11 @@ const links = [
   },
   {
     name: 'Core Concepts',
-    links: [],
+    links: [
+      { name: 'Run applications', url: '/docs/flama-cli/run' },
+      { name: 'Serve machine-learning models', url: '/docs/flama-cli/serve' },
+      { name: 'Start with definition files', url: '/docs/flama-cli/start' },
+    ],
   },
   {
     name: 'Adopting',
