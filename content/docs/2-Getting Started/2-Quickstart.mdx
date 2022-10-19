@@ -108,7 +108,7 @@ have an error like:
 ERROR:    Error loading ASGI app. Could not import module "hello_flama".
 ```
 
-The only way of fixing this is by providing `flama run` the correct application path. In this example, the path must be
+The only way of fixing this is by providing the correct application path. In this example, the path must be
 **examples.hello_flama:app** given that we are running <FlamaName /> CLI at the same level as the folder **examples**:
 
 ```commandline
@@ -153,7 +153,7 @@ if __name__ == "__main__":
     uvicorn.run(app, host="0.0.0.0", port=8000)
 ```
 
-We can now proceed, and run:
+We can proceed, and run:
 
 ```commandline
 > flama run examples.hello_flama:app
@@ -164,10 +164,13 @@ INFO:     Application startup complete.
 INFO:     Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
 ```
 
-This time, let's visit **http://127.0.0.1:8000/docs** and see what's there waiting for us. Yup, <FlamaName />
-automatically generates the API schema following the OpenAPI standard, and provides a convenient interface to interact
-with the documentation.
+This time, let's visit **http://127.0.0.1:8000/docs/** and see what's there waiting for us.
 
-To deep dive into the Flama CLI, please go to the [Flama CLI section](/docs/flama-cli/run). If you are more interested
-in learning how to serve ML models with <FlamaName />, you can go and visit section
+<Image src="/images/docs/docs-hello-flama-docs.png" alt="hello-flama-docs" width="1600" height="920" />
+
+Yup, <FlamaName /> automatically generates the API schema following the OpenAPI standard, and provides a convenient
+interface to interact with the documentation.
+
+To deep dive into the <FlamaName/> CLI, please go to the [Flama CLI section](/docs/flama-cli/run). If you are more
+interested in learning how to serve ML models with <FlamaName />, you can go and visit section
 [Flama ML API section](/docs/machine-learning-api/packaging-models).

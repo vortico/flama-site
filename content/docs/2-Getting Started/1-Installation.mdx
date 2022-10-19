@@ -27,7 +27,7 @@ avoid breaking compatibility between different projects.
 
 To create and activate a virtual environment with a compatible <PythonName /> version you can take the following code
 snippets. Before you start working on a new project, it is very important to activate the corresponding environment. The
-last command line in both code snippets precisely activate the environment with `conda` or `pyenv`, respectively.
+last command line in both code snippets precisely activate the environment with **conda** or **pyenv**, respectively.
 
 ##### Creation of virtual environment with conda
 
@@ -56,7 +56,7 @@ activated virtual environment, run the following command:
 > pip install flama
 ```
 
-Now you have <FlamaName /> installed and ready to be used in your project.
+After running this command line, you'll have <FlamaName /> installed and ready to be used in your project.
 
 ### Extras
 
@@ -66,7 +66,7 @@ when working in your project:
 - [Typesystem](https://www.encode.io/typesystem/): A comprehensive library for data validation typically used to define
   typed data schemas which provides data validation and object serialization & deserialization tools.
 
-- [Marshmallow](https://marshmallow.readthedocs.io/en/stable/quickstart.html#): An alternative library to `typesystem`
+- [Marshmallow](https://marshmallow.readthedocs.io/en/stable/quickstart.html#): An alternative library to **typesystem**
   for data validation.
 
 - [Forge (python)](https://python-forge.readthedocs.io/en/latest/): An elegant library for revising function signatures
@@ -75,16 +75,16 @@ when working in your project:
 - [SQlAlchemy](https://www.sqlalchemy.org/): SQL toolkit and Object Relational Mapper that gives application developers
   the full power and flexibility of SQL.
 
-These dependencies are required if you want to use typed data schemas (`typesystems` or `marshmallow`), or if you are
-going to use pagination (`python-forge`), or if you need to include a database (`sqlalchemy`) in your project.
+These dependencies are required if you want to use typed data schemas (**typesystems** or **marshmallow**), or if you
+are going to use pagination (**python-forge**), or if you need to include a database (**sqlalchemy**) in your project.
 
-If you use `typesystem` schemas, run:
+If you use **typesystem** schemas, run:
 
 ```commandline
 > pip install flama[typesystem, pagination, database]
 ```
 
-If you use `marshmallow` schemas instead, run:
+If you use **marshmallow** schemas instead, run:
 
 ```commandline
 > pip install flama[marshmallow, pagination, database]
@@ -107,7 +107,7 @@ To keep learning you can now check out the [Quickstart](/docs/getting-started/qu
 
 After installing <FlamaName /> you will have the <FlamaName /> command-line interface (CLI) at your disposal.
 
-The easiest and more practical way to check that everything was correctly installed is by running `flama --help`:
+The easiest and more practical way to check that everything was correctly installed is by running:
 
 ```commandline
 > flama --help
@@ -118,9 +118,20 @@ Usage: flama [OPTIONS] COMMAND [ARGS]...
 Options:
   --version  Check the version of your locally installed Flama
   --help     Get help about how to use Flama CLI
-...
+
+Commands:
+  run    Run a Flama Application.
+  serve  Serve the ML model file at <MODEL_PATH> within a Flama Application.
+  start  Start a Flama Application based on a config file.
 ```
 
-To check what version of the library you have installed, simply run `flama --version`.
+To check what version of the library you have installed, simply run:
 
-You are completely set now, and we recommend you to keep reading the documentation.
+```commandline
+> flama --version
+
+flama, version 0.16.0
+```
+
+If you get something similar to the above output, you are completely set. We recommend you to keep reading the
+documentation, and enjoy the journey.

@@ -5,11 +5,25 @@ wip: true
 
 ## Introduction
 
-Any ML model built using one of the mainstream data-science frameworks, e.g. Scikit-Learn or TensorFlow, can be served
-using Flama. For the sake of convenience and speeding up the process of integrating these models into a Flama API, comes
-with the functionality required to serialise and package them, automatically adding important metadata which will make
-the resulting files operational within Flama seamlessly. In this section we will introduce the methods required for this
-purpose:
+Any machine-learning model built using one of the mainstream data-science frameworks, e.g.
+[Scikit-Learn](https://scikit-learn.org/stable/), [TensorFlow](https://www.tensorflow.org/) or
+[PyTorch](https://pytorch.org/), can be served using <FlamaName/>. This, indeed, is what we have been explaining in the
+previous sections on <FlamaName/> CLI commands [run](/docs/flama-cli/run), [serve](/docs/flama-cli/serve), and
+[start](/docs/flama-cli/start). For this to happen, we needed either of the following two options:
+
+- A model packaged as a binary file (**.flm** files)
+- A model embedded in a <FlamaName/> App
+
+The second option will be explained in detail in the following sections:
+[add models](/docs/machine-learning-api/add-models), [model resource](/docs/machine-learning-api/model-resource), and
+[model components](/docs/machine-learning-api/model-components). The first option (which is the one we are going to
+discuss in what follows) requires us to save the models following a certain procedure. For the sake of convenience and
+speeding up the process of integrating these models into an API,
+
+<FlamaName /> comes with the functionality required to serialise and package them, automatically adding important
+metadata which will make the resulting files operational seamlessly.
+
+In this section we will introduce the methods required for this purpose:
 
 - `flama.dump`
 - `flama.load`
