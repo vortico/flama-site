@@ -8,7 +8,9 @@ wip: true
 Once you have your ML models packaged in _flm_ format, they can be exposed as resources of a Flama App. This is what
 constitutes what we refer to as a _Flama ML API_.
 
-## Example of adding a PyTorch model
+## Adding models
+
+### PyTorch
 
 ```python
 import typing
@@ -27,7 +29,7 @@ app.models.add_model(
 - **GET /torch_model**: Returns _resource_, i.e. the schema with `get_params()`
 - **POST /torch_model/predict**: Returns prediction of model
 
-## Example of adding a SKLearn model
+### Scikit-Learn
 
 ```python
 import typing
@@ -46,7 +48,7 @@ app.models.add_model(
 - **GET /sk_model**: Returns _resource_, i.e. the schema with `get_params()`
 - **POST /sk_model/predict**: Returns prediction of model
 
-## Example of adding a TensorFlow model
+### TensorFlow
 
 ```python
 import typing
@@ -67,7 +69,7 @@ If you run this code, you will get an API with the following endpoints:
 - **GET /tf_model**: Returns _resource_, i.e. the schema with `get_params()`
 - **POST /tf_model/predict**: Returns prediction of model
 
-## Example of adding multiple ML models
+### Multiple models
 
 ```python
 import typing

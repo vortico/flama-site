@@ -33,7 +33,9 @@ In this section we will introduce the methods required for this purpose:
 **Remark 2**: The dump step can live completely out of any Flama API. Indeed, the natural place where you will be
 running it will be at the model building stage (very likely in you Jupyter notebook).
 
-## Example of serialising PyTorch models
+## Packing & loading
+
+### PyTorch
 
 ```python
 import flama
@@ -47,7 +49,7 @@ with open("torch_model.flm", "wb") as f:
     flama.dump("pytorch", model, f)
 ```
 
-## Example of serialising Scikit-Learn models
+### Scikit-Learn
 
 ```python
 import flama
@@ -60,7 +62,7 @@ with open("sk_model.flm", "wb") as f:
     flama.dump("sklearn", model, f)
 ```
 
-## Example of serialising TensorFlow models
+### TensorFlow
 
 ```python
 import flama
