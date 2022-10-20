@@ -1,7 +1,26 @@
 :root {
-  scrollbar-color: theme('colors.primary.400') theme('colors.primary.100');
+  scrollbar-color: theme('colors.primary.400') transparent;
+
+  ::-webkit-scrollbar {
+    width: 8px;
+  }
+
+  ::-webkit-scrollbar-track {
+    background-color: transparent;
+  }
+
+  ::-webkit-scrollbar-thumb {
+    background-color: theme('colors.primary.400');
+    border-radius: 10px;
+    border: 2px solid transparent;
+    background-clip: padding-box;
+  }
 
   &.dark {
-    scrollbar-color: theme('colors.primary.600') theme('colors.primary.800');
+    scrollbar-color: theme('colors.primary.600') transparent;
+
+    ::-webkit-scrollbar-thumb {
+      background-color: theme('colors.primary.600');
+    }
   }
 }
