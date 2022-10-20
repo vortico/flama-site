@@ -3,9 +3,7 @@ title: Run
 wip: false
 ---
 
-## Running an App
-
-### Introducting Flama CLI
+## Flama CLI
 
 We have already seen how to use the command line to run an **app** in the
 [Quickstart](/docs/getting-started/quickstart), but we didn't do a proper introduction of the command line interface
@@ -18,9 +16,9 @@ Once you have a developed app that you want to serve, you need to choose and con
 <FlamaName /> CLI precisely aims at reducing the effort invested in this step to the bare minimum, so that you can focus
 on developing your app.
 
-### Parameters
+## Parameters
 
-#### App path
+### App path
 
 To be able to serve an app, you need to have a file where you have the following lines:
 
@@ -47,7 +45,7 @@ passed directly to the CLI as argument, or by utilising the equivalent environme
 are at **project_folder** (following the previous example of folder structure), we can run the app by either of the
 following two ways:
 
-##### Using option argument
+#### Using option argument
 
 ```commandLine
 > flama run src.main:app
@@ -58,7 +56,7 @@ INFO:     Application startup complete.
 INFO:     Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
 ```
 
-##### Using environment variable
+#### Using environment variable
 
 ```commandLine
 > export FLAMA_APP=src.main:app
@@ -70,7 +68,7 @@ INFO:     Application startup complete.
 INFO:     Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
 ```
 
-#### Development mode
+### Development mode
 
 If you run your app as specified above, everything will be running with the code as it was at the moment you run the
 command. However, more often than not, you might need to make some changes in the code of your app, which would require
@@ -80,13 +78,13 @@ code, and will reload the app automatically for you.
 
 For this, we only need to run one of the following two options:
 
-##### Using option argument
+#### Using option argument
 
 ```commandLine
 > flama run --dev
 ```
 
-##### Using environment variable
+#### Using environment variable
 
 ```commandLine
 > export FLAMA_DEV=True
@@ -96,7 +94,7 @@ For this, we only need to run one of the following two options:
 The convenience of this mode of execution does not stop here. Running in development mode also brings useful tools which
 make the debugging of the code easier, e.g. highly-detailed error messages, and interactive error webpages.
 
-#### Further options
+### Server parameters
 
 <FlamaName /> CLI uses **uvicorn** as webserver, and it is because of this that it accepts every argument of the uvicorn
 CLI:

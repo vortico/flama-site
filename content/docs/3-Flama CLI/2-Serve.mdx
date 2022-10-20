@@ -26,7 +26,7 @@ following example files for the sake of learning:
 
 Once you have downloaded any of the files listed above, you will be able to serve your first ML model codeless.
 
-### Codeless serving
+## Codeless serving
 
 Let's pick up one of the example model files we have just introduced in the previous section, say **sklearn_model.flm**.
 Now, let's run:
@@ -45,7 +45,7 @@ and listening via the port **8000**. But, this time we have not written a single
 approach** of <FlamaName /> to ML models deployment, which makes possible the deployment of an already trained-tested ML
 model as an API ready to receive requests and return estimations almost without any effort.
 
-#### How do we interact with the model?
+### How do we interact with the model?
 
 So, we have an app which is running an ML model. The natural question to ask now is, how do we interact with that model?
 All models served with **flama serve** come with the following end points for free:
@@ -57,7 +57,7 @@ All models served with **flama serve** come with the following end points for fr
 - <Label color="blue">POST</Label> **http://127.0.0.1:8000/predict/** Expects the input data (observations) to be passed
   as argument to predict their output.
 
-#### Interactive and intuitive documentation
+### Interactive and intuitive documentation
 
 As mentioned in the previous section, we recommend inspecting the documentation route (`/docs/`) as soon as we have the
 model serving. To do that you only need to **flama serve** whatever model which you have packaged previously, and you'll
@@ -116,7 +116,7 @@ no matter where the model is deployed. And, this is a huge step towards the prod
 have a reproducible problem, which is key to understand and replicate the behaviour of our models in a production
 environment, since it'll be the same as we observe in local.
 
-### Parameters
+## Parameters
 
 Although the default usage of **flama serve** is already very convenient, you might be interested in customise a bit the
 result. For instance, you might want to serve the model at a different route (i.e., not at the default **/**), or the
@@ -141,6 +141,24 @@ Options:
   --port INTEGER          Bind socket to this port.  [default: 8000]
   --help                  Show this message and exit.
 ```
+
+We can readily see the following groups of parameters:
+
+### Model parameters
+
+- **model-url**: Route of the model (default: /)
+- **model-name**: Name of the model (default: model)
+
+### App parameters
+
+- **app-title**: Name of the application (default: Flama)
+- **app-version**: Version of the application (default: 0.1.0)
+- **app-description**: Description of the application (default: Fire up) with the flame]
+
+### Server parameters
+
+- **host**: Bind socket to this host (default: 127.0.0.1)
+- **port**: Bind socket to this port (default: 8000)
 
 Each of these options can be passed directly to the CLI by using `--<option-name> <value>`, or by utilising the
 equivalent environment variable, i.e. `FLAMA_<OPTION_NAME>=<VALUE>` (take care, the equivalent environment variable

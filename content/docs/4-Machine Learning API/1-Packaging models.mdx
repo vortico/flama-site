@@ -21,14 +21,14 @@ discuss in what follows) requires us to save the models following a certain proc
 speeding up the process of integrating these models into an API, <FlamaName /> comes with the functionality required to
 serialise and package them, automatically adding important metadata which make the resulting files operational.
 
-### FLM files
+## FLM files
 
 The binary files needed by the <FlamaName/> CLI are typically named with the suffix **.flm**. We call them _flama_ files
 for the sake of simplicity, but FLM stands for **Flama Lightweight Model**. This comes from the fact that, FLM files are
 a lightweight representation of ML models, which come with useful metadata needed for later purposes, e.g. building a
 wrapper <FlamaName/> app containing the model.
 
-### Dump & load
+## Dump & load
 
 Let's consider the following familiar situation, which is the day-to-day routine of many data scientists. After careful
 experimentation, cross-validation, testing, and so on, we have found the optimal ML model for our problem. Great job!
@@ -39,11 +39,12 @@ which will have to eventually _unpickle_ (i.e., using **pickle.load**) the objec
 seems like a very repetitive and boring task, doesn't it?
 
 As we have seen already when we introduced [serve](/docs/flama-cli/serve) and [start](/docs/flama-cli/start),
+
 <FlamaName /> comes equipped with a very convenient CLI which does all the boring part for you seamlessly, just with a
 single line of code. For this, we only need our models to be packaged with the <FlamaName /> counterparts of pickle's
 dump and load commands, namely: **flama.dump** and **flama.load**.
 
-#### Dump method
+### Dump method
 
 <FlamaName /> **dump** method uses optimal compression with the aim of making the packing process more efficient, and
 faster. The packing step can live completely out of any <FlamaName /> application. Indeed, the natural place to package
@@ -61,7 +62,7 @@ with open("path/to/file.flm", "wb") as fs:
     )
 ```
 
-#### Load method
+### Load method
 
 <FlamaName /> **load** method is responsible for the efficient unpacking of the model file. The *unpacking* stage will
 typically happen within the context of a <FlamaName /> application. If you're not planning the development of any
@@ -79,8 +80,6 @@ with open("path/to/file.flm", "rb") as fs:
     )
 ```
 
-## Packing & loading
-
 Having introduced the methods which allow for packing (**flama.dump**) and loading (**flama.load**), we can proceed and
 introduce how the example files we've been using so far were generated. These files were:
 
@@ -88,14 +87,14 @@ introduce how the example files we've been using so far were generated. These fi
 - [TensorFlow model](/models/tensorflow_model.flm)
 - [PyTorch model](/models/pytorch_model.flm)
 
-### Examples
+## Examples
 
 Let's proceed showing how to pack scikit-learn, tensorflow, and pytorch models, respectively. The following examples
 don't intend to be complete nor functional pieces of code. The examples aim at showing the relevant steps for the
 purpose of packagin models, so they do not include the following natural stages: data loading and cleansing, training
 and testing.
 
-#### Scikit-Learn
+### Scikit-Learn
 
 ```python
 import flama
@@ -108,7 +107,7 @@ with open("sk_model.flm", "wb") as f:
     flama.dump("sklearn", model, f)
 ```
 
-#### TensorFlow
+### TensorFlow
 
 ```python
 import flama
@@ -131,7 +130,7 @@ with open("tf_model.flm", "wb") as f:
     flama.dump("tensorflow", model, f)
 ```
 
-#### PyTorch
+### PyTorch
 
 ```python
 import flama
