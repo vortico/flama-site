@@ -22,6 +22,13 @@ speeding up the process of integrating these models into an API, <FlamaName /> c
 serialise and package them, automatically adding important metadata which will make the resulting files operational
 seamlessly.
 
+### FLM files
+
+The binary files needed by the <FlamaName/> CLI are typically named with the suffix **.flm**. We call them _flama_ files
+for the sake of simplicity, but FLM stands for **Flama Lightweight Model**. This comes from the fact that, FLM files are
+a lightweight representation of ML models, which come with useful metadata needed for later purposes, e.g. building a
+wrapper <FlamaName/> app containing the model.
+
 ### Dump & load
 
 Let's consider the following familiar situation, which is the day-to-day routine of many data scientists. After careful
@@ -33,66 +40,44 @@ which will have to eventually _unpickle_ (i.e., using **pickle.load**) the objec
 seems like a very repetitive and boring task, doesn't it?
 
 As we have seen already when we introduced [serve](/docs/flama-cli/serve) and [start](/docs/flama-cli/start),
-
 <FlamaName /> comes equipped with a very convenient CLI does the boring part for you seamlessly, and with a single line
 of code. We only need our models to be packaged with the <FlamaName /> counterparts of pickle's dump and load commands,
 namely: **flama.dump** and **flama.load**.
 
-#### Dump methods
+#### Dump method
 
 <FlamaName /> **dump** method uses optimal compression with the aim of making the packing process more efficient, and
-faster. The *dumping*/*packing* step can live completely out of any <FlamaName /> application. Indeed, the natural place
-to package your models will be at the model-building stage, which will be very likely happening on you Jupyter notebook.
+faster. The packing step can live completely out of any <FlamaName /> application. Indeed, the natural place to package
+your models will be at the model-building stage, which will be very likely happening on you Jupyter notebook. An example
+of usage of this method:
 
 ```python
-def dumps(lib: typing.Union[str, ModelFormat], model: typing.Any, **kwargs) -> bytes:
-    """Serialize an ML model using Flama format to bytes string.
+import flama
 
-    :param lib: The ML library used for building the model.
-    :param model: The ML model.
-    :param kwargs: Keyword arguments passed to library dump method.
-    :return: Serialized model using Flama format.
-    """
-    return Model(ModelFormat(lib), model).to_bytes(**kwargs)
-
-
-def dump(lib: typing.Union[str, ModelFormat], model: typing.Any, fs: typing.BinaryIO, **kwargs) -> None:
-    """Serialize an ML model using Flama format to bytes stream.
-
-    :param lib: The ML library used for building the model.
-    :param model: The ML model.
-    :param fs: Output bytes stream.
-    :param kwargs: Keyword arguments passed to library dump method.
-    :return: Serialized model using Flama format.
-    """
-    fs.write(dumps(lib, model, **kwargs))
+with open("path/to/file.flm", "wb") as fs:
+    flama.dump(
+        lib=flama.ModelFormat.pytorch, # library the model is built with
+        model=model,                   # the model object itsel
+        fs=fs,                         # BinaryIO where the model will be stored
+    )
 ```
 
-#### Load methods
+#### Load method
 
 <FlamaName /> **load** method is responsible for the efficient unpacking of the model file. The *unpacking* stage will
 typically happen within the context of a <FlamaName /> application. If you're not planning the development of any
-because you'll be using <FlamaName /> CLI for this, then you won't have to use the load methods at all.
+because you'll be using <FlamaName /> CLI for this, then you won't have to use the load methods at all. An example of
+usage of this method:
 
 ```python
-def loads(data: bytes, **kwargs) -> Model:
-    """Deserialize an ML model using Flama format from a bytes string.
+import flama
 
-    :param data: The serialized model.
-    :param kwargs: Keyword arguments passed to library load method.
-    :return: ML model.
-    """
-    return Model.from_bytes(data, **kwargs)
-
-
-def load(fs: typing.BinaryIO, **kwargs) -> Model:
-    """Deserialize an ML model using Flama format from a bytes stream.
-
-    :param fs: Input bytes stream containing the serialized model.
-    :param kwargs: Keyword arguments passed to library load method.
-    :return: ML model.
-    """
-    return loads(fs.read(), **kwargs)
+with open("path/to/file.flm", "rb") as fs:
+    flama.load(
+        lib=flama.ModelFormat.pytorch, # library the model is built with
+        model=model,                   # the model object itsel
+        fs=fs,                         # BinaryIO where the model is stored
+    )
 ```
 
 ## Packing & loading
