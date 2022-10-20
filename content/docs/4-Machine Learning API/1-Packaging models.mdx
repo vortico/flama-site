@@ -18,20 +18,84 @@ The second option will be explained in detail in the following sections:
 [add models](/docs/machine-learning-api/add-models), [model resource](/docs/machine-learning-api/model-resource), and
 [model components](/docs/machine-learning-api/model-components). The first option (which is the one we are going to
 discuss in what follows) requires us to save the models following a certain procedure. For the sake of convenience and
-speeding up the process of integrating these models into an API,
+speeding up the process of integrating these models into an API, <FlamaName /> comes with the functionality required to
+serialise and package them, automatically adding important metadata which will make the resulting files operational
+seamlessly.
 
-<FlamaName /> comes with the functionality required to serialise and package them, automatically adding important
-metadata which will make the resulting files operational seamlessly.
+### Dump & load
 
-In this section we will introduce the methods required for this purpose:
+Let's consider the following familiar situation, which is the day-to-day routine of many data scientists. After careful
+experimentation, cross-validation, testing, and so on, we have found the optimal ML model for our problem. Great job!
+Now, we want to take our model out of our Jupyter Notebook, and offer it as a service to make predictions on demand. The
+first thing we think about is [_pickling_](https://docs.python.org/3/library/pickle.html#module-pickle) (i.e., using
+`pickle.dump`) the model, and pass the resulting file to the corresponding team/colleague to develop the wrapper API
+which will have to eventually _unpickle_ (i.e., using `pickle.load`) the object, and expose the **predict** method. It
+seems like a very repetitive and boring task, doesn't it?
 
-- `flama.dump`
-- `flama.load`
+As we have seen already when we introduced [serve](/docs/flama-cli/serve) and [start](/docs/flama-cli/start),
 
-**Remark**: Flama's dump method uses optimal compression with the aim of making the process more efficient and faster.
+<FlamaName /> comes equipped with a very convenient CLI does the boring part for you seamlessly, and with a single line
+of code. We only need our models to be packaged with the <FlamaName /> counterparts of pickle's dump and load commands,
+namely: **flama.dump** and **flama.load**.
 
-**Remark 2**: The dump step can live completely out of any Flama API. Indeed, the natural place where you will be
-running it will be at the model building stage (very likely in you Jupyter notebook).
+#### Dump methods
+
+<FlamaName />
+'s **dump** method uses optimal compression with the aim of making the packing process more efficient, and faster. The *dumping*/*packing*
+step can live completely out of any <FlamaName /> application. Indeed, the natural place to package your models will be at
+the model-building stage, which will be very likely happening on you Jupyter notebook.
+
+```python
+def dumps(lib: typing.Union[str, ModelFormat], model: typing.Any, **kwargs) -> bytes:
+    """Serialize an ML model using Flama format to bytes string.
+
+    :param lib: The ML library used for building the model.
+    :param model: The ML model.
+    :param kwargs: Keyword arguments passed to library dump method.
+    :return: Serialized model using Flama format.
+    """
+    return Model(ModelFormat(lib), model).to_bytes(**kwargs)
+
+
+def dump(lib: typing.Union[str, ModelFormat], model: typing.Any, fs: typing.BinaryIO, **kwargs) -> None:
+    """Serialize an ML model using Flama format to bytes stream.
+
+    :param lib: The ML library used for building the model.
+    :param model: The ML model.
+    :param fs: Output bytes stream.
+    :param kwargs: Keyword arguments passed to library dump method.
+    :return: Serialized model using Flama format.
+    """
+    fs.write(dumps(lib, model, **kwargs))
+```
+
+#### Load methods
+
+<FlamaName />
+'s **load** method is responsible for the efficient unpacking of the model file. The *unpacking* stage will typically happen
+within the context of a <FlamaName /> application. If you're not planning the development of any because you'll be using <FlamaName /> CLI
+for this, then you won't have to use the load methods at all.
+
+```python
+def loads(data: bytes, **kwargs) -> Model:
+    """Deserialize an ML model using Flama format from a bytes string.
+
+    :param data: The serialized model.
+    :param kwargs: Keyword arguments passed to library load method.
+    :return: ML model.
+    """
+    return Model.from_bytes(data, **kwargs)
+
+
+def load(fs: typing.BinaryIO, **kwargs) -> Model:
+    """Deserialize an ML model using Flama format from a bytes stream.
+
+    :param fs: Input bytes stream containing the serialized model.
+    :param kwargs: Keyword arguments passed to library load method.
+    :return: ML model.
+    """
+    return loads(fs.read(), **kwargs)
+```
 
 ## Packing & loading
 
