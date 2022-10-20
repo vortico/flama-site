@@ -1,6 +1,6 @@
 ---
 title: Packaging models
-wip: true
+wip: false
 ---
 
 ## Introduction
@@ -83,21 +83,21 @@ with open("path/to/file.flm", "rb") as fs:
 
 ## Packing & loading
 
-### PyTorch
+Having introduced the methods which allow for packing (**flama.dump**) and loading (**flama.load**), we can proceed and
+introduce how the example files we've been using so far were generated. These files were:
 
-```python
-import flama
-import torch
+- [Scikit Learn model](/models/sklearn_model.flm)
+- [TensorFlow model](/models/tensorflow_model.flm)
+- [PyTorch model](/models/pytorch_model.flm)
 
-class Model(torch.nn.Module):
-    def forward(self, x):
-        return x + 10
+### Examples
 
-with open("torch_model.flm", "wb") as f:
-    flama.dump("pytorch", model, f)
-```
+Let's proceed showing how to pack scikit-learn, tensorflow, and pytorch models, respectively. The following examples
+don't intend to be complete nor functional pieces of code. The examples aim at showing the relevant steps for the
+purpose of packagin models, so they do not include the following natural stages: data loading and cleansing, training
+and testing.
 
-### Scikit-Learn
+#### Scikit-Learn
 
 ```python
 import flama
@@ -110,7 +110,7 @@ with open("sk_model.flm", "wb") as f:
     flama.dump("sklearn", model, f)
 ```
 
-### TensorFlow
+#### TensorFlow
 
 ```python
 import flama
@@ -131,4 +131,18 @@ model.fit(x_train, y_train, epochs=5)
 
 with open("tf_model.flm", "wb") as f:
     flama.dump("tensorflow", model, f)
+```
+
+#### PyTorch
+
+```python
+import flama
+import torch
+
+class Model(torch.nn.Module):
+    def forward(self, x):
+        return x + 10
+
+with open("torch_model.flm", "wb") as f:
+    flama.dump("pytorch", model, f)
 ```
