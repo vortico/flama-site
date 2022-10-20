@@ -39,6 +39,7 @@ which will have to eventually _unpickle_ (i.e., using **pickle.load**) the objec
 seems like a very repetitive and boring task, doesn't it?
 
 As we have seen already when we introduced [serve](/docs/flama-cli/serve) and [start](/docs/flama-cli/start),
+
 <FlamaName /> comes equipped with a very convenient CLI which does all the boring part for you seamlessly, just with a
 single line of code. For this, we only need our models to be packaged with the <FlamaName /> counterparts of pickle's
 dump and load commands, namely: **flama.dump** and **flama.load**.
@@ -47,8 +48,8 @@ dump and load commands, namely: **flama.dump** and **flama.load**.
 
 <FlamaName /> **dump** method uses optimal compression with the aim of making the packing process more efficient, and
 faster. The packing step can live completely out of any <FlamaName /> application. Indeed, the natural place to package
-your models will be at the model-building stage, which will be very likely happening on you Jupyter notebook. An example
-of usage of this method:
+your models will be at the model-building stage, which will be very likely happening on your Jupyter notebook. An
+example of usage of this method:
 
 ```python
 import flama
