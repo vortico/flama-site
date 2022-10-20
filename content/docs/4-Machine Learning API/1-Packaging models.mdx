@@ -27,9 +27,9 @@ seamlessly.
 Let's consider the following familiar situation, which is the day-to-day routine of many data scientists. After careful
 experimentation, cross-validation, testing, and so on, we have found the optimal ML model for our problem. Great job!
 Now, we want to take our model out of our Jupyter Notebook, and offer it as a service to make predictions on demand. The
-first thing we think about is [_pickling_](https://docs.python.org/3/library/pickle.html#module-pickle) (i.e., using
-`pickle.dump`) the model, and pass the resulting file to the corresponding team/colleague to develop the wrapper API
-which will have to eventually _unpickle_ (i.e., using `pickle.load`) the object, and expose the **predict** method. It
+first thing we think about is [pickling](https://docs.python.org/3/library/pickle.html#module-pickle) (i.e., using
+**pickle.dump**) the model, and pass the resulting file to the corresponding team/colleague to develop the wrapper API
+which will have to eventually _unpickle_ (i.e., using **pickle.load**) the object, and expose the **predict** method. It
 seems like a very repetitive and boring task, doesn't it?
 
 As we have seen already when we introduced [serve](/docs/flama-cli/serve) and [start](/docs/flama-cli/start),
@@ -40,10 +40,9 @@ namely: **flama.dump** and **flama.load**.
 
 #### Dump methods
 
-<FlamaName />
-'s **dump** method uses optimal compression with the aim of making the packing process more efficient, and faster. The *dumping*/*packing*
-step can live completely out of any <FlamaName /> application. Indeed, the natural place to package your models will be at
-the model-building stage, which will be very likely happening on you Jupyter notebook.
+<FlamaName /> **dump** method uses optimal compression with the aim of making the packing process more efficient, and
+faster. The *dumping*/*packing* step can live completely out of any <FlamaName /> application. Indeed, the natural place
+to package your models will be at the model-building stage, which will be very likely happening on you Jupyter notebook.
 
 ```python
 def dumps(lib: typing.Union[str, ModelFormat], model: typing.Any, **kwargs) -> bytes:
@@ -71,10 +70,9 @@ def dump(lib: typing.Union[str, ModelFormat], model: typing.Any, fs: typing.Bina
 
 #### Load methods
 
-<FlamaName />
-'s **load** method is responsible for the efficient unpacking of the model file. The *unpacking* stage will typically happen
-within the context of a <FlamaName /> application. If you're not planning the development of any because you'll be using <FlamaName /> CLI
-for this, then you won't have to use the load methods at all.
+<FlamaName /> **load** method is responsible for the efficient unpacking of the model file. The *unpacking* stage will
+typically happen within the context of a <FlamaName /> application. If you're not planning the development of any
+because you'll be using <FlamaName /> CLI for this, then you won't have to use the load methods at all.
 
 ```python
 def loads(data: bytes, **kwargs) -> Model:
