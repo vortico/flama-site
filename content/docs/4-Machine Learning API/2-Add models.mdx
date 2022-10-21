@@ -5,10 +5,23 @@ wip: true
 
 ## Introduction
 
-Once you have your ML models packaged in _flm_ format, they can be exposed as resources of a Flama App. This is what
-constitutes what we refer to as a _Flama ML API_.
+In this section we are going to introduce a new way of using FLM files, which will be useful for those who are
+interested in developing their own <FlamaName/> App. There are several reasons why you can consider developing your own
+app, e.g. amongst other reasons you might want:
+
+- To add further functionality which is not built-in when using the <FlamaName/> CLI
+- To gain control on fine details for technical reasons
+- To learn by doing
+
+This is perfectly okay, and normal. <FlamaName/> CLI is not a "one size fits all" answer. Indeed, there are some
+characteristics of a <FlamaName/> App which we may need to customise, for which we need to develop the application
+ourselves, e.g. **on-startup** or **on-shutdown** events, to name some examples.
 
 ## Adding models
+
+Once you have your ML models packaged in _flm_ format, they can be exposed as
+[Resources](/docs/machine-learning-api/model-resource) of a Flama App. This is what constitutes what we refer to as a
+_Flama ML API_.
 
 ### PyTorch
 
