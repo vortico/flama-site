@@ -17,49 +17,196 @@ This is perfectly okay, and normal. <FlamaName/> CLI is not a "one size fits all
 characteristics of a <FlamaName/> App which we may need to customise, for which we need to develop the application
 ourselves, e.g. **on-startup** or **on-shutdown** events, to name some examples.
 
-## Adding models
+## Base application
 
-Once you have your ML models packaged in _flm_ format, they can be exposed as
-[Resources](/docs/machine-learning-api/model-resource) of a Flama App. This is what constitutes what we refer to as a
-_Flama ML API_.
-
-### PyTorch
+For the sake of consistency across our examples, we are going to consider the following base application:
 
 ```python
-import typing
+from flama import Flama, Route
 
-from flama import Flama
 
-app = Flama()
+class AppStatus:
+    loaded = False
 
-app.models.add_model(
-    path="/torch_model",
-    model="path/to/your_model_file.flm",
-    name="name_of_the_torch_model",
+
+def startup():
+    print("\nStarting up the ML API...\n")
+    # Here, whatever action we want to be run at the startup of the application
+    AppStatus.loaded = True
+
+
+def shutdown():
+    print("\nShutting down the ML API...\n")
+    # Here, whatever action we want to be run at the shutdown of the application
+
+
+def home():
+    """
+    tags:
+        - Home
+    summary:
+        Returns readiness message
+    description:
+        The function returns a readiness message in which the global variable AppStatus.loaded is shown.
+        If the 'on_startup' function has worked as expected, the message will show the 'loaded' variable as True.
+        Else, it'll show the variable as 'False'
+    """
+    return f"The API is ready. Loaded = {AppStatus.loaded}"
+
+
+def user_me():
+    """
+    tags:
+        - User
+    summary:
+        Returns hello 'John Doe'
+    description:
+        The function returns the plain-text message "Hello John Doe"
+    """
+    username = "John Doe"
+    return f"Hello {username}"
+
+
+def user(username: str):
+    """
+    tags:
+        - User
+    summary:
+        Returns hello 'username'
+    description:
+        The function returns the plain-text message "Hello 'username'" where the 'username' is the user specified as
+        query parameter.
+    """
+    return f"Hello {username}"
+
+
+app = Flama(
+    title="Flama ML",
+    version="0.1.0",
+    description="Machine learning API using Flama 🔥",
+    routes=[
+        Route("/", home),
+        Route('/user/me', user_me),
+        Route('/user/{username}', user),
+    ],
+    on_startup=[startup],
+    on_shutdown=[shutdown]
 )
 ```
 
-- **GET /torch_model**: Returns _resource_, i.e. the schema with `get_params()`
-- **POST /torch_model/predict**: Returns prediction of model
+As can be seen, we have used a non-standard configuration of the application by using the parameters:
+
+- **routes**: A list of routes to serve incoming HTTP and WebSocket requests. In this particular case,
+- **on_startup**: A list of callables to run on application startup. Startup handler callables do not take any
+  arguments, and may be be either standard functions, or async functions.
+- **on_shutdown**: A list of callables to run on application shutdown. Shutdown handler callables do not take any
+  arguments, and may be be either standard functions, or async functions.
+
+We suggest to save the previous example in a local file, say **example/add_models.py**, and run it with the CLI in
+development mode:
+
+```commandline
+> flama run examples.base_application:app --dev
+
+INFO:     Will watch for changes in these directories: ['/home/miguel/Dev/personal/flama']
+INFO:     Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
+INFO:     Started reloader process [35011] using WatchFiles
+INFO:     Started server process [35034]
+INFO:     Waiting for application startup.
+
+Starting up the ML API...
+
+INFO:     Application startup complete.
+```
+
+If we click on the URL given above (i.e., **http://127.0.0.1:8000**), we should get the following message in our
+browser:
+
+```commandline
+"The API is ready. Loaded = True"
+```
+
+This is just a quick example to show the effect of **on_startup** and **on_shutdown** parameters. They are very
+convenient when we need the application to have some initialisation or deactivation steps which are specific of our
+particular situation.
+
+Following the steps described in the previous [section](/docs/machine-learning-api/packaging-models), it should be
+straightforward to produce ML models packaged in FLM format. What we want now is to expose such models as
+[Resources](/docs/machine-learning-api/model-resource) of a <FlamaName/> App. This is what constitutes what we refer to
+as a Flama ML API.
+
+We already have the base <FlamaName/> App up and running in development mode. Let's start adding ML models to it in
+live. This will be a good example to see by ourselves the advantages of running the app in development mode.
+
+## Add models
+
+Any <FlamaName/> App will have accessible the attribute **models**, which will have the method **add_model** at our
+disposal. The standard usage of this method will be as follows:
+
+```python
+app.models.add_model(
+    path="path/to/model",
+    model="path/to/your_model_file.flm",
+    name="model_name",
+)
+```
+
+Let's examine what we need:
+
+- **app**: The <FlamaName/> App we are developing, and under which we want to serve ML models
+- **path**: The URL path to find the model resource
+- **model**: The local file path where the FLM file is at
+- **name**: A custom name for the ML model resource for documenting purposes
+
+Having a good understanding of what's needed, we can now proceed with some examples.
+
+## Examples
+
+As has been the case throughout this documentation so far, we will be using the example FLM files generated in the
+previous section, namely:
+
+- [Scikit Learn model](/models/sklearn_model.flm)
+- [TensorFlow model](/models/tensorflow_model.flm)
+- [PyTorch model](/models/pytorch_model.flm)
 
 ### Scikit-Learn
 
+To proceed, we will need to add the following lines to the base application which is runnind (i.e., to the file
+**examples/add_models.py**):
+
 ```python
-import typing
-
-from flama import Flama
-
-app = Flama()
-
 app.models.add_model(
     path="/sk_model",
-    model="path/to/your_model_file.flm",
-    name="name_of_the_sk_model",
+    model="examples/sklearn_model.flm",
+    name="logistic-regression",
 )
 ```
 
-- **GET /sk_model**: Returns _resource_, i.e. the schema with `get_params()`
-- **POST /sk_model/predict**: Returns prediction of model
+Right after adding and saving the document, we should see the reloading of the application happening on our terminal,
+something like:
+
+```commandline
+...
+WARNING:  WatchFiles detected changes in 'examples/add_models.py'. Reloading...
+INFO:     Started server process [48286]
+INFO:     Waiting for application startup.
+
+Starting up the ML API...
+
+INFO:     Application startup complete.
+```
+
+As we anticipated already when we introduced the [serve](/docs/flama-cli/serve) command, the model added will
+automatically have associated the following endpoints:
+
+- <Label color="green">GET</Label> **/sk_learn/** Returns the model resource, i.e. the model hyper-parameter's schema which
+  would be obtained with the method **get_params()**.
+- <Label color="blue">POST</Label> **/sk_learn/predict/** Expects the input data (observations) to be passed as argument
+  to predict their output.
+
+Check the documentation at **http://127.0.0.1:8000/docs/**, and you'll see now something like:
+
+<Image src="/images/docs/docs-mlapi-sklearn.png" alt="docs-mlapi-sklearn" width="1600" height="925" />
 
 ### TensorFlow
 
@@ -81,6 +228,25 @@ If you run this code, you will get an API with the following endpoints:
 
 - **GET /tf_model**: Returns _resource_, i.e. the schema with `get_params()`
 - **POST /tf_model/predict**: Returns prediction of model
+
+### PyTorch
+
+```python
+import typing
+
+from flama import Flama
+
+app = Flama()
+
+app.models.add_model(
+    path="/torch_model",
+    model="path/to/your_model_file.flm",
+    name="name_of_the_torch_model",
+)
+```
+
+- **GET /torch_model**: Returns _resource_, i.e. the schema with `get_params()`
+- **POST /torch_model/predict**: Returns prediction of model
 
 ### Multiple models
 
