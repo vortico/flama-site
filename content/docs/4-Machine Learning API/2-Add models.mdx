@@ -102,7 +102,7 @@ As can be seen, we have used a non-standard configuration of the application by 
 - **on_shutdown**: A list of callables to run on application shutdown. Shutdown handler callables do not take any
   arguments, and may be be either standard functions, or async functions.
 
-We suggest to save the previous example in a local file, say **example/add_models.py**, and run it with the CLI in
+We suggest to save the previous example in a local file, say **examples/add_models.py**, and run it with the CLI in
 development mode:
 
 ```commandline
@@ -171,12 +171,12 @@ previous section, namely:
 
 ### Scikit-Learn
 
-To proceed, we will need to add the following lines to the base application which is runnind (i.e., to the file
+To proceed, we will need to add the following lines to the base application which is running (i.e., to the file
 **examples/add_models.py**):
 
 ```python
 app.models.add_model(
-    path="/sk_model",
+    path="/sklearn/",
     model="examples/sklearn_model.flm",
     name="logistic-regression",
 )
@@ -196,91 +196,220 @@ Starting up the ML API...
 INFO:     Application startup complete.
 ```
 
-As we anticipated already when we introduced the [serve](/docs/flama-cli/serve) command, the model added will
+As we already anticipated when we introduced the [serve](/docs/flama-cli/serve) command, the model added will
 automatically have associated the following endpoints:
 
-- <Label color="green">GET</Label> **/sk_learn/** Returns the model resource, i.e. the model hyper-parameter's schema which
+- <Label color="green">GET</Label> **/sklearn/** Returns the model resource, i.e. the model hyper-parameter's schema which
   would be obtained with the method **get_params()**.
-- <Label color="blue">POST</Label> **/sk_learn/predict/** Expects the input data (observations) to be passed as argument
-  to predict their output.
+- <Label color="blue">POST</Label> **/sklearn/predict/** Expects the input data (observations) to be passed as argument to
+  predict their output.
 
-Check the documentation at **http://127.0.0.1:8000/docs/**, and you'll see now something like:
+Check the documentation at **http://127.0.0.1:8000/docs/**, you should see something like:
 
 <Image src="/images/docs/docs-mlapi-sklearn.png" alt="docs-mlapi-sklearn" width="1600" height="925" />
 
 ### TensorFlow
 
+As we probably are guessing, we can add TensorFlow modesl by adding the following lines to the base application:
+
 ```python
-import typing
-
-from flama import Flama
-
-app = Flama()
-
 app.models.add_model(
-    path="/tf_model",
-    model="path/to/your_model_file.flm",
-    name="name_of_the_tf_model",
+    path="/tensorflow/",
+    model="examples/tensorflow_model.flm",
+    name="tensorflow-neural-network",
 )
 ```
 
-If you run this code, you will get an API with the following endpoints:
+Right after adding and saving the document, we should see the reloading of the application happening on our terminal,
+something like:
 
-- **GET /tf_model**: Returns _resource_, i.e. the schema with `get_params()`
-- **POST /tf_model/predict**: Returns prediction of model
+```commandline
+...
+WARNING:  WatchFiles detected changes in 'examples/add_models.py'. Reloading...
+INFO:     Started server process [48286]
+INFO:     Waiting for application startup.
+
+Starting up the ML API...
+
+INFO:     Application startup complete.
+```
+
+Just like it happened with the scikit-learn model, our tensorflow models will automatically have associated the
+following endpoints:
+
+- <Label color="green">GET</Label> **/tensorflow/** Returns the model resource, i.e. the model hyper-parameter's schema which
+  would be obtained with the method **to_json()**.
+- <Label color="blue">POST</Label> **/tensorflow/predict/** Expects the input data (observations) to be passed as argument
+  to predict their output.
+
+Check the documentation at **http://127.0.0.1:8000/docs/**, you should see something like:
+
+<Image src="/images/docs/docs-mlapi-sklearn.png" alt="docs-mlapi-sklearn" width="1600" height="925" />
 
 ### PyTorch
 
+As we can expect, there is no difference in adding PyTorch models to the already running application:
+
 ```python
-import typing
-
-from flama import Flama
-
-app = Flama()
-
 app.models.add_model(
-    path="/torch_model",
-    model="path/to/your_model_file.flm",
-    name="name_of_the_torch_model",
+    path="/pytorch/",
+    model="examples/pytorch_model.flm",
+    name="pytorch-model",
 )
 ```
 
-- **GET /torch_model**: Returns _resource_, i.e. the schema with `get_params()`
-- **POST /torch_model/predict**: Returns prediction of model
+Right after adding and saving the document, we should see the reloading of the application happening on our terminal,
+something like:
+
+```commandline
+...
+WARNING:  WatchFiles detected changes in 'examples/add_models.py'. Reloading...
+INFO:     Started server process [48286]
+INFO:     Waiting for application startup.
+
+Starting up the ML API...
+
+INFO:     Application startup complete.
+```
+
+Just like it happened with the scikit-learn model, and with the TensorFlow model, our PyTorch models will automatically
+have associated the following endpoints:
+
+- <Label color="green">GET</Label> **/pytorch/** Returns the model resource, i.e. the model hyper-parameter's schema which
+  would be obtained with the following code:
+
+  ```python
+  {
+    "modules": [str(x) for x in self.model.modules()],
+    "parameters": {k: str(v) for k, v in self.model.named_parameters()},
+    "state": self.model.state_dict(),
+  }
+  ```
+
+- <Label color="blue">POST</Label> **/pytorch/predict/** Expects the input data (observations) to be passed as argument to
+  predict their output.
+
+Check the documentation at **http://127.0.0.1:8000/docs/**, you should see something like:
+
+<Image src="/images/docs/docs-mlapi-sklearn.png" alt="docs-mlapi-sklearn" width="1600" height="925" />
 
 ### Multiple models
 
+A great advantage of the **models** module is that it can store as many models as we need. Thus, if we want to serve the
+three models of our prior examples at once, we only need to put together the three examples of **add_model**, as
+follows:
+
 ```python
-import typing
+from flama import Flama, Route
 
-from flama import Flama
 
-app = Flama()
+class AppStatus:
+    loaded = False
 
-app.models.add_model(
-    path="/torch_model",
-    model="path/to/your_model_file.flm",
-    name="name_of_the_torch_model",
+
+def startup():
+    print("\nStarting up the ML API...\n")
+    # Here, whatever action we want to be run at the startup of the application
+    AppStatus.loaded = True
+
+
+def shutdown():
+    print("\nShutting down the ML API...\n")
+    # Here, whatever action we want to be run at the shutdown of the application
+
+
+def home():
+    """
+    tags:
+        - Home
+    summary:
+        Returns readiness message
+    description:
+        The function returns a readiness message in which the global variable AppStatus.loaded is shown.
+        If the 'on_startup' function has worked as expected, the message will show the 'loaded' variable as True.
+        Else, it'll show the variable as 'False'
+    """
+    return f"The API is ready. Loaded = {AppStatus.loaded}"
+
+
+def user_me():
+    """
+    tags:
+        - User
+    summary:
+        Returns hello 'John Doe'
+    description:
+        The function returns the plain-text message "Hello John Doe"
+    """
+    username = "John Doe"
+    return f"Hello {username}"
+
+
+def user(username: str):
+    """
+    tags:
+        - User
+    summary:
+        Returns hello 'username'
+    description:
+        The function returns the plain-text message "Hello 'username'" where the 'username' is the user specified as
+        query parameter.
+    """
+    return f"Hello {username}"
+
+
+app = Flama(
+    title="Flama ML",
+    version="0.1.0",
+    description="Machine learning API using Flama 🔥",
+    routes=[
+        Route("/", home),
+        Route('/user/me', user_me),
+        Route('/user/{username}', user),
+    ],
+    on_startup=[startup],
+    on_shutdown=[shutdown]
 )
 
-app.models.add_model(
-    path="/sk_model",
-    model="path/to/your_model_file.flm",
-    name="name_of_the_sk_model",
-)
 
 app.models.add_model(
-    path="/tf_model",
-    model="path/to/your_model_file.flm",
-    name="name_of_the_tf_model",
+    path="/sklearn/",
+    model="examples/sklearn_model.flm",
+    name="logistic-regression",
+)
+
+
+app.models.add_model(
+    path="/tensorflow/",
+    model="examples/tensorflow_model.flm",
+    name="tensorflow-neural-network",
+)
+
+
+app.models.add_model(
+    path="/pytorch/",
+    model="examples/pytorch_model.flm",
+    name="pytorch-model",
 )
 ```
 
-- **GET /tf_model**: Returns _resource_, i.e. the schema with `get_params()`
-- **POST /tf_model/predict**: Returns prediction of model
-- **GET /sk_model**: Returns _resource_, i.e. the schema with `get_params()`
-- **POST /sk_model/predict**: Returns prediction of model
-- **GET /torch_model**: Returns _resource_, i.e. the schema with `get_params()`
-- **POST /torch_model/predict**: Returns prediction of model
+If we run this example, our <FlamaName/> app will have the following endpoints:
 
-**Remark**: Show SWAGGER docs for all combinations
+- <Label color="green">GET</Label> **/**: Returns a readiness message in which the global variable AppStatus.loaded is shown.
+  If the 'on_startup' function has worked as expected, the message will show the 'loaded' variable as True. Else, it'll show
+  the variable as 'False'
+- <Label color="green">GET</Label> **/user/me/**: Returns the plain-text message "Hello John Doe"
+- <Label color="green">GET</Label> **/user/\{username\}/**: Returns the plain-text message "Hello 'username'" where the
+      'username' is the user specified as query parameter
+- <Label color="green">GET</Label> **/sklearn/**: Returns the representation of the model resource, i.e. a JSON with all
+  the hyper-parameters of the model
+- <Label color="blue">POST</Label> **/sklearn/predict/**: Returns a ScikitLearn model prediction when provided with an input
+  data array via **--data**
+- <Label color="green">GET</Label> **/tensorflow/**: Returns the representation of the model resource, i.e. a JSON with all
+  the hyper-parameters of the model
+- <Label color="blue">POST</Label> **/tensorflow/predict/**: Returns a TensorFlow model prediction when provided with an
+  input data array via **--data**
+- <Label color="green">GET</Label> **/pytorch/**; Returns the representation of the model resource, i.e. a JSON with all
+  the hyper-parameters of the model
+- <Label color="blue">POST</Label> **/pytorch/predict/**: Returns a PyTorch model prediction when provided with an input
+  data array via **--data**
