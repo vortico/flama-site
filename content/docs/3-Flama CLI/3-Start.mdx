@@ -46,18 +46,18 @@ The best way to start with definition files is by example. For this purpose, you
 This command line will produce a simple definition file which will be stored in your current folder as `flama.json`.
 Let's dig into it a bit:
 
-```JSON
+```json
 {
-    "dev": false,
-    "app": {
-        "title": "API title",
-        "version": "0.1.0",
-        "description": "API description",
-        "schema": "/schema/",
-        "docs": "/docs/",
-        "models": [{"url": "/model-url/", "path": "model-path.flm", "name": "model-name"}]
-    },
-    "server": {"host": "127.0.0.1", "port": 8000}
+  "dev": false,
+  "app": {
+    "title": "API title",
+    "version": "0.1.0",
+    "description": "API description",
+    "schema": "/schema/",
+    "docs": "/docs/",
+    "models": [{ "url": "/model-url/", "path": "model-path.flm", "name": "model-name" }]
+  },
+  "server": { "host": "127.0.0.1", "port": 8000 }
 }
 ```
 
