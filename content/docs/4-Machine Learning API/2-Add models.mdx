@@ -400,11 +400,11 @@ If we run this example, our <FlamaName/> app will have the following endpoints:
   the variable as 'False'
 - <Label color="green">GET</Label> **/user/me/**: Returns the plain-text message "Hello John Doe"
 - <Label color="green">GET</Label> **/user/\{username\}/**: Returns the plain-text message "Hello 'username'" where the
-  'username' is the user specified as query parameter
+'username' is the user specified as query parameter
 - <Label color="green">GET</Label> **/sklearn/**: Returns the representation of the model resource, i.e. a JSON with all
   the hyper-parameters of the model
 - <Label color="blue">POST</Label> **/sklearn/predict/**: Returns a ScikitLearn model prediction when provided with an input
-  data array via **--data**
+  data array (via **--data**
 - <Label color="green">GET</Label> **/tensorflow/**: Returns the representation of the model resource, i.e. a JSON with all
   the hyper-parameters of the model
 - <Label color="blue">POST</Label> **/tensorflow/predict/**: Returns a TensorFlow model prediction when provided with an

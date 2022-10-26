@@ -111,10 +111,11 @@ Usage: flama run [OPTIONS] FLAMA_APP
   command line, or by environment variable.
 
 Options:
+  --dev                           Development mode.
   --host TEXT                     Bind socket to this host.  [default:
                                   127.0.0.1]
   --port INTEGER                  Bind socket to this port.  [default: 8000]
-  --dev                           Development mode (enables auto-reload).
+  --reload                        Enable auto-reload.
   --uds TEXT                      Bind to a UNIX domain socket.
   --fd INTEGER                    Bind to socket from this file descriptor.
   --reload-dir PATH               Set reload directories explicitly, instead
