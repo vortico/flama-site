@@ -21,19 +21,14 @@ model via the URL which is specified as parameter **path**. Here, interacting me
   represented via the model-predict URL, e.g. <Label color="blue">POST</Label> **http://127.0.0.1/sklearn/predict/** for
   the same example.
 
-This means, when we serve/add models, <FlamaName/> takes care of
-
---
-
-Adding models to a <FlamaName /> App in the way introduced in the
-[previous section](/docs/machine-learning-api/add-models) involves the creation of a `Resource` object (specifically, a
-`ModelResource`) automatically for you, which represents an API resource, in the REST sense of the word. This
-`ModelResource` defines the default way of interaction with the ML model itself by providing **predict** and **inspect**
-(P&I) methods.
+This means, when we serve/add models, <FlamaName/> takes care of creating a **Resource** object per model automatically,
+specifically a **ModelResource** object, which represents an API resource in the REST sense of the word. This object
+defines the default way of interaction with the model itself by providing the methods just mentioned. A more thorough
+discussion about the **Resource** class and its children classes can be found in [here](/docs/api-reference/resource).
 
 However, the convenience of `add_models` might not be sufficient for your purposes for the following reasons:
 
-- You need to customise the P&I methods
+- You need to customise the default methods
 - You need to define new methods for the resource
 
 In what follows you will learn how to add model resources in a more customised way with the class `ModelResource`.
