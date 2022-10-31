@@ -3,8 +3,6 @@ title: Packaging models
 wip: false
 ---
 
-## Introduction
-
 Any machine-learning model built using one of the mainstream data-science frameworks, e.g.
 [Scikit-Learn](https://scikit-learn.org/stable/), [TensorFlow](https://www.tensorflow.org/) or
 [PyTorch](https://pytorch.org/), can be served using <FlamaName/>. This, indeed, is what we have been explaining in the
@@ -39,6 +37,7 @@ which will have to eventually _unpickle_ (i.e., using **pickle.load**) the objec
 seems like a very repetitive and boring task, doesn't it?
 
 As we have seen already when we introduced [serve](/docs/flama-cli/serve) and [start](/docs/flama-cli/start),
+
 <FlamaName /> comes equipped with a very convenient CLI which does all the boring part for you seamlessly, just with a
 single line of code. For this, we only need our models to be packaged with the <FlamaName /> counterparts of pickle's
 dump and load commands, namely: **flama.dump** and **flama.load**.

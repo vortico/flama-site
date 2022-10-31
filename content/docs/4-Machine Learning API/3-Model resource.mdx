@@ -3,6 +3,28 @@ title: Model resources
 wip: true
 ---
 
+Thus far we have shown how to [package models](/docs/machine-learning-api/packaging-models) in order to
+[add them](/docs/machine-learning-api/) to a <FlamaName/> App. The way in which ML models are added or what they
+represent internally was not discussed in detail before, as that was not necessary for the purpose of previous sections.
+However, it should be no surprise for us, _something_ happens under the hood when we add models. And, that "something"
+is responsible for making the model object(s) accessible via HTTP request to certain URL(s). When we serve/add models
+either by CLI **serve/start** or by using the syntax **app.models.add_model** we get the ability of interacting with the
+model via the URL which is specified as parameter **path**. Here, interacting means:
+
+- Obtaining a **JSON** representation of the model added, which contains all the parameters uniquely defining the model.
+  We obtain this **JSON** representation by simply running a **GET** request to the model URL, e.g.
+
+  <Label color="green">GET</Label> **http://127.0.0.1/sklearn/** for one of our examples.
+
+- Obtaining predictions from the model added, which requires us to send the input data on which predictions will be run.
+  We get such predictions via a **POST** requests with a data payload to the method predict of the model which is
+  represented via the model-predict URL, e.g. <Label color="blue">POST</Label> **http://127.0.0.1/sklearn/predict/** for
+  the same example.
+
+This means, when we serve/add models, <FlamaName/> takes care of
+
+--
+
 Adding models to a <FlamaName /> App in the way introduced in the
 [previous section](/docs/machine-learning-api/add-models) involves the creation of a `Resource` object (specifically, a
 `ModelResource`) automatically for you, which represents an API resource, in the REST sense of the word. This
