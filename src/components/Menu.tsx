@@ -5,6 +5,7 @@ import { Bars3Icon, MagnifyingGlassIcon, XMarkIcon } from '@heroicons/react/24/o
 import { SearchButton } from '@/components/Search'
 import React, { useCallback, useState } from 'react'
 import { createPortal } from 'react-dom'
+import Tooltip from '@/components/Tooltip'
 
 function Logo() {
   return (
@@ -44,6 +45,9 @@ function SocialList() {
         aria-label="Flama on Github"
       >
         <GithubIcon className="h-5 w-5 lg:h-6 lg:w-6" />
+        <Tooltip orientation="bottom-left" className="animate-pulse">
+          <div className="whitespace-nowrap p-3 text-left text-sm font-semibold text-primary-100 ">Gift me a ⭐ !</div>
+        </Tooltip>
       </a>
     </>
   )
