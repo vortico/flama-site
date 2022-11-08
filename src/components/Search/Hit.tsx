@@ -32,16 +32,15 @@ export function Hit({ hit, children }: HitProps) {
   }
 
   return (
-    <Link href={url}>
-      <a
-        className={`${hit.__is_result?.() ? 'DocSearch-Hit--Result' : ''} ${
-          hit.__is_parent?.() ? 'DocSearch-Hit--Parent' : ''
-        } ${hit.__is_first?.() ? 'DocSearch-Hit--FirstChild' : ''} ${
-          hit.__is_last?.() ? 'DocSearch-Hit--LastChild' : ''
-        } ${hit.__is_child?.() ? 'DocSearch-Hit--Child' : ''}`}
-      >
-        {children}
-      </a>
+    <Link
+      href={url}
+      className={`${hit.__is_result?.() ? 'DocSearch-Hit--Result' : ''} ${
+        hit.__is_parent?.() ? 'DocSearch-Hit--Parent' : ''
+      } ${hit.__is_first?.() ? 'DocSearch-Hit--FirstChild' : ''} ${
+        hit.__is_last?.() ? 'DocSearch-Hit--LastChild' : ''
+      } ${hit.__is_child?.() ? 'DocSearch-Hit--Child' : ''}`}
+    >
+      {children}
     </Link>
   )
 }

@@ -6,7 +6,7 @@ import Link from '@/components/Link'
 import { H1, H2, H3, H4, H5, H6 } from '@/components/mdx/header'
 import { Code, Pre } from '@/components/mdx/code'
 import { ComponentType } from 'react'
-import Image from 'next/image'
+import Image from 'next/legacy/image'
 
 export interface MDXComponentProps {
   code: string

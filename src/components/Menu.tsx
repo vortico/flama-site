@@ -8,11 +8,9 @@ import { createPortal } from 'react-dom'
 
 function Logo() {
   return (
-    <Link href="/">
-      <a className="flex items-center justify-start gap-2 text-brand-500" aria-label="Flama logo">
-        <FlamaIcon className="h-5 w-5 lg:h-6 lg:w-6" />
-        <span className="text-xl lg:text-2xl">Flama</span>
-      </a>
+    <Link href="/" className="flex items-center justify-start gap-2 text-brand-500" aria-label="Flama logo">
+      <FlamaIcon className="h-5 w-5 lg:h-6 lg:w-6" />
+      <span className="text-xl lg:text-2xl">Flama</span>
     </Link>
   )
 }
@@ -27,8 +25,8 @@ function NavList({ ...props }: React.ComponentProps<'ul'>) {
     <ul {...props}>
       {entries.map((entry) => (
         <li key={entry.href}>
-          <Link href={entry.href}>
-            <a className="block hover:text-brand-500 dark:hover:text-brand-400">{entry.title}</a>
+          <Link href={entry.href} className="block hover:text-brand-500 dark:hover:text-brand-400">
+            {entry.title}
           </Link>
         </li>
       ))}
@@ -42,7 +40,7 @@ function SocialList() {
       <ThemeModeSwitcher className="h-5 w-5 text-primary-400 hover:text-primary-500 dark:text-primary-600 dark:hover:text-primary-500 md:h-6 md:w-6" />
       <a
         href="https://github.com/perdy/flama"
-        className="block text-primary-400 hover:text-primary-500 dark:text-primary-600 dark:hover:text-primary-500"
+        className="relative block text-primary-400 hover:text-primary-500 dark:text-primary-600 dark:hover:text-primary-500"
         aria-label="Flama on Github"
       >
         <GithubIcon className="h-5 w-5 lg:h-6 lg:w-6" />
