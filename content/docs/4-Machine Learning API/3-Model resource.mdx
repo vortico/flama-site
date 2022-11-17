@@ -35,9 +35,13 @@ In what follows you will learn how to add model resources in a more customised w
 
 ## The ModelResource class
 
-### Predict
+The best way to learn how to implement your own model resources is by example, as we've been doing so far with previous
+concepts. In particular, we are going to start implementing the endpoints **/predict/** and **/inspect/**, which come by
+default when using the tools seen so far to serve/add models automatically. With these two examples we will better
+understand the _magic_ happening under the hood when using either the CLI **serve/start**, or the method
+**app.models.add_model**. Then, we will show an example where ..
 
-Explain the following meta-example:
+### Predict
 
 ```python
 class MyModel(ModelResource, metaclass=ModelResourceType):
