@@ -18,7 +18,7 @@ export function Code({ children, className }: React.ComponentProps<'code'>) {
       <CodeInline code={code} language={language as Language} />
     </span>
   ) : (
-    <div className="not-prose max-h-80">
+    <div className="not-prose">
       <CodeBlock code={code} language={language as Language} lineNumbers={language !== 'commandline'} />
     </div>
   )
