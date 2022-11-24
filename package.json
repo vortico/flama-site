@@ -72,7 +72,6 @@
   "prettier": {
     "singleQuote": true,
     "semi": false,
-    "proseWrap": "always",
     "printWidth": 120
   },
   "eslintConfig": {

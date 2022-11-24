@@ -12,13 +12,12 @@ either by CLI **serve/start** or by using the syntax **app.models.add_model** we
 model via the URL which is specified as parameter **path**. Here, interacting means:
 
 - Obtaining a **JSON** representation of the model added, which contains all the parameters uniquely defining the model.
-  We obtain this **JSON** representation by simply running a **GET** request to the model URL, e.g.
-
-  <Label color="green">GET</Label> **http://127.0.0.1/sklearn/** for one of our examples.
+  We obtain this **JSON** representation by simply running a <Label color="green">GET</Label> request to the model URL, e.g.
+  **http://127.0.0.1/sklearn/** for one of our examples.
 
 - Obtaining predictions from the model added, which requires us to send the input data on which predictions will be run.
-  We get such predictions via a **POST** requests with a data payload to the method predict of the model which is
-  represented via the model-predict URL, e.g. <Label color="blue">POST</Label> **http://127.0.0.1/sklearn/predict/** for
+  We get such predictions via a <Label color="blue">POST</Label> requests with a data payload to the method predict of the model which is
+  represented via the model-predict URL, e.g. **http://127.0.0.1/sklearn/predict/** for
   the same example.
 
 This means, when we serve/add models, <FlamaName/> takes care of creating a **Resource** object per model automatically,
@@ -36,10 +35,71 @@ In what follows you will learn how to add model resources in a more customised w
 ## The ModelResource class
 
 The best way to learn how to implement your own model resources is by example, as we've been doing so far with previous
-concepts. In particular, we are going to start implementing the endpoints **/predict/** and **/inspect/**, which come by
-default when using the tools seen so far to serve/add models automatically. With these two examples we will better
-understand the _magic_ happening under the hood when using either the CLI **serve/start**, or the method
-**app.models.add_model**. Then, we will show an example where ..
+concepts. For this reason, we are going to re-implement the endpoints **/predict/** and **/inspect/** (which come by
+default when using the tools seen before to serve/add models automatically) as a good starting point to showcase the
+steps and ingredients required. With these two examples you will develop a better understanding of the _magic_ which
+happens under the hood when using either the CLI **serve/start**, or the method **app.models.add_model**.
+After these examples, you'll learn how to implement a custom method to be served as an endpoint, together with
+the built-ins provided by default (actually, via the [metaclass](https://docs.python.org/3/reference/datamodel.html#metaclasses) **ModelResourceType**).
+
+### Preamble
+
+The first step (let's call it _preamble_) is to prepare our <FlamaName/> **app**, and all the ingredients needed to be
+able to add custom model resources. This is exactly what you have here:
+
+```python
+# Standard import:
+from flama import Flama
+
+# New imports (not seen so far):
+from flama.models import ModelResource, ModelResourceType
+from flama.resources import resource_method
+
+# Flama app instantiation:
+app = Flama(
+    title="Flama ML",
+    version="0.1.0",
+    description="Machine learning API using Flama 🔥",
+)
+
+# Model resources will be added here:
+...
+
+# In case we want to make it a runnable script:
+if __name__ == "__main__":
+    flama.run(flama_app="__main__:app", server_host="0.0.0.0", server_port=8080, server_reload=True)
+```
+
+As can be seen, there are three ingredients imported which we haven't seen yet, namely:
+
+- **ModelResource**: This is a <FlamaName /> built-in class which derives from the most fundamental resource
+  class **BaseResource**. These classes can be seen as the interface that any custom model class will need to adhere
+  to. In case you're not familiar with the interface design pattern, we like the definition given by [RealPython](https://realpython.com/python-interface/):
+
+  > At a high level, an interface acts as a blueprint for designing classes.
+  > Like classes, interfaces define methods. Unlike classes, these methods are abstract.
+  > An abstract method is one that the interface simply defines. It doesn’t implement the methods.
+  > This is done by classes, which then implement the interface and give concrete meaning to the interface’s abstract methods.
+
+- **ModelResourceType**: This is a <FlamaName /> built-in metaclass which derives from the most fundamental
+  resource type metaclass **ResourceType**. The concept of metaclass is a bit less intuitive, and some highly
+  recognised pythonists recommend to avoid them:
+
+  > Metaclasses are deeper magic than 99% of users should ever worry about. If you wonder whether you need them,
+  > you don’t (the people who actually need them know with certainty that they need them, and don’t need an
+  > explanation about why).
+  >
+  > - Tim Peters
+
+  We agree with such a claim, which is why you won't need to worry about them, apart from having to import the
+  **ModelResourceType**, and use it as an argument when building your custom model class.
+
+- **resource_method**: This is a <FlamaName /> built-in decorator which allows us to convert a given class method into
+  an **app** endpoint, with the following main arguments:
+
+  - **path**: Route path.
+  - **methods**: HTTP methods available.
+  - **name**: Route name
 
 ### Predict
 
@@ -115,6 +175,12 @@ class MySKLearnModel(ModelResource, metaclass=ModelResourceType):
 ```
 
 ## Examples
+
+As customary already, we will be using the example FLM files generated in the previous section, namely:
+
+- [Scikit Learn model](/models/sklearn_model.flm)
+- [TensorFlow model](/models/tensorflow_model.flm)
+- [PyTorch model](/models/pytorch_model.flm)
 
 ### PyTorch
 
