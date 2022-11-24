@@ -49,6 +49,7 @@ able to add custom model resources. This is exactly what you have here:
 
 ```python
 # Standard import:
+import flama
 from flama import Flama
 
 # New imports (not seen so far):
@@ -97,9 +98,9 @@ As can be seen, there are three ingredients imported which we haven't seen yet, 
 - **resource_method**: This is a <FlamaName /> built-in decorator which allows us to convert a given class method into
   an **app** endpoint, with the following main arguments:
 
-  - **path**: Route path.
-  - **methods**: HTTP methods available.
-  - **name**: Route name
+  - **path**: Route path through which we'll be able to call the decorated method, e.g. **/predict/**
+  - **methods**: HTTP methods associated with the endpoint, e.g. **GET** or **POST**
+  - **name**: Name which uniquely determines the route being added to the **app**.
 
 ### Predict
 
