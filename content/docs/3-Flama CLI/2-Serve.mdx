@@ -69,7 +69,7 @@ As you can see, the documentation page not only gives you a handy way to interac
 available, but also gives you the equivalent `curl` statement. For instance, in order to get the schema of the model:
 
 ```commandLine
-$ curl --request GET \
+> curl --request GET \
   --url http://127.0.0.1:8000/ \
   --header 'Content-Type: application/json'
 
@@ -97,7 +97,7 @@ Or, in case we want to make a prediction:
 <Image src="/images/docs/docs-predict-post.png" alt="docs-post-predict" width="1600" height="760" />
 
 ```commandLine
-curl --request POST \
+> curl --request POST \
   --url http://127.0.0.1:8000/predict/ \
   --header 'Content-Type: application/json' \
   --data '{"input": [[1,2,3], [1,2,3]]}'
