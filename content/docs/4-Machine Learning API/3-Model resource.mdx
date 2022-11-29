@@ -63,8 +63,8 @@ app = Flama(
     description="Machine learning API using Flama 🔥",
 )
 
-# Model resources will be added here:
-...
+# Model resources will be added here
+# ( ... code ... )
 
 # In case we want to make it a runnable script:
 if __name__ == "__main__":
@@ -104,16 +104,87 @@ As can be seen, there are three ingredients imported which we haven't seen yet, 
 
 ### Predict
 
-```python
-class MyModel(ModelResource, metaclass=ModelResourceType):
-    name = "my_model"
-    verbose_name = "My ML model"
-    model_path = "path/to/your_model_file.flm"
+We can start with one of the endpoints given for granted when using the tools showed in previous
+sections, namely **/predict/**. The way in which we build our own model resource is very
+straightforward, we only need to use the following pattern:
 
+```python
+# FIXME: Missing schemas
+
+class MySKModel(ModelResource, metaclass=ModelResourceType):
+    # special names:
+    verbose_name = "My ScikitLearn Model"
+    model_path = "sklearn_model.flm"
+    name = "sk_model"
+
+    # FIXME: Missing types
+    #       This won't work, but it's almost correct
     @resource_method("/predict", methods=["POST"], name="model-predict")
-    def predict(self, x):
-        return self.model.predict(x).tolist()
+    def predict(self, data):
+        return self.model.predict(data)
 ```
+
+As we already said, this example is not functional (just yet). However, it contains a good
+amount of the pieces required, so we can start talking about these ingredients:
+
+- **MySKModel(ModelResource, metaclass=ModelResourceType)**: The very first thing needed is to
+  create our own model-resource class, which means inheriting from **ModelResource**. However,
+  that's only the interface, and we also need some extra magic which lives in the metaclass **ModelResourceType**.
+  Only with these two ingredients, your model-resource class will be <FlamaName /> compliant.
+
+- **Special attribute names**: These three attributes are mandatory for several purposes.
+  The attribute **model_path** specifies where to find the binary file with the model,
+  **verbose_name** defines a tag for the documentation, and **name** is used only internally,
+  but required to uniquely identify the resource being added.
+
+- **@resource_method**: The first argument determines the path associated to the method which
+  the decorator accompanies to, e.g. **/predict/**. It also receives as parameter **methods**,
+  which refers to the request methods to which this endpoint responds to (e.g. **POST**),
+  and **name**, a parameter used internally to uniquely identify this endpoint.
+
+It's time to know why we said the previous example won't work: it's all due to missing types and schemas.
+
+<FlamaName /> is a strongly-typed-and-schema-specific framework. Wait, what? This only means that we need to provide the
+schema type of the input and output arguments if we want any method to be <FlamaName /> compliant, and such schemas need
+to be registered schemas in the **app**.
+
+What do we need to make this example a working example? Let's check what the correct example
+look like:
+
+```python
+# Definition of input (X) and ouput (Y) schemas
+X = ts.Schema(fields={"input": ts.fields.Array()})
+Y = ts.Schema(fields={"output": ts.fields.Array()})
+
+# Registration of schemas:
+app.schema.register_schema("X", X)
+app.schema.register_schema("Y", Y)
+
+class MySKModel(ModelResource, metaclass=ModelResourceType):
+    # special names:
+    verbose_name = "My ScikitLearn Model"
+    model_path = "sklearn_model.flm"
+    name = "sk_model"
+
+    # Correct typed method with some documentation
+    @resource_method("/predict", methods=["POST"], name="model-predict")
+    def predict(self, data: X) -> Y:
+        """
+        tags:
+            - My ScikitLearn Model
+        summary:
+            Run predict method.
+        description:
+            This is a more detailed description of the predict method.
+        responses:
+            200:
+                description: ML model prediction.
+        """
+        return {"output": self.model.predict(data["input"])}
+```
+
+This example is fully functional, so you should be able to **flama-run** it after
+adding the previous code snippet to the code introduced in the preamble.
 
 ### Inspect
 
