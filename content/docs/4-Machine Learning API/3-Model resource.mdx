@@ -146,12 +146,13 @@ It's time to know why we said the previous example won't work: it's all due to m
 
 <FlamaName /> is a strongly-typed-and-schema-specific framework. Wait, what? This only means that we need to provide the
 schema type of the input and output arguments if we want any method to be <FlamaName /> compliant, and such schemas need
-to be registered schemas in the **app**.
+to be registered in the **app**.
 
-What do we need to make this example a working example? Let's check what the correct example
-look like:
+What do we need to make this example a working example? Let's see what the correct code looks like:
 
 ```python
+import typesystem as ts
+
 # Definition of input (X) and ouput (Y) schemas
 X = ts.Schema(fields={"input": ts.fields.Array()})
 Y = ts.Schema(fields={"output": ts.fields.Array()})
@@ -167,7 +168,7 @@ class MySKModel(ModelResource, metaclass=ModelResourceType):
     name = "sk_model"
 
     # Correct typed method with some documentation
-    @resource_method("/predict", methods=["POST"], name="model-predict")
+    @resource_method("/predict/", methods=["POST"], name="model-predict")
     def predict(self, data: X) -> Y:
         """
         tags:
@@ -183,12 +184,36 @@ class MySKModel(ModelResource, metaclass=ModelResourceType):
         return {"output": self.model.predict(data["input"])}
 ```
 
-This example is fully functional, so you should be able to **flama-run** it after
-adding the previous code snippet to the code introduced in the preamble.
+You will notice the following changes:
+
+- **typesystem.Schema**s: We've added two schemas to define the data type of the input and the output. We have
+  used _typesystem_ for this purpose. If you don't remember how this python package got there, go back to
+  [Quickstart](/docs/getting-started/quickstart). Also, remember that <FlamaName /> is also compatible with
+  **Marshmallow**. For more information about how to define schemas, we refer to their official documentation
+  websites: [typesystem](https://www.encode.io/typesystem/), and [marshmallow](https://marshmallow.readthedocs.io/en/stable/),
+  respectively.
+
+- **app.schema.register_schema**: These lines appear right after the definition of our schemas, and they are intended
+  to register the new data schemas in the **app**. This makes possible the automatic identification of body
+  arguments in request, via the design pattern known as [dependency injection](https://en.wikipedia.org/wiki/Dependency_injection).
+  The finer details on how this happens are left aside (we recommend the curious developer to dive into the code,
+  taking advantage of the open code). In layman's terms, thanks to the registration of these schemas, <FlamaName />
+  will be in charge of identifying what's what when a request comes accompanied by data by analysing the schema
+  of the input data.
+
+- **predict(self, data: X) -> Y**: Type hinting is mandatory, and (as we just mentioned) plays a key role in the
+  dependency injection responsible for identifying and type-checking incoming data.
+
+Finally, we can put all these pieces together and get a fully functional code. Thus, you should now be able to
+**flama-run** it (this is how we _read_ the `flama run command line) after adding the previous code snippet
+to the code introduced in the preamble. Or, if you prefer, you can get the full example from
+[here](https://github.com/perdy/flama/blob/develop/examples/add_model_resource.py).
 
 ### Inspect
 
-Explain the following meta-example:
+It shouldn't be a surprise that the other endpoint we got for free before, i.e. <Label color="green">GET</Label> **/**,
+is completely analogous to the previous example. In the following code, we introduce a reimplementation of such method
+under a different route in order to be able to compare both:
 
 ```python
 class MyModel(ModelResource, metaclass=ModelResourceType):
@@ -196,14 +221,24 @@ class MyModel(ModelResource, metaclass=ModelResourceType):
     verbose_name = "My ML model"
     model_path = "path/to/your_model_file.flm"
 
-    @resource_method("/inspect", methods=["GET"], name="model-inspect")
-    def inspect(self) -> typing.Any:
-        return self.model.get_params()
+    @resource_method("/inspect/", methods=["GET"], name="model-inspect-model")
+    def inspect_model(self):
+        """
+        tags:
+            - My ScikitLearn Model
+        summary:
+            Get metadata info.
+        description:
+            This is a more detailed description of the method itself.
+        responses:
+            200:
+        """
+        return {"params": self.model.inspect()}
 ```
 
 ### Custom methods
 
-Explain the following meta-example:
+And, finally, let's add something completely custom:
 
 ```python
 class MyModel(ModelResource, metaclass=ModelResourceType):
@@ -211,11 +246,19 @@ class MyModel(ModelResource, metaclass=ModelResourceType):
     verbose_name = "My ML model"
     model_path = "path/to/your_model_file.flm"
 
-    @resource_method("/custom-method", methods=["GET"], name="model-custom-method")
-    def custom_method(self):
+    # custom attributes
+    info = {
+        "model_version": "1.0.0",
+        "library_version": "1.0.2",
+    }
+
+    @resource_method("/metadata/", methods=["GET"], name="metadata-method")
+    def metadata(self):
         """
+        tags:
+            - My ScikitLearn Model
         summary:
-            A custom method which returns the verbose name of the model.
+            Get metadata info.
         description:
             This is a more detailed description of the method itself.
             Here we can give all the details required and they will appear
@@ -224,7 +267,11 @@ class MyModel(ModelResource, metaclass=ModelResourceType):
             200:
                 description: Verbose name of the ML model.
         """
-        return {"name": self.verbose_name}
+
+        return {
+            "metadata": {"built-in": self._meta.verbose_name},
+            "custom": {**self.info, "date": datetime.now().date(), "time": datetime.now().time()},
+        }
 ```
 
 ## Adding the resource
