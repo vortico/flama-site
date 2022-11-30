@@ -1,6 +1,6 @@
 ---
 title: Model resources
-wip: true
+wip: false
 ---
 
 Thus far we have shown how to [package models](/docs/machine-learning-api/packaging-models) in order to
@@ -229,16 +229,20 @@ class MyModel(ModelResource, metaclass=ModelResourceType):
         summary:
             Get metadata info.
         description:
-            This is a more detailed description of the method itself.
+            This is a more detailed description of the method.
         responses:
             200:
+                description: ML model info.
         """
         return {"params": self.model.inspect()}
 ```
 
 ### Custom methods
 
-And, finally, let's add something completely custom:
+And, finally, let's add something completely custom to our model-resource. We will add a method to get information about the
+model itself, which is not part of the model's API. This is a good example of how to add custom methods to your model-resource.
+In particular, the method will return metadata information about the model, such as the name of the model,
+the version of the library used to train it, and the version of the model itself. The code is as follows:
 
 ```python
 class MyModel(ModelResource, metaclass=ModelResourceType):
@@ -260,42 +264,60 @@ class MyModel(ModelResource, metaclass=ModelResourceType):
         summary:
             Get metadata info.
         description:
-            This is a more detailed description of the method itself.
-            Here we can give all the details required and they will appear
-            automatically in the auto-generated docs.
+            This is a more detailed description of the method.
         responses:
             200:
-                description: Verbose name of the ML model.
+                description: ML model metadata.
         """
 
-        return {
-            "metadata": {"built-in": self._meta.verbose_name},
+        return {"metadata": {
+            "built-in": {"verbose_name": self._meta.verbose_name},
             "custom": {**self.info, "date": datetime.now().date(), "time": datetime.now().time()},
-        }
+        }}
 ```
 
 ## Adding the resource
 
+Despite that we have said that the previous code is enough to make our model-resource work, we still need to add it to the
+**app**. This can be done in two ways: explicitly or implicitly. The first one might seem more straightforward,
+and it is indeed, but it is also more verbose. The second one is more concise, and only requires the use of a decorator
+on top of the model-resource class definition. Let's see both ways:
+
 ### Explicit
 
 ```python
-class MySKLearnModel(ModelResource, metaclass=ModelResourceType):
+class MyModel(ModelResource, metaclass=ModelResourceType):
     ...
 
-app.models.add_model_resource(path="/model", resource=MySKLearnModel)
+app.models.add_model_resource(path="/my_model", resource=MyModel)
 ```
 
 ### Decorator
 
 ```python
 @app.models.model("/model")
-class MySKLearnModel(ModelResource, metaclass=ModelResourceType):
+class MyModel(ModelResource, metaclass=ModelResourceType):
     ...
+```
+
+With this, we have finished the implementation of our model resource. Now, we can run the app and test it. We can do so
+by either running the **app** directly from our editor, or by using the **flama run** command line.
+In the latter case, we can use the `--dev` flag to enable the development mode, which will allow us to use the interactive
+debugger in case of an error. The following code shows how to run the app using the **flama run** command line:
+
+```commandline
+> flama run add_model_resource:app --dev
 ```
 
 ## Examples
 
-As customary already, we will be using the example FLM files generated in the previous section, namely:
+So far, we have seen all the necessary steps to add a custom model resource to our **app**.
+In particular a **ScikitLearn** model-resource. However, we have not shown how to implement a **PyTorch** or **TensorFlow**
+resource. Actually, the steps are exactly the same for all.
+
+In the following, we show the template code related to the implementation of a custom model resource for the different
+libraries mentioned above. As customary already, we will be using the example FLM files generated in the previous section,
+namely:
 
 - [Scikit Learn model](/models/sklearn_model.flm)
 - [TensorFlow model](/models/tensorflow_model.flm)
@@ -304,40 +326,108 @@ As customary already, we will be using the example FLM files generated in the pr
 ### PyTorch
 
 ```python
-class MyTorchModel(ModelResource, metaclass=ModelResourceType):
-    name = "torch_model"
-    verbose_name = "PyTorch Model"
-    model_path = "path/to/your_model_file.flm"
+@app.models.model("/pytorch_model/")
+class PyTorchModel(ModelResource, metaclass=ModelResourceType):
+    name = "pythorch_model"
+    verbose_name = "PyTorch model"
+    model_path = "pytorch_model.flm"
 
-    @resource_method("/info", methods=["GET"], name="model-info")
-    def info(self):
-        return {"name": self.verbose_name}
+    info = {
+        "model_version": "1.0.0",
+        "library_version": "1.0.2",
+    }
+
+    @resource_method("/metadata/", methods=["GET"], name="pytorch-metadata")
+    def metadata(self):
+        """
+        tags:
+            - PyTorch model
+        summary:
+            Get metadata info.
+        description:
+            Method returning relevant metadata information.
+        responses:
+            200:
+                description: ML model metadata.
+        """
+
+        return {"metadata": {
+            "built-in": {"verbose_name": self._meta.verbose_name},
+            "custom": {**self.info, "date": datetime.now().date(), "time": datetime.now().time()},
+        }}
 ```
 
 ### Scikit-Learn
 
 ```python
-class MySKLearnModel(ModelResource, metaclass=ModelResourceType):
-    name = "sk_model"
-    verbose_name = "SK-Learn Model"
-    model_path = "path/to/your_model_file.flm"
+@app.models.model("/sklearn_model/")
+class SKLearnModel(ModelResource, metaclass=ModelResourceType):
+    name = "pythorch_model"
+    verbose_name = "ScikitLearn model"
+    model_path = "sklearn_model.flm"
 
-    @resource_method("/info", methods=["GET"], name="model-info")
-    def info(self):
-        return {"name": self.verbose_name}
+    info = {
+        "model_version": "1.0.0",
+        "library_version": "1.0.2",
+    }
+
+    @resource_method("/metadata/", methods=["GET"], name="sklearn-metadata")
+    def metadata(self):
+        """
+        tags:
+            - ScikitLearn model
+        summary:
+            Get metadata info.
+        description:
+            Method returning relevant metadata information.
+        responses:
+            200:
+                description: ML model metadata.
+        """
+
+        return {"metadata": {
+            "built-in": {"verbose_name": self._meta.verbose_name},
+            "custom": {**self.info, "date": datetime.now().date(), "time": datetime.now().time()},
+        }}
 ```
 
 ### TensorFlow
 
 ```python
-class MySKLearnModel(ModelResource, metaclass=ModelResourceType):
-    name = "tf_model"
-    verbose_name = "TensorFlow Model"
-    model_path = "path/to/your_model_file.flm"
+@app.models.model("/tensorflow_model/")
+class SKLearnModel(ModelResource, metaclass=ModelResourceType):
+    name = "tensorflow_model"
+    verbose_name = "TensorFlow model"
+    model_path = "tensorflow_model.flm"
 
-    @resource_method("/info", methods=["GET"], name="model-info")
-    def info(self):
-        return {"name": self.verbose_name}
+    info = {
+        "model_version": "1.0.0",
+        "library_version": "1.0.2",
+    }
+
+    @resource_method("/metadata/", methods=["GET"], name="tensorflow-metadata")
+    def metadata(self):
+        """
+        tags:
+            - TensorFlow model
+        summary:
+            Get metadata info.
+        description:
+            Method returning relevant metadata information.
+        responses:
+            200:
+                description: ML model metadata.
+        """
+
+        return {"metadata": {
+            "built-in": {"verbose_name": self._meta.verbose_name},
+            "custom": {**self.info, "date": datetime.now().date(), "time": datetime.now().time()},
+        }}
 ```
 
-**Remark**: Show SWAGGER docs for all combinations
+Once you have your custom model resource implemented, you can run the app and test it. The best way to check that everything
+is working as expected is by navigating to the **/docs/** endpoint. This will show you the documentation of the **app**,
+as well as the documentation of the custom model resource. In the following, we show the documentation of the custom
+model resource for the **ScikitLearn** model:
+
+<Image src="/images/docs/doc-add-resources-final.png" alt="docs-addresource" width="1600" height="984" />
