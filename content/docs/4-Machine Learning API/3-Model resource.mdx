@@ -271,7 +271,7 @@ class MyModel(ModelResource, metaclass=ModelResourceType):
         """
 
         return {"metadata": {
-            "built-in": {"verbose_name": self._meta.verbose_name},
+            "built-in": {"verbose_name": self._meta.verbose_name, "name": self._meta.name},
             "custom": {**self.info, "date": datetime.now().date(), "time": datetime.now().time()},
         }}
 ```
@@ -352,7 +352,7 @@ class PyTorchModel(ModelResource, metaclass=ModelResourceType):
         """
 
         return {"metadata": {
-            "built-in": {"verbose_name": self._meta.verbose_name},
+            "built-in": {"verbose_name": self._meta.verbose_name, "name": self._meta.name},
             "custom": {**self.info, "date": datetime.now().date(), "time": datetime.now().time()},
         }}
 ```
@@ -386,7 +386,7 @@ class SKLearnModel(ModelResource, metaclass=ModelResourceType):
         """
 
         return {"metadata": {
-            "built-in": {"verbose_name": self._meta.verbose_name},
+            "built-in": {"verbose_name": self._meta.verbose_name, "name": self._meta.name},
             "custom": {**self.info, "date": datetime.now().date(), "time": datetime.now().time()},
         }}
 ```
@@ -420,7 +420,7 @@ class SKLearnModel(ModelResource, metaclass=ModelResourceType):
         """
 
         return {"metadata": {
-            "built-in": {"verbose_name": self._meta.verbose_name},
+            "built-in": {"verbose_name": self._meta.verbose_name, "name": self._meta.name},
             "custom": {**self.info, "date": datetime.now().date(), "time": datetime.now().time()},
         }}
 ```
