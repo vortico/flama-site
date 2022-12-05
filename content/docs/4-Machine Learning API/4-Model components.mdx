@@ -2,3 +2,38 @@
 title: Model components
 wip: true
 ---
+
+In the previous section we covered the fundamentals of building custom model resources. Understanding
+what model resources are, and how to use them, was the first step in building a custom model. We took
+advantage of the <FlamaName /> built-in's **ModelResource** and **ModelResourceType** to create a custom
+model resource that incorporated custom methods and exposed them as routes of our API,
+beyond the standard **/predict/** and **/inspect/** routes added by default when using <FlamaName /> CLI,
+or the syntax **app.models.add_model** (see the sections about [adding models](/docs/machine-learning-api/add-models#add-models) and
+[adding model resources](/docs/machine-learning-api/model-resource#adding-the-resource) for more details).
+
+```python
+class CustomModel(Model):
+    def inspect(self) -> typing.Any:
+        return self.model.__dict__
+
+    def predict(self, x: typing.Any) -> typing.Any:
+        return self.model.predict(x)
+
+
+class CustomModelComponent(ModelComponent):
+    def resolve(self) -> CustomModel:
+        return self.model
+
+
+component = CustomModelComponent(model)
+
+
+class CustomModelResource(ModelResource, metaclass=ModelResourceType):
+    name = "custom_model"
+    verbose_name = "Custom model"
+    component = component
+
+
+app.add_component(component)
+app.models.add_model_resource("/", CustomModelResource)
+```
