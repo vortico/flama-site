@@ -13,44 +13,81 @@ or the syntax **app.models.add_model** (see the sections about [adding models](/
 Without us knowing, when we created our custom model resource, <FlamaName /> added it as a _Component_
 of the application (specifically, as a _ModelComponent_). But, what is a component? And what is a model component?
 
-## What is a component?
+Before we dive into the details of the **ModelComponent** class, let's first understand what a **Component**
+and a **ModelComponent** represent within the context of a <FlamaName /> application. These are very important
+concepts, as they will help us understand how to extend the functionality of our application.
+Once we have a good understanding of these concepts, we will provide an example of how to build a
 
-<FlamaName /> **Component**s are the building blocks of an application. Components are an abstraction which allow us to
-isolate the logic required to create the objects needed by the application methods exposed as routes. Whenever an
-application route receives a request, it will call the corresponding method of the application which encapsulates the
-functionality responsible for yielding the desired response. Such functionality typically requires objects to be
-created, and these objects are created by the application components. Thus, Components permits us to isolate the logic
-which is not directly related to the application's business logic, and to reuse it across different application methods.
-Now, a natural question could be: "what are these objects that components create?". The answer is: They can be anything!
-They can be: a query parameter, a body, a database connection, a machine learning model, etc.
+<FlamaName /> application that uses a custom model component which incorporates a lazy loading mechanism. The example
+will show us the power of being able to control the finest details of our models.
 
-## What is a model component?
+- **What is a component?** <FlamaName /> **Components** are the building blocks of an application. Components are an abstraction which allow us to
+  isolate the logic required to create the objects needed by the application methods exposed as routes. Whenever an
+  application route receives a request, it will call the corresponding method of the application which encapsulates the
+  functionality responsible for yielding the desired response. Such functionality typically requires objects to be
+  created, and these objects are instantiated by the application **Components**. Thus, **Components** permits us to isolate
+  the logic that's not directly related to the application's business logic, and to reuse it across different application
+  methods. A natural question at this point could be: "what are these objects that components create?". The answer is: They can be anything!
+  They can be: a query parameter, a body, a database connection, a machine learning model, etc.
 
-(TBC)
+- **What is a model component?** One of the built-in components of <FlamaName /> is the **ModelComponent**. This component is responsible for creating
+  the objects that are required by the application methods in charge of handling the requests to (at least)
+  the **/predict/** and **/inspect/** routes. This means, whenever a request which requires an ML model is received
+  (e.g., to make a prediction, or to inspect the model), the **ModelComponent** will be resolving automatically the
+  creation of the corresponding ML model object. If you are asking yourself _what a lazy loading mechanism is_, here
+  is a brief explanation: A lazy loading mechanism is a mechanism that allows us to delay the creation of an object
+  until it is actually needed. This is useful when we want to avoid the overhead of creating an object that we might
+  For example, if we have a machine learning model that takes a long time to load, we might want to defer the creation
+  of the model until it is actually needed. This way, we can avoid the loading time of the model at the startup,
+  reducing the time it takes for our application to be ready to receive requests.
+
+## The ModelComponent class
+
+### Preamble
+
+The best way to know how to implement our own **ModelComponent** is by example, as we've been doing so far in previous
+sections. With this purpose in mind, we are going to build a <FlamaName /> application which loads a machine learning
+model only when the first request to any of the **/predict/** or **/inspect/** routes is received.
+To do so, we will need:
+
+- A custom **Model** class which wraps the methods of the machine learning model we want to use.
+  In this example, we will implement the **predict** and **inspect** methods of the model.
+
+- A custom **ModelComponent** class which will be in charge of instantiating our custom **Model**
+  class, and return it via the **resolve** method. We need to highlight that the **resolve** method
+  is the one that is called by the dependency injection of <FlamaName /> framework, hence its
+  **mandatory** character, and implementation.
+
+- A custom **ModelResource** class which will be in charge of exposing the **predict** and **inspect**
+  methods of our custom **Model** class as routes of our API. This is, in essence, the same class we implemented
+  in the previous section. We will also expose an additional method, as we did in the previous section, which
+  will return some metadata, including the status of the model (whether it is loaded or not).
+
+### Model
+
+Let's start implementing the easiest of the ingredients we have mentioned above:
 
 ```python
-class CustomModel(Model):
+from flama.models import Model
+
+class MySKModel(Model):
     def inspect(self) -> typing.Any:
-        return self.model.__dict__
+        return self.model.inspect()
 
     def predict(self, x: typing.Any) -> typing.Any:
         return self.model.predict(x)
-
-
-class CustomModelComponent(ModelComponent):
-    def resolve(self) -> CustomModel:
-        return self.model
-
-
-component = CustomModelComponent(model)
-
-
-class CustomModelResource(ModelResource, metaclass=ModelResourceType):
-    name = "custom_model"
-    verbose_name = "Custom model"
-    component = component
-
-
-app.add_component(component)
-app.models.add_model_resource("/", CustomModelResource)
 ```
+
+### ModelComponent
+
+### ModelResource
+
+## Adding the component
+
+## Examples
+
+### PyTorch
+
+### Scikit-learn
+
+### TensorFlow
