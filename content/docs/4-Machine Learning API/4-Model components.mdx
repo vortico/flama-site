@@ -68,6 +68,7 @@ To do so, we will need:
 Let's start implementing the easiest of the ingredients we have mentioned above:
 
 ```python
+import typing
 from flama.models import Model
 
 class MySKModel(Model):
@@ -105,6 +106,8 @@ The **resolve** method will call the **load_model** method, and return the model
 yet. Without further ado, let's implement our **ModelComponent** class:
 
 ```python
+from flama.models import ModelComponent
+
 class MySKModelComponent(ModelComponent):
 
     def __init__(self, model_path: str):
