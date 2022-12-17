@@ -204,6 +204,26 @@ class MySKModelResource(ModelResource, metaclass=ModelResourceType):
         return self._get_metadata()
 ```
 
+As we can see, the only difference with the implementation we saw in the previous section is that we are using the
+class attribute **component**, which we are setting to the **component** object we instantiated earlier. Obviously,
+we are also adding the **unload** method, which is in charge of calling the **unload_model** method of the
+**MySKModelComponent** class. The **metadata** method is also different, as it is now returning the **loaded**
+attribute, which is a boolean value indicating whether the model is loaded or not. The **loaded** attribute is
+obtained by checking whether the **self.component.model.model** attribute is **None** or not. If it is **None**,
+then the model is not loaded, and if it is not **None**, then the model is loaded. This will be useful for us to
+check whether the lazy loading mechanism is working as expected. Finally, we could avoid the instantiation of the
+**component** object by calling the **MySKModelComponent** class directly in the **component** class attribute.
+This would look something like this:
+
+```python
+class MySKModelResource(ModelResource, metaclass=ModelResourceType):
+    name = "custom_model"
+    verbose_name = "Lazy-loaded ScikitLearn Model"
+    component = MySKModelComponent("sklearn_model.flm")
+
+    # rest of the code ...
+```
+
 ## Adding the component
 
 ## Examples
