@@ -91,6 +91,58 @@ model = MySKModel(flama.load(f).model)
 
 ### ModelComponent
 
+Now that we have the **Model** class implemented, we need the **ModelComponent** class. This class will be in charge
+of instantiating the **MySKModel** class, and returning it via the **resolve** method. In this particular example,
+we are going to implement a lazy loading mechanism, which means that the model will be instantiated only when the
+first request to any of the **/predict/** or **/inspect/** routes is received. This is different from what was done
+under the hood by <FlamaName /> when we used the **app.models.add_model** or **app.models.add_model_resource**.
+In both cases there was a **ModelComponent** which was created without us knowing, but the instantiation of the
+model object occurs in the **resolve** method directly, hence the model is instantiated at the startup of the
+application. In our case, we want to delay the instantiation of the model until the first _relevant_ request happens.
+Therefore, the **resolve** method will not be the one making the call to the constructor of the **MySKModel** class.
+Instead, we will implement a method called **load_model** which will be in charge of instantiating the model object.
+The **resolve** method will call the **load_model** method, and return the model object, if the object is not initialised
+yet. Without further ado, let's implement our **ModelComponent** class:
+
+```python
+class MySKModelComponent(ModelComponent):
+
+    def __init__(self, model_path: str):
+        self._model_path = model_path
+        self.model = MySKModel(None)
+
+    def load_model(self):
+        with open(self._model_path, "rb") as f:
+            self.model = MySKModel(flama.load(f).model)
+
+    def unload_model(self):
+        self.model = MySKModel(None)
+
+    def resolve(self) -> MySKModel:
+        if not self.model.model:
+            self.load_model()
+
+        return self.model
+```
+
+In short, to instantiate an object of the **MySKModelComponent** class, we need to pass the path to the model object as an
+argument to the constructor. This path will be stored in the **self.\_model_path** attribute. The **self.model**
+attribute is an instance of the **MySKModel** class, which is initialised with a **None** value, which makes it
+lightweight by default. The **load_model** method is in charge of instantiating the model object, and
+assigning it to the **self.model** attribute. We've also added an **unload_model** method, which is in charge of
+setting the **self.model** attribute to a **None** value, i.e. to reset the model attribute.
+Finally, the **resolve** method is in charge of calling the **load_model** method, if the **self.model** attribute
+is not initialised yet, and returning the **self.model** attribute.
+
+How will we have to initialise the **MySKModelComponent** class? We will have to do it as follows:
+
+```python
+component = MySKModelComponent("sklearn_model.flm")
+```
+
+The object **component** will be passed to the last of the ingredients we need to implement the **ModelComponent**,
+namely the **ModelResource** class.
+
 ### ModelResource
 
 ## Adding the component
