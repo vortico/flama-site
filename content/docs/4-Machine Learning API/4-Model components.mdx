@@ -78,6 +78,17 @@ class MySKModel(Model):
         return self.model.predict(x)
 ```
 
+As we can see, the **MySKModel** class inherits from the **Model** class, which is a built-in class of <FlamaName />.
+This base class provides the initialisation of the **model** attribute, and the **inspect** and **predict** methods,
+which will be exposed as routes of our application. If we wanted to instantiate a model object of the class
+**MySKModel**, we would need to pass the model object as an argument to the constructor, as follows:
+
+```python
+with open("sklearn_model.flm", "rb") as f:
+    model = pickle.load(f)
+model = MySKModel(flama.load(f).model)
+```
+
 ### ModelComponent
 
 ### ModelResource
