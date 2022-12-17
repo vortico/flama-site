@@ -148,6 +148,62 @@ namely the **ModelResource** class.
 
 ### ModelResource
 
+We have already implemented the **ModelResource** class in the previous section, so we will not go into all the details
+of the implementation. The only difference with the previous section is that we are not going to use the
+**model_path** class attribute this time. This class attribute is used to instantiate a **ModelComponent** object
+internally. However, we have our own **ModelComponent** class, so we don't want <FlamaName /> to create a
+**ModelComponent** object for us. Instead, we want to pass our own **ModelComponent** object to the **ModelResource**,
+and this is what we are going to do. Let's see how:
+
+```python
+class MySKModelResource(ModelResource, metaclass=ModelResourceType):
+    name = "custom_model"
+    verbose_name = "Lazy-loaded ScikitLearn Model"
+    component = component
+
+    info = {
+        "model_version": "1.0.0",
+        "library_version": "1.0.2",
+    }
+
+    def _get_metadata(self):
+        return {
+            "metadata": {
+                "built-in": {
+                    "verbose_name": self._meta.verbose_name,
+                    "name": self._meta.name,
+                },
+                "custom": {
+                    **self.info,
+                    "loaded": self.component.model.model is not None,
+                    "date": datetime.now().date(),
+                    "time": datetime.now().time()
+                },
+            }
+        }
+
+    @resource_method("/unload/", methods=["GET"], name="unload-method")
+    def unload(self):
+        """
+        tags:
+            - Lazy-loaded ScikitLearn Model
+        summary:
+            Unload the model.
+        """
+        self.component.unload_model()
+        return self._get_metadata()
+
+    @resource_method("/metadata/", methods=["GET"], name="metadata-method")
+    def metadata(self):
+        """
+        tags:
+            - Lazy-loaded ScikitLearn Model
+        summary:
+            Get metadata info.
+        """
+        return self._get_metadata()
+```
+
 ## Adding the component
 
 ## Examples
