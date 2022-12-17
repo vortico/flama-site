@@ -226,6 +226,204 @@ class MySKModelResource(ModelResource, metaclass=ModelResourceType):
 
 ## Adding the component
 
+Now that we have implemented the **ModelComponent** and the **ModelResource**, we need to add our custom model component
+to our application. As we can see below, the procedure is quite similar to the way in which we added a model
+resource in the previous section:
+
+```python
+app = Flama(
+    title="Flama ML",
+    version="0.1.0",
+    description="Machine learning API using Flama 🔥",
+    docs="/docs/",
+)
+
+app.add_component(component)
+app.models.add_model_resource(path="/model", resource=MySKModelResource)
+```
+
+This is the most verbose way of adding it. We could also add it by using the **component** argument of the
+
+<FlamaName /> class constructor:
+
+```python
+app = Flama(
+    title="Flama ML",
+    version="0.1.0",
+    description="Machine learning API using Flama 🔥",
+    docs="/docs/",
+    components=[component],
+)
+
+app.models.add_model_resource(path="/model", resource=MySKModelResource)
+```
+
+### Run
+
+Putting everything together, we have the following code:
+
+```python
+import typing
+from datetime import datetime
+
+import flama
+from flama import Flama
+from flama.models import Model, ModelResource, ModelResourceType, ModelComponent
+from flama.resources import resource_method
+
+
+class MySKModel(Model):
+    def inspect(self) -> typing.Any:
+        return self.model.get_params()
+
+    def predict(self, x: typing.Any) -> typing.Any:
+        return self.model.predict(x)
+
+
+class MySKModelComponent(ModelComponent):
+
+    def __init__(self, model_path: str):
+        self._model_path = model_path
+        self.model = MySKModel(None)
+
+    def load_model(self):
+        with open(self._model_path, "rb") as f:
+            self.model = MySKModel(flama.load(f).model)
+
+    def unload_model(self):
+        self.model = MySKModel(None)
+
+    def resolve(self) -> MySKModel:
+        if not self.model.model:
+            self.load_model()
+
+        return self.model
+
+
+component = MySKModelComponent("sklearn_model.flm")
+
+
+class MySKModelResource(ModelResource, metaclass=ModelResourceType):
+    name = "custom_model"
+    verbose_name = "Lazy-loaded ScikitLearn Model"
+    component = component
+
+    info = {
+        "model_version": "1.0.0",
+        "library_version": "1.0.2",
+    }
+
+    def _get_metadata(self):
+        return {
+            "metadata": {
+                "built-in": {
+                    "verbose_name": self._meta.verbose_name,
+                    "name": self._meta.name,
+                },
+                "custom": {
+                    **self.info,
+                    "loaded": self.component.model.model is not None,
+                    "date": datetime.now().date(),
+                    "time": datetime.now().time()
+                },
+            }
+        }
+
+    @resource_method("/unload/", methods=["GET"], name="unload-method")
+    def unload(self):
+        """
+        tags:
+            - Lazy-loaded ScikitLearn Model
+        summary:
+            Unload the model.
+        """
+        self.component.unload_model()
+        return self._get_metadata()
+
+    @resource_method("/metadata/", methods=["GET"], name="metadata-method")
+    def metadata(self):
+        """
+        tags:
+            - Lazy-loaded ScikitLearn Model
+        summary:
+            Get metadata info.
+        """
+        return self._get_metadata()
+
+
+app = Flama(
+    title="Flama ML",
+    version="0.1.0",
+    description="Machine learning API using Flama 🔥",
+    docs="/docs/",
+    components=[component],
+)
+
+app.models.add_model_resource(path="/model", resource=MySKModelResource)
+
+
+if __name__ == "__main__":
+    flama.run(flama_app="__main__:app", server_host="0.0.0.0", server_port=8080, server_reload=True)
+```
+
+Now we only have to run the application, and we will be able to test our custom model component.
+As always, the best way to check that everything is working as expected is by navigating to the **/docs/** endpoint.
+This will show you the documentation of the app:
+
+<Image
+  src="/images/docs/docs-add-model-component-docs.png"
+  alt="docs-add-model-component-docs"
+  width="1600"
+  height="590"
+/>
+
+### Testing the lazy loading mechanism
+
+To check that the lazy loading mechanism is working as expected, we can navigate to the section _Get metadata info_,
+and click on _Send API Request_. This will return the following response:
+
+<Image
+  src="/images/docs/docs-add-model-component-metadata-false.png"
+  alt="docs-add-model-component-metadata"
+  width="1600"
+  height="1043"
+/>
+
+As can be seen, the **loaded** attribute is **false**, which means that the model is not loaded. Now, we can navigate
+to the section _Retrieve the model section_ (which calls the **/inspect/** endpoint), and click on _Send API Request_.
+This will return the following response:
+
+<Image
+  src="/images/docs/docs-add-model-component-inspect.png"
+  alt="docs-add-model-component-inspect-true"
+  width="1600"
+  height="1043"
+/>
+
+If we navigate again to the section _Get metadata info_, and click on _Send API Request_, we will see that the **loaded**
+attribute is now **true**. This means that the model has been loaded:
+
+<Image
+  src="/images/docs/docs-add-model-component-metadata-true.png"
+  alt="docs-add-model-component-inspect-false"
+  width="1600"
+  height="1043"
+/>
+
+Finally, we can navigate to the section _Unload the model_, and click on _Send API Request_. This will return the following
+response:
+
+<Image
+  src="/images/docs/docs-add-model-component-unload.png"
+  alt="docs-add-model-component-unload"
+  width="1600"
+  height="1043"
+/>
+
+which informs us immediately that the model has been unloaded.
+
+🥳 Hurrah! Everything is working as expected. We have successfully added a custom model component to our application.
+
 ## Examples
 
 ### PyTorch
