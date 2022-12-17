@@ -1,6 +1,6 @@
 ---
 title: Model components
-wip: true
+wip: false
 ---
 
 In the previous section we covered the fundamentals of building custom model resources. Understanding
@@ -71,7 +71,7 @@ Let's start implementing the easiest of the ingredients we have mentioned above:
 import typing
 from flama.models import Model
 
-class MySKModel(Model):
+class MyCustomModel(Model):
     def inspect(self) -> typing.Any:
         return self.model.inspect()
 
@@ -79,28 +79,28 @@ class MySKModel(Model):
         return self.model.predict(x)
 ```
 
-As we can see, the **MySKModel** class inherits from the **Model** class, which is a built-in class of <FlamaName />.
+As we can see, the **MyCustomModel** class inherits from the **Model** class, which is a built-in class of <FlamaName />.
 This base class provides the initialisation of the **model** attribute, and the **inspect** and **predict** methods,
 which will be exposed as routes of our application. If we wanted to instantiate a model object of the class
-**MySKModel**, we would need to pass the model object as an argument to the constructor, as follows:
+**MyCustomModel**, we would need to pass the model object as an argument to the constructor, as follows:
 
 ```python
 with open("sklearn_model.flm", "rb") as f:
     model = pickle.load(f)
-model = MySKModel(flama.load(f).model)
+model = MyCustomModel(flama.load(f).model)
 ```
 
 ### ModelComponent
 
 Now that we have the **Model** class implemented, we need the **ModelComponent** class. This class will be in charge
-of instantiating the **MySKModel** class, and returning it via the **resolve** method. In this particular example,
+of instantiating the **MyCustomModel** class, and returning it via the **resolve** method. In this particular example,
 we are going to implement a lazy loading mechanism, which means that the model will be instantiated only when the
 first request to any of the **/predict/** or **/inspect/** routes is received. This is different from what was done
 under the hood by <FlamaName /> when we used the **app.models.add_model** or **app.models.add_model_resource**.
 In both cases there was a **ModelComponent** which was created without us knowing, but the instantiation of the
 model object occurs in the **resolve** method directly, hence the model is instantiated at the startup of the
 application. In our case, we want to delay the instantiation of the model until the first _relevant_ request happens.
-Therefore, the **resolve** method will not be the one making the call to the constructor of the **MySKModel** class.
+Therefore, the **resolve** method will not be the one making the call to the constructor of the **MyCustomModel** class.
 Instead, we will implement a method called **load_model** which will be in charge of instantiating the model object.
 The **resolve** method will call the **load_model** method, and return the model object, if the object is not initialised
 yet. Without further ado, let's implement our **ModelComponent** class:
@@ -108,39 +108,39 @@ yet. Without further ado, let's implement our **ModelComponent** class:
 ```python
 from flama.models import ModelComponent
 
-class MySKModelComponent(ModelComponent):
+class MyCustomModelComponent(ModelComponent):
 
     def __init__(self, model_path: str):
         self._model_path = model_path
-        self.model = MySKModel(None)
+        self.model = MyCustomModel(None)
 
     def load_model(self):
         with open(self._model_path, "rb") as f:
-            self.model = MySKModel(flama.load(f).model)
+            self.model = MyCustomModel(flama.load(f).model)
 
     def unload_model(self):
-        self.model = MySKModel(None)
+        self.model = MyCustomModel(None)
 
-    def resolve(self) -> MySKModel:
+    def resolve(self) -> MyCustomModel:
         if not self.model.model:
             self.load_model()
 
         return self.model
 ```
 
-In short, to instantiate an object of the **MySKModelComponent** class, we need to pass the path to the model object as an
+In short, to instantiate an object of the **MyCustomModelComponent** class, we need to pass the path to the model object as an
 argument to the constructor. This path will be stored in the **self.\_model_path** attribute. The **self.model**
-attribute is an instance of the **MySKModel** class, which is initialised with a **None** value, which makes it
+attribute is an instance of the **MyCustomModel** class, which is initialised with a **None** value, which makes it
 lightweight by default. The **load_model** method is in charge of instantiating the model object, and
 assigning it to the **self.model** attribute. We've also added an **unload_model** method, which is in charge of
 setting the **self.model** attribute to a **None** value, i.e. to reset the model attribute.
 Finally, the **resolve** method is in charge of calling the **load_model** method, if the **self.model** attribute
 is not initialised yet, and returning the **self.model** attribute.
 
-How will we have to initialise the **MySKModelComponent** class? We will have to do it as follows:
+How will we have to initialise the **MyCustomModelComponent** class? We will have to do it as follows:
 
 ```python
-component = MySKModelComponent("sklearn_model.flm")
+component = MyCustomModelComponent("sklearn_model.flm")
 ```
 
 The object **component** will be passed to the last of the ingredients we need to implement the **ModelComponent**,
@@ -156,7 +156,7 @@ internally. However, we have our own **ModelComponent** class, so we don't want 
 and this is what we are going to do. Let's see how:
 
 ```python
-class MySKModelResource(ModelResource, metaclass=ModelResourceType):
+class MyCustomModelResource(ModelResource, metaclass=ModelResourceType):
     name = "custom_model"
     verbose_name = "Lazy-loaded ScikitLearn Model"
     component = component
@@ -207,19 +207,19 @@ class MySKModelResource(ModelResource, metaclass=ModelResourceType):
 As we can see, the only difference with the implementation we saw in the previous section is that we are using the
 class attribute **component**, which we are setting to the **component** object we instantiated earlier. Obviously,
 we are also adding the **unload** method, which is in charge of calling the **unload_model** method of the
-**MySKModelComponent** class. The **metadata** method is also different, as it is now returning the **loaded**
+**MyCustomModelComponent** class. The **metadata** method is also different, as it is now returning the **loaded**
 attribute, which is a boolean value indicating whether the model is loaded or not. The **loaded** attribute is
 obtained by checking whether the **self.component.model.model** attribute is **None** or not. If it is **None**,
 then the model is not loaded, and if it is not **None**, then the model is loaded. This will be useful for us to
 check whether the lazy loading mechanism is working as expected. Finally, we could avoid the instantiation of the
-**component** object by calling the **MySKModelComponent** class directly in the **component** class attribute.
+**component** object by calling the **MyCustomModelComponent** class directly in the **component** class attribute.
 This would look something like this:
 
 ```python
-class MySKModelResource(ModelResource, metaclass=ModelResourceType):
+class MyCustomModelResource(ModelResource, metaclass=ModelResourceType):
     name = "custom_model"
     verbose_name = "Lazy-loaded ScikitLearn Model"
-    component = MySKModelComponent("sklearn_model.flm")
+    component = MyCustomModelComponent("sklearn_model.flm")
 
     # rest of the code ...
 ```
@@ -239,7 +239,7 @@ app = Flama(
 )
 
 app.add_component(component)
-app.models.add_model_resource(path="/model", resource=MySKModelResource)
+app.models.add_model_resource(path="/model", resource=MyCustomModelResource)
 ```
 
 This is the most verbose way of adding it. We could also add it by using the **component** argument of the
@@ -255,7 +255,7 @@ app = Flama(
     components=[component],
 )
 
-app.models.add_model_resource(path="/model", resource=MySKModelResource)
+app.models.add_model_resource(path="/model", resource=MyCustomModelResource)
 ```
 
 ### Run
@@ -272,7 +272,7 @@ from flama.models import Model, ModelResource, ModelResourceType, ModelComponent
 from flama.resources import resource_method
 
 
-class MySKModel(Model):
+class MyCustomModel(Model):
     def inspect(self) -> typing.Any:
         return self.model.get_params()
 
@@ -280,30 +280,30 @@ class MySKModel(Model):
         return self.model.predict(x)
 
 
-class MySKModelComponent(ModelComponent):
+class MyCustomModelComponent(ModelComponent):
 
     def __init__(self, model_path: str):
         self._model_path = model_path
-        self.model = MySKModel(None)
+        self.model = MyCustomModel(None)
 
     def load_model(self):
         with open(self._model_path, "rb") as f:
-            self.model = MySKModel(flama.load(f).model)
+            self.model = MyCustomModel(flama.load(f).model)
 
     def unload_model(self):
-        self.model = MySKModel(None)
+        self.model = MyCustomModel(None)
 
-    def resolve(self) -> MySKModel:
+    def resolve(self) -> MyCustomModel:
         if not self.model.model:
             self.load_model()
 
         return self.model
 
 
-component = MySKModelComponent("sklearn_model.flm")
+component = MyCustomModelComponent("sklearn_model.flm")
 
 
-class MySKModelResource(ModelResource, metaclass=ModelResourceType):
+class MyCustomModelResource(ModelResource, metaclass=ModelResourceType):
     name = "custom_model"
     verbose_name = "Lazy-loaded ScikitLearn Model"
     component = component
@@ -359,7 +359,7 @@ app = Flama(
     components=[component],
 )
 
-app.models.add_model_resource(path="/model", resource=MySKModelResource)
+app.models.add_model_resource(path="/model", resource=MyCustomModelResource)
 
 
 if __name__ == "__main__":
@@ -438,8 +438,55 @@ namely:
 - [TensorFlow model](/models/tensorflow_model.flm)
 - [PyTorch model](/models/pytorch_model.flm)
 
+In this case, the change required to use one or another library is minimal. In particular, we only need to change the
+class attribute **component**.
+
 ### PyTorch
+
+```python
+component = MyCustomModelComponent("pytorch_model.flm")
+
+class MyModelResource(ModelResource, metaclass=ModelResourceType):
+    name = "custom_model"
+    verbose_name = "Lazy-loaded PyTorch Model"
+    component = component
+
+    # ...
+```
 
 ### Scikit-learn
 
+```python
+component = MyCustomModelComponent("sklearn_model.flm")
+
+class MyModelResource(ModelResource, metaclass=ModelResourceType):
+    name = "custom_model"
+    verbose_name = "Lazy-loaded ScikitLearn Model"
+    component = component
+
+    # ...
+```
+
 ### TensorFlow
+
+```python
+component = MyCustomModelComponent("tensorflow_model.flm")
+
+class MyModelResource(ModelResource, metaclass=ModelResourceType):
+    name = "custom_model"
+    verbose_name = "Lazy-loaded TensorFlow Model"
+    component = component
+
+    # ...
+```
+
+## Conclusion
+
+We have seen how to add a custom model component to our application. In particular, we have seen how to implement
+model component which loads the model lazily. This is a very useful feature, as it allows us to save memory and
+resources when the application is not being used. This has allowed us to create a completely customised
+machine learning API using <FlamaName />. With this, we hope you have reached a good understanding of how to
+use <FlamaName /> to create your own machine learning API, and how to add custom components to it, which will
+be necessary in your projects very likely. Feel free to use the code provided in this tutorial as a starting point
+for your own projects, and to modify it as you see fit. We hope you become a <FlamaName /> ambassador, and that
+you share your experience with us. We will be very happy to hear form your experience with <FlamaName />.
