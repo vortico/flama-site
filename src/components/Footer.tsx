@@ -11,7 +11,7 @@ const links = [
     ],
   },
   {
-    name: 'Core Concepts',
+    name: 'Interact with Flama',
     links: [
       { name: 'Run applications', url: '/docs/flama-cli/run' },
       { name: 'Serve machine-learning models', url: '/docs/flama-cli/serve' },
@@ -19,8 +19,13 @@ const links = [
     ],
   },
   {
-    name: 'Adopting',
-    links: [],
+    name: 'Core Concepts',
+    links: [
+      { name: 'Flama Artifacts', url: '/docs/machine-learning-api/packaging-models' },
+      { name: 'Flama Applications', url: '/docs/machine-learning-api/add-models' },
+      { name: 'Model Resources', url: '/docs/machine-learning-api/model-resource' },
+      { name: 'Model Components', url: '/docs/machine-learning-api/model-components' },
+    ],
   },
   {
     name: 'About Flama',
