@@ -6,6 +6,7 @@ import { PythonIcon } from '@/components/icons'
 import { Sample } from '@/lib/samples'
 import { SparklesIcon } from '@heroicons/react/24/outline'
 import { CommandLineIcon } from '@heroicons/react/24/solid'
+import { motion } from 'framer-motion'
 import React, { useCallback, useMemo, useState } from 'react'
 
 const items: ISelectableItem[] = [
@@ -70,7 +71,12 @@ export default function ProductionReadyFirst({ samples }: ProductionReadyFirstPr
         </>
       }
     >
-      <div className="ml-auto -mt-16 w-full max-w-3xl">
+      <motion.div
+        initial={{ y: '250px' }}
+        whileInView={{ y: 0 }}
+        viewport={{ once: true }}
+        className="ml-auto -mt-16 w-full max-w-3xl"
+      >
         {selectedSample && (
           <CodeWindow
             title={selectedSample.title}
@@ -80,7 +86,7 @@ export default function ProductionReadyFirst({ samples }: ProductionReadyFirstPr
             className="max-h-64"
           />
         )}
-      </div>
+      </motion.div>
     </HomeSection>
   )
 }

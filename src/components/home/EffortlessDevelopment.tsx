@@ -2,6 +2,7 @@ import FlamaName from '@/components/FlamaName'
 import HomeSection from '@/components/home/HomeSection'
 import { BoltIcon } from '@heroicons/react/24/outline'
 import { ChevronRightIcon } from '@heroicons/react/24/solid'
+import { motion } from 'framer-motion'
 import React, { useCallback, useMemo, useState } from 'react'
 
 const samples = [
@@ -128,7 +129,12 @@ export default function EffortlessDevelopment() {
         </>
       }
     >
-      <div className="flex flex-col items-center justify-start gap-y-10 lg:flex-row lg:justify-center">
+      <motion.div
+        initial={{ scale: 0, opacity: 0 }}
+        whileInView={{ scale: 1, opacity: 1 }}
+        viewport={{ once: true }}
+        className="flex flex-col items-center justify-start gap-y-10 lg:flex-row lg:justify-center"
+      >
         <div className="h-full w-full basis-full space-y-6 pl-9 lg:basis-1/3">
           {samples.map(({ id, title }) => (
             <button key={id} className="flex items-center" onClick={onSelect(id)}>
@@ -146,7 +152,7 @@ export default function EffortlessDevelopment() {
           ))}
         </div>
         <div className="h-full w-full basis-full lg:basis-2/3">{selectedSample && selectedSample.description}</div>
-      </div>
+      </motion.div>
     </HomeSection>
   )
 }

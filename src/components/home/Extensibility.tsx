@@ -3,6 +3,7 @@ import FlamaName from '@/components/FlamaName'
 import HomeSection from '@/components/home/HomeSection'
 import { Sample } from '@/lib/samples'
 import { PuzzlePieceIcon } from '@heroicons/react/24/outline'
+import { motion } from 'framer-motion'
 import React from 'react'
 
 interface ExtensibilityProps {
@@ -33,14 +34,19 @@ export default function Extensibility({ samples }: ExtensibilityProps) {
         </>
       }
     >
-      <div className="ml-auto -mt-16 w-full max-w-3xl">
+      <motion.div
+        initial={{ y: '250px' }}
+        whileInView={{ y: 0 }}
+        viewport={{ once: true }}
+        className="ml-auto -mt-16 w-full max-w-3xl"
+      >
         <CodeWindow
           title={selectedSample.title}
           code={selectedSample.code}
           language={selectedSample.language}
           lineNumbers={selectedSample.lineNumbers}
         />
-      </div>
+      </motion.div>
     </HomeSection>
   )
 }

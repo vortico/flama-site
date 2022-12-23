@@ -5,6 +5,7 @@ import { ISelectableItem, SelectableList } from '@/components/home/SelectableLis
 import { PyTorchIcon, ScikitLearnIcon, TensorFlowIcon } from '@/components/icons'
 import { Sample } from '@/lib/samples'
 import { CpuChipIcon } from '@heroicons/react/24/outline'
+import { motion } from 'framer-motion'
 import React, { useCallback, useMemo, useState } from 'react'
 
 const frameworks: ISelectableItem[] = [
@@ -69,7 +70,12 @@ export default function MachineLearningResponsive({ samples }: MachineLearningRe
         </>
       }
     >
-      <div className="ml-auto -mt-16 w-full max-w-3xl">
+      <motion.div
+        initial={{ y: '250px' }}
+        whileInView={{ y: 0 }}
+        viewport={{ once: true }}
+        className="ml-auto -mt-16 w-full max-w-3xl"
+      >
         {selectedSample && (
           <CodeWindow
             title={selectedSample.title}
@@ -78,7 +84,7 @@ export default function MachineLearningResponsive({ samples }: MachineLearningRe
             lineNumbers={selectedSample.lineNumbers}
           />
         )}
-      </div>
+      </motion.div>
     </HomeSection>
   )
 }

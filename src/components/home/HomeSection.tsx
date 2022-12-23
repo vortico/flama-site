@@ -1,5 +1,4 @@
 import LinkButton from '@/components/LinkButton'
-import { motion } from 'framer-motion'
 import React, { ReactNode } from 'react'
 
 interface HomeSectionProps extends React.ComponentProps<'section'> {
@@ -40,14 +39,7 @@ export default function HomeSection({
         {selectableList && <div className="mt-8 max-w-xl">{selectableList}</div>}
       </div>
       <div className="mt-16 border-t border-brand-500/50 bg-gradient-to-b from-brand-500/10 py-8">
-        <motion.div
-          initial={{ opacity: 0.25, scale: 0.75 }}
-          whileInView={{ opacity: 1, scale: 1 }}
-          viewport={{ amount: 0.8 }}
-          className="mx-auto max-w-8xl px-4 sm:px-6 md:px-8"
-        >
-          {children}
-        </motion.div>
+        <div className="mx-auto max-w-8xl px-4 sm:px-6 md:px-8">{children}</div>
       </div>
     </section>
   )
