@@ -1,12 +1,12 @@
-import { useLiveReload, useMDXComponent } from 'next-contentlayer/hooks' // eslint-disable-line import/no-unresolved
-import Label from '@/components/Label'
 import FlamaName from '@/components/FlamaName'
-import PythonName from '@/components/PythonName'
+import Label from '@/components/Label'
 import Link from '@/components/Link'
-import { H1, H2, H3, H4, H5, H6 } from '@/components/mdx/header'
 import { Code, Pre } from '@/components/mdx/code'
-import { ComponentType } from 'react'
+import { H1, H2, H3, H4, H5, H6 } from '@/components/mdx/header'
+import PythonName from '@/components/PythonName'
+import { useLiveReload, useMDXComponent } from 'next-contentlayer/hooks' // eslint-disable-line import/no-unresolved
 import Image from 'next/legacy/image'
+import { ComponentType } from 'react'
 
 export interface MDXComponentProps {
   code: string

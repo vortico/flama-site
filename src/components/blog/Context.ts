@@ -1,5 +1,5 @@
-import { createContext } from 'react'
 import { Blog as IBlog } from '@/contentlayer'
+import { createContext } from 'react'
 
 export interface BlogContext {
   blog?: IBlog

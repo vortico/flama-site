@@ -1,8 +1,7 @@
-import React from 'react'
-import Link from 'next/link'
-
 // eslint-disable-next-line import/named
 import { DocSearchHit } from '@docsearch/react/dist/esm/types'
+import Link from 'next/link'
+import React from 'react'
 
 interface IndexedDocSearchHit extends DocSearchHit {
   __is_result(): boolean

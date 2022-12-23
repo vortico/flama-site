@@ -1,6 +1,6 @@
-import React from 'react'
 import { DocsContext } from '@/components/docs/Context'
 import { Bars3Icon, ChevronRightIcon } from '@heroicons/react/24/outline'
+import React from 'react'
 
 export function Breadcrumbs() {
   const { docs, onOpen } = React.useContext(DocsContext)

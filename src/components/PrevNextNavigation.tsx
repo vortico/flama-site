@@ -1,6 +1,6 @@
-import React from 'react'
 import Link from '@/components/Link'
 import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/solid'
+import React from 'react'
 
 interface PrevNextNavigationProps {
   prevTitle: string

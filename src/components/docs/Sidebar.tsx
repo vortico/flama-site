@@ -1,5 +1,5 @@
-import { QuickSearchButton } from '@/components/QuickSearchButton'
 import { DocsMenu } from '@/components/docs/Menu'
+import { QuickSearchButton } from '@/components/QuickSearchButton'
 import React from 'react'
 
 export function Sidebar() {

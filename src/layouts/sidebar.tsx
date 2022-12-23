@@ -1,5 +1,5 @@
-import React, { ReactNode } from 'react'
 import PlainLayout, { PlainLayoutProps } from '@/layouts/plain'
+import React, { ReactNode } from 'react'
 
 export interface SidebarLayoutProps extends PlainLayoutProps {
   sidebar: ReactNode

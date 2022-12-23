@@ -1,8 +1,8 @@
+import FlamaName from '@/components/FlamaName'
 import HomeSection from '@/components/home/HomeSection'
 import { BoltIcon } from '@heroicons/react/24/outline'
-import React, { useCallback, useMemo, useState } from 'react'
 import { ChevronRightIcon } from '@heroicons/react/24/solid'
-import FlamaName from '@/components/FlamaName'
+import React, { useCallback, useMemo, useState } from 'react'
 
 const samples = [
   {

@@ -1,12 +1,12 @@
-import HomeSection from '@/components/home/HomeSection'
-import { SparklesIcon } from '@heroicons/react/24/outline'
-import React, { useCallback, useMemo, useState } from 'react'
-import { ISelectableItem, SelectableList } from '@/components/home/SelectableList'
-import { Sample } from '@/lib/samples'
-import { CommandLineIcon } from '@heroicons/react/24/solid'
-import { PythonIcon } from '@/components/icons'
-import FlamaName from '@/components/FlamaName'
 import CodeWindow from '@/components/CodeWindow'
+import FlamaName from '@/components/FlamaName'
+import HomeSection from '@/components/home/HomeSection'
+import { ISelectableItem, SelectableList } from '@/components/home/SelectableList'
+import { PythonIcon } from '@/components/icons'
+import { Sample } from '@/lib/samples'
+import { SparklesIcon } from '@heroicons/react/24/outline'
+import { CommandLineIcon } from '@heroicons/react/24/solid'
+import React, { useCallback, useMemo, useState } from 'react'
 
 const items: ISelectableItem[] = [
   {

@@ -1,8 +1,8 @@
-import React from 'react'
-import Window from '@/components/Window'
-import type { Language } from 'prism-react-renderer'
 import CodeBlock from '@/components/CodeBlock'
 import CodeInline from '@/components/CodeInline'
+import Window from '@/components/Window'
+import type { Language } from 'prism-react-renderer'
+import React from 'react'
 
 export function Pre({ children }: React.ComponentProps<'pre'>) {
   return <Window>{children}</Window>

@@ -1,9 +1,9 @@
+import CodeWindow from '@/components/CodeWindow'
+import FlamaName from '@/components/FlamaName'
 import HomeSection from '@/components/home/HomeSection'
+import { Sample } from '@/lib/samples'
 import { ArrowPathIcon } from '@heroicons/react/24/outline'
 import React from 'react'
-import { Sample } from '@/lib/samples'
-import FlamaName from '@/components/FlamaName'
-import CodeWindow from '@/components/CodeWindow'
 
 interface ModelsLifecycleProps {
   samples: Sample[]

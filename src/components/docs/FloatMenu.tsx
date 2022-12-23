@@ -1,7 +1,7 @@
-import React, { useContext } from 'react'
 import { DocsContext } from '@/components/docs/Context'
-import { XMarkIcon } from '@heroicons/react/24/outline'
 import { DocsMenu } from '@/components/docs/Menu'
+import { XMarkIcon } from '@heroicons/react/24/outline'
+import React, { useContext } from 'react'
 
 export function FloatMenu() {
   const { onClose } = useContext(DocsContext)

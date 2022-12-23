@@ -1,9 +1,9 @@
-import React, { ReactNode } from 'react'
-import { Blog as IBlog } from '@/contentlayer'
-import PlainLayout from '@/layouts/plain'
 import { BlogContext } from '@/components/blog/Context'
 import { Menu } from '@/components/blog/Menu'
 import Footer from '@/components/Footer'
+import { Blog as IBlog } from '@/contentlayer'
+import PlainLayout from '@/layouts/plain'
+import React, { ReactNode } from 'react'
 
 interface BlogLayoutProps {
   blog: IBlog

@@ -1,7 +1,7 @@
-import { BlogLayout } from '@/layouts/blog'
-import { allBlogs, Blog as IBlog } from '@/contentlayer'
-import { NextSeo } from 'next-seo'
 import MDXComponent from '@/components/mdx/MDXComponent'
+import { allBlogs, Blog as IBlog } from '@/contentlayer'
+import { BlogLayout } from '@/layouts/blog'
+import { NextSeo } from 'next-seo'
 
 export async function getStaticPaths() {
   return {

@@ -1,9 +1,9 @@
+import CodeWindow from '@/components/CodeWindow'
+import FlamaName from '@/components/FlamaName'
 import HomeSection from '@/components/home/HomeSection'
+import { Sample } from '@/lib/samples'
 import { PuzzlePieceIcon } from '@heroicons/react/24/outline'
 import React from 'react'
-import CodeWindow from '@/components/CodeWindow'
-import { Sample } from '@/lib/samples'
-import FlamaName from '@/components/FlamaName'
 
 interface ExtensibilityProps {
   samples: Sample[]

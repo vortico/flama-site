@@ -1,6 +1,6 @@
-import React from 'react'
 import { SearchButton } from '@/components/Search'
 import { MagnifyingGlassIcon } from '@heroicons/react/24/outline'
+import React from 'react'
 
 export function QuickSearchButton({ className, ...props }: React.ComponentProps<'button'>) {
   return (

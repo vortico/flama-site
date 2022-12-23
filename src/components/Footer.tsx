@@ -1,6 +1,6 @@
 import { FlamaIcon } from '@/components/icons'
-import React from 'react'
 import Link from '@/components/Link'
+import React from 'react'
 
 const links = [
   {

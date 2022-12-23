@@ -1,11 +1,11 @@
+import Algolia from '@/algolia.config'
+import { SearchContext } from '@/components/Search/Context'
+import { Hit, HitProps } from '@/components/Search/Hit'
+import { useDocSearchKeyboardEvents } from '@/hooks/useDocSearchKeyboardEvents'
+import { DocSearchModal } from '@docsearch/react'
+import { useRouter } from 'next/router'
 import React, { useCallback, useState } from 'react'
 import { createPortal } from 'react-dom'
-import { useRouter } from 'next/router'
-import { DocSearchModal } from '@docsearch/react'
-import Algolia from '@/algolia.config'
-import { Hit, HitProps } from '@/components/Search/Hit'
-import { SearchContext } from '@/components/Search/Context'
-import { useDocSearchKeyboardEvents } from '@/hooks/useDocSearchKeyboardEvents'
 
 interface SearchProviderProps {
   children: React.ReactNode

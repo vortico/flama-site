@@ -1,8 +1,8 @@
-import React, { useMemo } from 'react'
-import { useRouter } from 'next/router'
-import Link from 'next/link'
-import { tableOfContent, TOC, TOCCategory, TOCLink } from '@/lib/toc'
 import { allDocs, Docs as IDocs } from '@/contentlayer'
+import { tableOfContent, TOC, TOCCategory, TOCLink } from '@/lib/toc'
+import Link from 'next/link'
+import { useRouter } from 'next/router'
+import React, { useMemo } from 'react'
 
 interface DocsMenuCategoryItemProps {
   link: TOCLink<IDocs>

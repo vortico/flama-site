@@ -1,11 +1,11 @@
-import Link from 'next/link'
 import { FlamaIcon, GithubIcon } from '@/components/icons'
-import ThemeModeSwitcher from '@/components/ThemeModeSwitcher'
-import { Bars3Icon, MagnifyingGlassIcon, XMarkIcon } from '@heroicons/react/24/outline'
 import { SearchButton } from '@/components/Search'
+import ThemeModeSwitcher from '@/components/ThemeModeSwitcher'
+import Tooltip from '@/components/Tooltip'
+import { Bars3Icon, MagnifyingGlassIcon, XMarkIcon } from '@heroicons/react/24/outline'
+import Link from 'next/link'
 import React, { useCallback, useState } from 'react'
 import { createPortal } from 'react-dom'
-import Tooltip from '@/components/Tooltip'
 
 function Logo() {
   return (

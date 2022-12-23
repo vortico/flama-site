@@ -1,13 +1,13 @@
-import React, { ReactNode, useCallback, useEffect, useState } from 'react'
+import { Breadcrumbs } from '@/components/docs/Breadcrumbs'
+import { DocsContext } from '@/components/docs/Context'
+import { FloatMenu } from '@/components/docs/FloatMenu'
+import { Sidebar } from '@/components/docs/Sidebar'
+import { PrevNextNavigation } from '@/components/PrevNextNavigation'
 import { Docs as IDocs } from '@/contentlayer'
 import SidebarLayout from '@/layouts/sidebar'
-import { createPortal } from 'react-dom'
-import { DocsContext } from '@/components/docs/Context'
-import { Breadcrumbs } from '@/components/docs/Breadcrumbs'
 import { useRouter } from 'next/router'
-import { Sidebar } from '@/components/docs/Sidebar'
-import { FloatMenu } from '@/components/docs/FloatMenu'
-import { PrevNextNavigation } from '@/components/PrevNextNavigation'
+import React, { ReactNode, useCallback, useEffect, useState } from 'react'
+import { createPortal } from 'react-dom'
 
 interface DocLayoutProps {
   docs: IDocs

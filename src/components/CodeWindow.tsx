@@ -1,5 +1,5 @@
-import Window, { WindowProps } from '@/components/Window'
 import CodeBlock, { CodeBlockProps } from '@/components/CodeBlock'
+import Window, { WindowProps } from '@/components/Window'
 import React, { useEffect, useRef } from 'react'
 
 export interface CodeWindowProps extends WindowProps, CodeBlockProps {

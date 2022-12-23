@@ -1,6 +1,6 @@
+import { MoonIcon, SunIcon } from '@heroicons/react/24/outline'
 import { useTheme } from 'next-themes'
 import React, { useCallback, useEffect, useState } from 'react'
-import { MoonIcon, SunIcon } from '@heroicons/react/24/outline'
 
 export default function ThemeModeSwitcher({ ...props }: React.ComponentProps<'button'>) {
   const [mounted, setMounted] = useState(false)

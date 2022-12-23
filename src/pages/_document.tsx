@@ -1,5 +1,5 @@
-import Document, { Head, Html, Main, NextScript } from 'next/document'
 import Algolia from '@/algolia.config'
+import Document, { Head, Html, Main, NextScript } from 'next/document'
 
 class MyDocument extends Document {
   render() {

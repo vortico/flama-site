@@ -1,10 +1,10 @@
-import React, { useCallback, useMemo, useState } from 'react'
-import { QuickSearchButton } from '@/components/QuickSearchButton'
-import { ChevronRightIcon } from '@heroicons/react/24/solid'
-import Link from '@/components/Link'
-import { Sample } from '@/lib/samples'
-import FlamaName from '@/components/FlamaName'
 import CodeWindow from '@/components/CodeWindow'
+import FlamaName from '@/components/FlamaName'
+import Link from '@/components/Link'
+import { QuickSearchButton } from '@/components/QuickSearchButton'
+import { Sample } from '@/lib/samples'
+import { ChevronRightIcon } from '@heroicons/react/24/solid'
+import React, { useCallback, useMemo, useState } from 'react'
 
 interface SamplesProps {
   samples: Sample[]

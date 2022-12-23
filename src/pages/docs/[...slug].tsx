@@ -1,10 +1,10 @@
-import { DocsLayout } from '@/layouts/docs'
+import MDXComponent from '@/components/mdx/MDXComponent'
+import { withTOC } from '@/components/mdx/toc'
 import type { Docs as IDocs } from '@/contentlayer'
 import { allDocs } from '@/contentlayer'
-import { withTOC } from '@/components/mdx/toc'
+import { DocsLayout } from '@/layouts/docs'
 import { NextSeo } from 'next-seo'
 import React from 'react'
-import MDXComponent from '@/components/mdx/MDXComponent'
 
 export async function getStaticPaths() {
   return {

@@ -1,6 +1,6 @@
-import React, { useContext, useEffect, useRef } from 'react'
-import { ActionKey, useActionKey } from '@/hooks/useActionKey'
 import { SearchContext } from '@/components/Search/Context'
+import { ActionKey, useActionKey } from '@/hooks/useActionKey'
+import React, { useContext, useEffect, useRef } from 'react'
 
 interface ChildrenProps {
   actionKey: ActionKey

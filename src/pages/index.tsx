@@ -1,13 +1,13 @@
-import React from 'react'
-import Hero from '@/components/home/Hero'
-import MachineLearningResponsive from '@/components/home/MachineLearningResponsive'
-import PlainLayout from '@/layouts/plain'
 import Footer from '@/components/Footer'
 import EffortlessDevelopment from '@/components/home/EffortlessDevelopment'
-import ProductionReadyFirst from '@/components/home/ProductionReadyFirst'
-import { loadSample, Sample } from '@/lib/samples'
-import ModelsLifecycle from '@/components/home/ModelsLifecycle'
 import Extensibility from '@/components/home/Extensibility'
+import Hero from '@/components/home/Hero'
+import MachineLearningResponsive from '@/components/home/MachineLearningResponsive'
+import ModelsLifecycle from '@/components/home/ModelsLifecycle'
+import ProductionReadyFirst from '@/components/home/ProductionReadyFirst'
+import PlainLayout from '@/layouts/plain'
+import { loadSample, Sample } from '@/lib/samples'
+import React from 'react'
 
 export async function getStaticProps() {
   const heroSamples = [

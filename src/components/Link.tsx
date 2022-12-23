@@ -1,5 +1,5 @@
-import React from 'react'
 import NextLink from 'next/link'
+import React from 'react'
 
 export default function Link({ href, className, children, ...props }: React.ComponentProps<'a'>) {
   return href?.startsWith('/') ? (

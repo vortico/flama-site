@@ -1,5 +1,5 @@
-import { createContext } from 'react'
 import { Docs as IDocs } from '@/contentlayer'
+import { createContext } from 'react'
 
 export interface DocsContext {
   docs?: IDocs

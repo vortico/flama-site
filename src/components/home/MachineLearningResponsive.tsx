@@ -1,11 +1,11 @@
+import CodeWindow from '@/components/CodeWindow'
+import FlamaName from '@/components/FlamaName'
 import HomeSection from '@/components/home/HomeSection'
-import { CpuChipIcon } from '@heroicons/react/24/outline'
-import React, { useCallback, useMemo, useState } from 'react'
 import { ISelectableItem, SelectableList } from '@/components/home/SelectableList'
 import { PyTorchIcon, ScikitLearnIcon, TensorFlowIcon } from '@/components/icons'
 import { Sample } from '@/lib/samples'
-import FlamaName from '@/components/FlamaName'
-import CodeWindow from '@/components/CodeWindow'
+import { CpuChipIcon } from '@heroicons/react/24/outline'
+import React, { useCallback, useMemo, useState } from 'react'
 
 const frameworks: ISelectableItem[] = [
   {

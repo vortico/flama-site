@@ -1,6 +1,6 @@
 import LinkButton from '@/components/LinkButton'
-import React, { ReactNode } from 'react'
 import { motion } from 'framer-motion'
+import React, { ReactNode } from 'react'
 
 interface HomeSectionProps extends React.ComponentProps<'section'> {
   icon: ReactNode

@@ -1,6 +1,6 @@
-import React from 'react'
 import type { Language } from 'prism-react-renderer'
 import Highlight, { defaultProps } from 'prism-react-renderer'
+import React from 'react'
 
 function CodeWrapper({ children }: React.ComponentProps<'code'>) {
   return <code className="relative inline flex-auto overflow-auto whitespace-normal">{children}</code>

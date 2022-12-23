@@ -1,9 +1,9 @@
-import { allBlogs, Blog as IBlog } from '@/contentlayer'
-import { NextSeo } from 'next-seo'
-import PlainLayout from '@/layouts/plain'
 import Footer from '@/components/Footer'
-import LinkButton from '@/components/LinkButton'
 import Link from '@/components/Link'
+import LinkButton from '@/components/LinkButton'
+import { allBlogs, Blog as IBlog } from '@/contentlayer'
+import PlainLayout from '@/layouts/plain'
+import { NextSeo } from 'next-seo'
 
 interface BlogPreviewProps {
   blog: IBlog

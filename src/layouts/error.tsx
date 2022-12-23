@@ -1,5 +1,5 @@
-import React from 'react'
 import PlainLayout from '@/layouts/plain'
+import React from 'react'
 
 interface ErrorLayoutProps {
   code: string
