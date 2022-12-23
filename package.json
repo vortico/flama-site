@@ -28,6 +28,7 @@
     "@heroicons/react": "^2.0.13",
     "@next/mdx": "^13.0.2",
     "contentlayer": "^0.2.9",
+    "framer-motion": "^8.0.2",
     "globby": "^13.1.2",
     "next": "^13.0.2",
     "next-contentlayer": "^0.2.9",
