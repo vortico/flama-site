@@ -1,4 +1,5 @@
 import Footer from '@/components/Footer'
+import DevelopmentTools from '@/components/home/DevelopmentTools'
 import EffortlessDevelopment from '@/components/home/EffortlessDevelopment'
 import Extensibility from '@/components/home/Extensibility'
 import Hero from '@/components/home/Hero'
@@ -133,6 +134,7 @@ export default function Home({
           <EffortlessDevelopment />
           <ModelsLifecycle samples={modelsLifecycleSamples} />
           <Extensibility samples={extensibilitySamples} />
+          <DevelopmentTools />
         </main>
         <Footer />
       </>
