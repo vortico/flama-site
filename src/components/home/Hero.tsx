@@ -4,7 +4,6 @@ import Link from '@/components/Link'
 import { QuickSearchButton } from '@/components/QuickSearchButton'
 import { Sample } from '@/lib/samples'
 import { ChevronRightIcon } from '@heroicons/react/24/solid'
-import { motion } from 'framer-motion'
 import React, { useCallback, useMemo, useState } from 'react'
 
 interface SamplesProps {
@@ -36,12 +35,7 @@ function Samples({ samples }: SamplesProps) {
           </button>
         ))}
       </div>
-      <motion.div
-        initial={{ opacity: 0, scale: 0 }}
-        whileInView={{ opacity: 1, scale: 1 }}
-        viewport={{ once: true }}
-        className="h-full min-h-[17.5rem] w-full basis-full lg:basis-2/3"
-      >
+      <div className="h-full min-h-[17.5rem] w-full basis-full lg:basis-2/3">
         {selectedSample && (
           <CodeWindow
             title={selectedSample.title}
@@ -51,7 +45,7 @@ function Samples({ samples }: SamplesProps) {
             className="max-h-64"
           />
         )}
-      </motion.div>
+      </div>
     </div>
   )
 }
