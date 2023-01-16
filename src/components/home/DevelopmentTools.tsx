@@ -49,8 +49,14 @@ export default function DevelopmentTools() {
       content={
         <>
           <p>
-            <FlamaName /> is designed to be quick to learn and use. This goal is accomplished with a simple and clear
-            syntax, and a rich spectrum of built-in functionality, reducing boilerplating and development time.
+            The process of developing APIs for Machine Learning can be complex and time-consuming, especially when it
+            comes to debugging. Debugging refers to the process of identifying and fixing errors in the code, which can
+            range from simple syntax errors to more complex issues such as incorrect data access or resource management.
+          </p>
+          <br />
+          <p>
+            <FlamaName /> provides graphical tools that make debugging simple and direct, allowing you to trace code
+            errors (Internal Server Error), or access to non-existent resources (Not Found) with ease.
           </p>
         </>
       }
