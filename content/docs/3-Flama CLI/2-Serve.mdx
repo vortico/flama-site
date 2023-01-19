@@ -74,37 +74,67 @@ available, but also gives you the equivalent `curl` statement. For instance, in 
   --header 'Content-Type: application/json'
 
 {
-  "C": 1,
-  "class_weight": null,
-  "dual": false,
-  "fit_intercept": true,
-  "intercept_scaling": 1,
-  "l1_ratio": null,
-  "max_iter": 100,
-  "multi_class": "auto",
-  "n_jobs": null,
-  "penalty": "l2",
-  "random_state": null,
-  "solver": "lbfgs",
-  "tol": 0.0001,
-  "verbose": 0,
-  "warm_start": false
+  "id": "13e09755-0925-4b27-839e-cf144c5c1309",
+  "timestamp": "2023-01-19T16:39:19.282700",
+  "framework": {
+    "lib": "sklearn",
+    "version": "1.2.0"
+  },
+  "model": {
+    "obj": "MLPClassifier",
+    "info": {
+      "activation": "tanh",
+      "alpha": 0.0001,
+      "batch_size": "auto",
+      "beta_1": 0.9,
+      "beta_2": 0.999,
+      "early_stopping": false,
+      "epsilon": 1e-08,
+      "hidden_layer_sizes": [
+        10
+      ],
+      "learning_rate": "constant",
+      "learning_rate_init": 0.001,
+      "max_fun": 15000,
+      "max_iter": 2000,
+      "momentum": 0.9,
+      "n_iter_no_change": 10,
+      "nesterovs_momentum": true,
+      "power_t": 0.5,
+      "random_state": null,
+      "shuffle": true,
+      "solver": "adam",
+      "tol": 0.0001,
+      "validation_fraction": 0.1,
+      "verbose": false,
+      "warm_start": false
+    },
+    "params": null,
+    "metrics": null
+  },
+  "extra": null
 }
 ```
 
 Or, in case we want to make a prediction:
 
-<Image src="/images/docs/docs-predict-post.png" alt="docs-post-predict" width="1600" height="760" />
+<Image src="/images/docs/docs-predict-post.png" alt="docs-post-predict" width="1600" height="1135" />
 
 ```commandLine
 > curl --request POST \
   --url http://127.0.0.1:8000/predict/ \
   --header 'Content-Type: application/json' \
-  --data '{"input": [[1,2,3], [1,2,3]]}'
+  --data '{
+  "input": [
+    [0, 0], [1, 0], [0, 1], [0, 0]
+  ]
+}'
 
 {
   "output": [
     0,
+    1,
+    1,
     0
   ]
 }
@@ -284,14 +314,14 @@ can do it by any of the following two equivalent ways:
 #### Using option argument
 
 ```commandline
-> flama serve sklearn_model.flm --model-url=/logreg
+> flama serve sklearn_model.flm --model-url=/xor
 ```
 
 #### Using environment variable
 
 ```commandline
 > export FLAMA_MODEL_PATH=sklearn_model.flm
-> export FLAMA_MODEL_URL=/logreg
+> export FLAMA_MODEL_URL=/xor
 > flama serve sklearn_model.flm
 ```
 
@@ -301,15 +331,15 @@ As a quick usage example which populates all application and models parameters, 
 
 ```commanline
 > flama serve sklearn_model.flm \
-    --model-url="/logreg" \
-    --model-name="Logistic Regression" \
+    --model-url="/xor" \
+    --model-name="XOR dummy model" \
     --app-title="ML API" \
     --app-version="1.0.0" \
-    --app-description="Logistic Regression model serving for predictions" \
+    --app-description="XOR model serving for predictions" \
     --app-docs="/docs/" \
     --app-schema="/schema/"
 ```
 
 With these changes, the documentation at **http://127.0.0.1:8000/docs/** will look like:
 
-<Image src="/images/docs/docs-serve-params.png" alt="docs-post-predict" width="1600" height="912" />
+<Image src="/images/docs/docs-serve-params.png" alt="docs-post-predict" width="1600" height="999" />

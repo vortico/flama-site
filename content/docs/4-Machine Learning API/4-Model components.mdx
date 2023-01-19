@@ -109,17 +109,17 @@ yet. Without further ado, let's implement our **ModelComponent** class:
 from flama.models import ModelComponent
 
 class MyCustomModelComponent(ModelComponent):
-
     def __init__(self, model_path: str):
         self._model_path = model_path
-        self.model = MyCustomModel(None)
+        self.model = MyCustomModel(None, meta=None)
 
     def load_model(self):
         with open(self._model_path, "rb") as f:
-            self.model = MyCustomModel(flama.load(f).model)
+            model_obj = flama.load(f)
+            self.model = MyCustomModel(model_obj.model, meta=model_obj.meta)
 
     def unload_model(self):
-        self.model = MyCustomModel(None)
+        self.model = MyCustomModel(None, meta=None)
 
     def resolve(self) -> MyCustomModel:
         if not self.model.model:
@@ -395,9 +395,9 @@ This will return the following response:
 
 <Image
   src="/images/docs/docs-add-model-component-inspect.png"
-  alt="docs-add-model-component-inspect-true"
+  alt="docs-add-model-component-inspect"
   width="1600"
-  height="1043"
+  height="1070"
 />
 
 If we navigate again to the section _Get metadata info_, and click on _Send API Request_, we will see that the **loaded**
@@ -405,7 +405,7 @@ attribute is now **true**. This means that the model has been loaded:
 
 <Image
   src="/images/docs/docs-add-model-component-metadata-true.png"
-  alt="docs-add-model-component-inspect-false"
+  alt="docs-add-model-component-metadata-false"
   width="1600"
   height="1043"
 />
