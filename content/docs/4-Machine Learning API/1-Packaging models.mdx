@@ -96,13 +96,16 @@ and testing.
 
 ```python
 import flama
-from sklearn.linear_model import LogisticRegression
+from sklearn.neural_network import MLPClassifier
 
-model = LogisticRegression()
-model.fit(x_train, y_train)
+model = MLPClassifier(activation="tanh", max_iter=2000, hidden_layer_sizes=(10,))
+model.fit(
+    np.array([[0, 0], [0, 1], [1, 0], [1, 1]]),
+    np.array([0, 1, 1, 0]),
+)
 
-with open("sk_model.flm", "wb") as f:
-    flama.dump("sklearn", model, f)
+with open("sklearn_model.flm", "wb") as f:
+    flama.dump(model, f)
 ```
 
 ### TensorFlow
@@ -111,21 +114,26 @@ with open("sk_model.flm", "wb") as f:
 import flama
 import tensorflow as tf
 
-model = tf.keras.models.Sequential([
-    tf.keras.layers.Flatten(input_shape=(28, 28)),
-    tf.keras.layers.Dense(128, activation='relu'),
-    tf.keras.layers.Dropout(0.2),
-    tf.keras.layers.Dense(10, activation='softmax')
-])
-model.compile(
-    optimizer='adam',
-    loss='sparse_categorical_crossentropy',
-    metrics=['accuracy']
-)
-model.fit(x_train, y_train, epochs=5)
+import tensorflow as tf
 
-with open("tf_model.flm", "wb") as f:
-    flama.dump("tensorflow", model, f)
+model = tf.keras.models.Sequential(
+    [
+        tf.keras.layers.Flatten(input_shape=(2,)),
+        tf.keras.layers.Dense(10, activation="tanh"),
+        tf.keras.layers.Dense(1, activation="sigmoid"),
+    ]
+)
+
+model.compile(optimizer="adam", loss="mse")
+model.fit(
+    np.array([[0, 0], [0, 1], [1, 0], [1, 1]]),
+    np.array([[0], [1], [1], [0]]),
+    epochs=2000,
+    verbose=0,
+)
+
+with open("tensorflow_model.flm", "wb") as f:
+    flama.dump(model, f)
 ```
 
 ### PyTorch
@@ -135,9 +143,42 @@ import flama
 import torch
 
 class Model(torch.nn.Module):
-    def forward(self, x):
-        return x + 10
+    def __init__(self):
+        super().__init__()
+        self.l1 = torch.nn.Linear(2, 10)
+        self.l2 = torch.nn.Linear(10, 1)
 
-with open("torch_model.flm", "wb") as f:
-    flama.dump("pytorch", model, f)
+    def forward(self, x):
+        x = torch.tanh(self.l1(x))
+        x = torch.sigmoid(self.l2(x))
+        return x
+
+    def _train(self, X, Y, loss, optimizer):
+        for m in self.modules():
+            if isinstance(m, torch.nn.Linear):
+                m.weight.data.normal_(0, 1)
+
+        steps = X.size(0)
+        for i in range(2000):
+            for j in range(steps):
+                data_point = np.random.randint(steps)
+                x_var = torch.autograd.Variable(X[data_point], requires_grad=False)
+                y_var = torch.autograd.Variable(Y[data_point], requires_grad=False)
+
+                optimizer.zero_grad()
+                y_hat = model(x_var)
+                loss_result = loss.forward(y_hat, y_var)
+                loss_result.backward()
+                optimizer.step()
+
+        return self
+
+
+X = torch.Tensor([[0, 0], [0, 1], [1, 0], [1, 1]])
+Y = torch.Tensor([0, 1, 1, 0]).view(-1, 1)
+model = Model()
+model._train(X, Y, loss=torch.nn.BCELoss(), optimizer=torch.optim.Adam(model.parameters()))
+
+with open("pytorch_model.flm", "wb") as f:
+    flama.dump(model, f)
 ```
