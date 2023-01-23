@@ -12,12 +12,13 @@ const samples = [
     id: 'internal-server-error',
     title: 'Internal Server Error',
     content: (
-      <div className="dark:opacity-70">
+      <div className="dark:opacity-80">
         <Image
-          src="/images/home/internal-server-error.png"
+          src="/images/home/internal-server-error.gif"
           alt="internal-server-error-page"
-          width="1600"
-          height="920"
+          width="920"
+          height="410"
+          unoptimized={true}
         />
       </div>
     ),
@@ -26,8 +27,8 @@ const samples = [
     id: 'not-found',
     title: 'Not Found',
     content: (
-      <div className="dark:opacity-70">
-        <Image src="/images/home/not-found.png" alt="not-found-page" width="1600" height="920" />
+      <div className="dark:opacity-80">
+        <Image src="/images/home/not-found.gif" alt="not-found-page" width="920" height="410" unoptimized={true} />
       </div>
     ),
   },
