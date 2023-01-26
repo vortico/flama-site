@@ -30,9 +30,9 @@ const links = [
   {
     name: 'About Flama',
     links: [
-      { name: 'GitHub', url: 'https://github.com/perdy/flama' },
-      { name: 'Releases', url: 'https://github.com/perdy/flama/releases' },
-      { name: 'Issues', url: 'https://github.com/perdy/flama/issues' },
+      { name: 'GitHub', url: 'https://github.com/vortico/flama' },
+      { name: 'Releases', url: 'https://github.com/vortico/flama/releases' },
+      { name: 'Issues', url: 'https://github.com/vortico/flama/issues' },
       { name: 'Contribute', url: '/docs/contributing/how-to-contribute' },
     ],
   },

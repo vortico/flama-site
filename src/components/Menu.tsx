@@ -40,7 +40,7 @@ function SocialList() {
     <>
       <ThemeModeSwitcher className="h-5 w-5 text-primary-400 hover:text-primary-500 dark:text-primary-600 dark:hover:text-primary-500 md:h-6 md:w-6" />
       <a
-        href="https://github.com/perdy/flama"
+        href="https://github.com/vortico/flama"
         className="relative block text-primary-400 hover:text-primary-500 dark:text-primary-600 dark:hover:text-primary-500"
         aria-label="Flama on Github"
       >

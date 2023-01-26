@@ -1,1 +1,1 @@
-docker run -d --name=flama -p 8000:8000 -v /path/to/your_model_file:/models/model perdy/flama
+docker run -d --name=flama -p 8000:8000 -v /path/to/your_model_file:/models/model vortico/flama

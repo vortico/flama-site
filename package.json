@@ -4,12 +4,12 @@
   "private": true,
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/perdy/flama-site.git"
+    "url": "git+https://github.com/vortico/flama-site.git"
   },
   "author": "José Antonio Perdiguero López",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/perdy/flama-site/issues"
+    "url": "https://github.com/vortico/flama-site/issues"
   },
   "homepage": "https://flama.dev",
   "scripts": {
