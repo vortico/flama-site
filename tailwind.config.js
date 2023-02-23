@@ -231,17 +231,14 @@ module.exports = {
     },
     fontFamily: {
       serif: ['Montserrat', ...defaultTheme.fontFamily.serif],
-      sans: ['"Fira Sans"', ...defaultTheme.fontFamily.sans],
+      sans: ['Lato', ...defaultTheme.fontFamily.sans],
       mono: ['"Fira Mono"', ...defaultTheme.fontFamily.mono],
     },
   },
   plugins: [
     require('@tailwindcss/typography'),
     function ({ addVariant }) {
-      addVariant(
-        'supports-backdrop-blur',
-        '@supports (backdrop-filter: blur(0)) or (-webkit-backdrop-filter: blur(0))'
-      )
+      addVariant('supports-backdrop-blur', '@supports (backdrop-filter: blur(0)) or (-webkit-backdrop-filter: blur(0))')
     },
   ],
 }

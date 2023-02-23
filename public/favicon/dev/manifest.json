@@ -6,13 +6,13 @@
   "display": "standalone",
   "icons": [
     {
-      "src": "/favicon/dev/icon-192x192.png",
+      "src": "/favicon/dev/icon-192.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "/favicon/dev/icon-512x512.png",
+      "src": "/favicon/dev/icon-512.png",
       "sizes": "512x512a",
       "type": "image/png"
     }
