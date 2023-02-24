@@ -4,8 +4,7 @@ import HomeSection from '@/components/home/HomeSection'
 import { ISelectableItem, SelectableList } from '@/components/home/SelectableList'
 import { PythonIcon } from '@/components/icons'
 import { Sample } from '@/lib/samples'
-import { SparklesIcon } from '@heroicons/react/24/outline'
-import { CommandLineIcon } from '@heroicons/react/24/solid'
+import { IconSparkles, IconTerminal2 } from '@tabler/icons-react'
 import { motion } from 'framer-motion'
 import React, { useCallback, useMemo, useState } from 'react'
 
@@ -13,7 +12,7 @@ const items: ISelectableItem[] = [
   {
     id: 'cli',
     name: 'Command Line',
-    icon: <CommandLineIcon fillOpacity=".8" />,
+    icon: <IconTerminal2 className="h-full w-full" fillOpacity=".8" />,
   },
   {
     id: 'python',
@@ -46,7 +45,7 @@ export default function ProductionReadyFirst({ samples }: ProductionReadyFirstPr
   return (
     <HomeSection
       id="production-ready-first"
-      icon={<SparklesIcon />}
+      icon={<IconSparkles className="h-full w-full" />}
       title="Production-Ready First"
       docRef="/docs/"
       selectableList={

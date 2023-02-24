@@ -1,5 +1,5 @@
 import { SearchButton } from '@/components/Search'
-import { MagnifyingGlassIcon } from '@heroicons/react/24/outline'
+import { IconSearch } from '@tabler/icons-react'
 import React from 'react'
 
 export function QuickSearchButton({ className, ...props }: React.ComponentProps<'button'>) {
@@ -10,7 +10,7 @@ export function QuickSearchButton({ className, ...props }: React.ComponentProps<
     >
       {({ actionKey }) => (
         <>
-          <MagnifyingGlassIcon className="h-6 w-6 flex-none text-brand-500" />
+          <IconSearch className="h-6 w-6 flex-none text-brand-500" />
           <span className="flex-auto text-primary-500 dark:text-primary-300">Quick search...</span>
           {actionKey && (
             <kbd className="font-sans font-semibold text-brand-500">

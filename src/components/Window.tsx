@@ -1,4 +1,4 @@
-import { MinusCircleIcon, PlusCircleIcon, XCircleIcon } from '@heroicons/react/24/solid'
+import { IconCircleMinus, IconCirclePlus, IconCircleX } from '@tabler/icons-react'
 import React, { MutableRefObject, useCallback, useState } from 'react'
 
 export interface WindowProps extends React.ComponentProps<'div'> {
@@ -36,13 +36,13 @@ export default function Window({ title, contentRef, className, children }: Windo
           <span className="truncate font-semibold text-primary-400">{title}</span>
           <div className="flex items-center justify-end gap-x-2">
             <button className="h-4 w-4" onClick={onMinimize} aria-label="Minimize Window">
-              <MinusCircleIcon />
+              <IconCircleMinus className="h-full w-full" />
             </button>
             <button className="h-4 w-4" onClick={onMaximize} aria-label="Maximize Window">
-              <PlusCircleIcon />
+              <IconCirclePlus className="h-full w-full" />
             </button>
             <button className="h-4 w-4" onClick={onClose} aria-label="Close Window">
-              <XCircleIcon />
+              <IconCircleX className="h-full w-full" />
             </button>
           </div>
         </div>

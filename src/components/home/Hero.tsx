@@ -3,7 +3,7 @@ import FlamaName from '@/components/FlamaName'
 import Link from '@/components/Link'
 import { QuickSearchButton } from '@/components/QuickSearchButton'
 import { Sample } from '@/lib/samples'
-import { ChevronRightIcon } from '@heroicons/react/24/solid'
+import { IconChevronRight } from '@tabler/icons-react'
 import React, { useCallback, useMemo, useState } from 'react'
 
 interface SamplesProps {
@@ -22,7 +22,9 @@ function Samples({ samples }: SamplesProps) {
       <div className="flex h-12 w-full basis-full justify-around lg:block lg:h-full lg:basis-1/3 lg:space-y-6 lg:pl-9">
         {samples.map(({ id, title }) => (
           <button key={id} className="flex items-center" onClick={onSelect(id)}>
-            {selected === id && <ChevronRightIcon className="-ml-8 inline h-8 text-brand-500 sm:-ml-9 sm:h-9" />}
+            {selected === id && (
+              <IconChevronRight className="-ml-8 inline h-8 w-8 text-brand-500 sm:-ml-9 sm:h-9 sm:w-9" />
+            )}
             <span
               className={`text-lg font-bold tracking-tight sm:text-3xl ${
                 selected === id
@@ -59,7 +61,7 @@ export default function Hero({ samples }: HeroProps) {
     <>
       <section className="mx-auto max-w-5xl px-8 pt-20 text-center sm:pt-24 lg:pt-32">
         <h1 className="text-4xl font-extrabold text-primary-700 dark:text-primary-200 sm:text-5xl lg:text-6xl">
-          Productionalize your machine learning models seamlessly
+          Productionalise your machine learning models seamlessly
         </h1>
         <p className="mx-auto mt-10 max-w-3xl text-lg">
           <FlamaName /> is a data-science oriented framework to rapidly build modern and robust machine learning APIs.

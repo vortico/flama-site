@@ -1,5 +1,5 @@
 import Link from '@/components/Link'
-import { ChevronLeftIcon, ChevronRightIcon } from '@heroicons/react/24/solid'
+import { IconChevronLeft, IconChevronRight } from '@tabler/icons-react'
 import React from 'react'
 
 interface LinkButtonProps extends React.ComponentProps<'a'> {
@@ -22,9 +22,9 @@ export default function LinkButton({
         leftIcon && 'pl-2'
       } ${rightIcon && 'pr-2'} ${className}`}
     >
-      {leftIcon && <ChevronLeftIcon className="h-4 pr-2" />}
+      {leftIcon && <IconChevronLeft className="h-4 w-4 pr-2" />}
       <span className="text-left text-sm font-semibold">{text}</span>
-      {rightIcon && <ChevronRightIcon className="h-4 pl-2" />}
+      {rightIcon && <IconChevronRight className="h-4 w-4 pl-2" />}
     </Link>
   )
 }

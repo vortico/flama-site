@@ -1,8 +1,7 @@
 import FlamaName from '@/components/FlamaName'
 import HomeSection from '@/components/home/HomeSection'
 import Window from '@/components/Window'
-import { WrenchScrewdriverIcon } from '@heroicons/react/24/outline'
-import { ChevronRightIcon } from '@heroicons/react/24/solid'
+import { IconChevronRight, IconTools } from '@tabler/icons-react'
 import { motion } from 'framer-motion'
 import Image from 'next/image'
 import React, { useCallback, useMemo, useState } from 'react'
@@ -44,7 +43,7 @@ export default function DevelopmentTools() {
   return (
     <HomeSection
       id="development-tools"
-      icon={<WrenchScrewdriverIcon />}
+      icon={<IconTools className="h-full w-full" />}
       title="Development Tools"
       docRef="/docs/"
       content={
@@ -66,7 +65,7 @@ export default function DevelopmentTools() {
         <div className="h-full w-full basis-full space-y-6 pl-9 lg:basis-1/3">
           {samples.map(({ id, title }) => (
             <button key={id} className="flex items-center" onClick={onSelect(id)}>
-              {selected === id && <ChevronRightIcon className="-ml-7 inline h-7 text-brand-500" />}
+              {selected === id && <IconChevronRight className="-ml-7 inline h-7 w-7 text-brand-500" />}
               <span
                 className={`text-lg font-bold tracking-tight sm:text-xl ${
                   selected === id

@@ -1,4 +1,4 @@
-import { CheckIcon, DocumentDuplicateIcon } from '@heroicons/react/24/outline'
+import { IconCheck, IconClipboardCopy } from '@tabler/icons-react'
 import React, { useCallback, useState } from 'react'
 
 export interface ClipboardButtonProps {
@@ -22,9 +22,9 @@ export default function ClipboardButton({ code }: ClipboardButtonProps) {
     >
       <button onClick={onCopy} aria-label="Copy to Clipboard">
         {copied ? (
-          <CheckIcon className="h-6 w-6 text-brand-500" />
+          <IconCheck className="h-6 w-6 text-brand-500" />
         ) : (
-          <DocumentDuplicateIcon className="h-6 w-6 text-primary-500" />
+          <IconClipboardCopy className="h-6 w-6 text-primary-500" />
         )}
       </button>
     </div>

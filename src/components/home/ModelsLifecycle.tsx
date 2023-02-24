@@ -2,7 +2,7 @@ import CodeWindow from '@/components/CodeWindow'
 import FlamaName from '@/components/FlamaName'
 import HomeSection from '@/components/home/HomeSection'
 import { Sample } from '@/lib/samples'
-import { ArrowPathIcon } from '@heroicons/react/24/outline'
+import { IconRefresh } from '@tabler/icons-react'
 import { motion } from 'framer-motion'
 import React from 'react'
 
@@ -16,7 +16,7 @@ export default function ModelsLifecycle({ samples }: ModelsLifecycleProps) {
   return (
     <HomeSection
       id="models-lifecycle"
-      icon={<ArrowPathIcon />}
+      icon={<IconRefresh className="h-full w-full" />}
       title="Models Lifecycle"
       docRef="/docs/"
       content={

@@ -1,5 +1,5 @@
 import { BlogContext } from '@/components/blog/Context'
-import { ChevronDoubleLeftIcon } from '@heroicons/react/24/solid'
+import { IconChevronsLeft } from '@tabler/icons-react'
 import Link from 'next/link'
 import React, { useContext } from 'react'
 
@@ -19,7 +19,7 @@ export function Menu() {
           href="/blog"
           className="group flex items-center space-x-2 text-primary-600 hover:text-brand-500 dark:text-primary-400 dark:hover:text-brand-400"
         >
-          <ChevronDoubleLeftIcon className="h-4" />
+          <IconChevronsLeft className="h-4" />
           <span className="font-semibold">Go back to blog</span>
         </Link>
       </div>

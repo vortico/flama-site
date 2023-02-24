@@ -4,7 +4,7 @@ import HomeSection from '@/components/home/HomeSection'
 import { ISelectableItem, SelectableList } from '@/components/home/SelectableList'
 import { PyTorchIcon, ScikitLearnIcon, TensorFlowIcon } from '@/components/icons'
 import { Sample } from '@/lib/samples'
-import { CpuChipIcon } from '@heroicons/react/24/outline'
+import { IconRobot } from '@tabler/icons-react'
 import { motion } from 'framer-motion'
 import React, { useCallback, useMemo, useState } from 'react'
 
@@ -45,7 +45,7 @@ export default function MachineLearningResponsive({ samples }: MachineLearningRe
   return (
     <HomeSection
       id="machine-learning-responsive"
-      icon={<CpuChipIcon />}
+      icon={<IconRobot className="h-full w-full" />}
       title="Machine Learning Responsive"
       docRef="/docs/"
       selectableList={

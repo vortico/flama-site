@@ -2,7 +2,7 @@ import CodeWindow from '@/components/CodeWindow'
 import FlamaName from '@/components/FlamaName'
 import HomeSection from '@/components/home/HomeSection'
 import { Sample } from '@/lib/samples'
-import { PuzzlePieceIcon } from '@heroicons/react/24/outline'
+import { IconPlug } from '@tabler/icons-react'
 import { motion } from 'framer-motion'
 import React from 'react'
 
@@ -16,7 +16,7 @@ export default function Extensibility({ samples }: ExtensibilityProps) {
   return (
     <HomeSection
       id="extensibility"
-      icon={<PuzzlePieceIcon />}
+      icon={<IconPlug className="h-full w-full" />}
       title="Extensibility"
       docRef="/docs/"
       content={

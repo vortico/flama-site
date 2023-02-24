@@ -25,8 +25,8 @@
   },
   "dependencies": {
     "@docsearch/react": "^3.3.0",
-    "@heroicons/react": "^2.0.13",
     "@next/mdx": "^13.0.2",
+    "@tabler/icons-react": "^2.5.0",
     "contentlayer": "^0.2.9",
     "framer-motion": "^8.0.2",
     "globby": "^13.1.2",

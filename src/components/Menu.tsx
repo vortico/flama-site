@@ -2,7 +2,7 @@ import { FlamaIcon, GithubIcon } from '@/components/icons'
 import { SearchButton } from '@/components/Search'
 import ThemeModeSwitcher from '@/components/ThemeModeSwitcher'
 import Tooltip from '@/components/Tooltip'
-import { Bars3Icon, MagnifyingGlassIcon, XMarkIcon } from '@heroicons/react/24/outline'
+import { IconMenu2, IconSearch, IconX } from '@tabler/icons-react'
 import Link from 'next/link'
 import React, { useCallback, useState } from 'react'
 import { createPortal } from 'react-dom'
@@ -71,7 +71,7 @@ function FloatMenu({ onClose }: FloatMenuProps) {
       />
       <div className="relative rounded bg-primary-100 py-6 text-base font-semibold text-primary-600 shadow-lg dark:bg-primary-800 dark:text-primary-400">
         <button className="absolute top-5 right-5 flex h-8 w-8 items-center justify-center text-primary-400 hover:text-primary-500 dark:text-primary-600 dark:hover:text-primary-500">
-          <XMarkIcon className="h-5 w-5" onClick={onClose} aria-label="close menu" />
+          <IconX className="h-5 w-5" onClick={onClose} aria-label="close menu" />
         </button>
         <nav className="px-6 pb-6">
           <NavList className="flex flex-col gap-6 text-lg font-medium text-primary-600 dark:text-primary-400 " />
@@ -114,14 +114,14 @@ export default function Menu() {
             className="block text-primary-400 hover:text-primary-500 dark:text-primary-600 dark:hover:text-primary-500"
             aria-label="Search"
           >
-            <MagnifyingGlassIcon className="h-5 w-5" />
+            <IconSearch className="h-5 w-5" />
           </SearchButton>
           <button
             className="block text-primary-400 hover:text-primary-500 dark:text-primary-600 dark:hover:text-primary-500"
             onClick={onOpen}
             aria-label="Open menu"
           >
-            <Bars3Icon className="h-5 w-5" />
+            <IconMenu2 className="h-5 w-5" />
           </button>
         </div>
       </div>

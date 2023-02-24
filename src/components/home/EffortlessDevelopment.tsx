@@ -1,7 +1,6 @@
 import FlamaName from '@/components/FlamaName'
 import HomeSection from '@/components/home/HomeSection'
-import { BoltIcon } from '@heroicons/react/24/outline'
-import { ChevronRightIcon } from '@heroicons/react/24/solid'
+import { IconBolt, IconChevronRight } from '@tabler/icons-react'
 import { motion } from 'framer-motion'
 import React, { useCallback, useMemo, useState } from 'react'
 
@@ -117,7 +116,7 @@ export default function EffortlessDevelopment() {
   return (
     <HomeSection
       id="effortless-development"
-      icon={<BoltIcon />}
+      icon={<IconBolt className="h-full w-full" />}
       title="Effortless Development"
       docRef="/docs/"
       content={
@@ -138,7 +137,7 @@ export default function EffortlessDevelopment() {
         <div className="h-full w-full basis-full space-y-6 pl-9 lg:basis-1/3">
           {samples.map(({ id, title }) => (
             <button key={id} className="flex items-center" onClick={onSelect(id)}>
-              {selected === id && <ChevronRightIcon className="-ml-7 inline h-7 text-brand-500" />}
+              {selected === id && <IconChevronRight className="-ml-7 inline h-7 w-7 text-brand-500" />}
               <span
                 className={`text-lg font-bold tracking-tight sm:text-xl ${
                   selected === id

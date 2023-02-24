@@ -1,4 +1,4 @@
-import { MoonIcon, SunIcon } from '@heroicons/react/24/outline'
+import { IconMoon, IconSun } from '@tabler/icons-react'
 import { useTheme } from 'next-themes'
 import React, { useCallback, useEffect, useState } from 'react'
 
@@ -16,7 +16,7 @@ export default function ThemeModeSwitcher({ ...props }: React.ComponentProps<'bu
 
   return (
     <button aria-label="Theme Mode Switcher" type="button" {...props} onClick={onSwitch}>
-      {theme === 'light' ? <SunIcon /> : <MoonIcon />}
+      {theme === 'light' ? <IconSun className="h-full w-full" /> : <IconMoon className="h-full w-full" />}
     </button>
   )
 }
