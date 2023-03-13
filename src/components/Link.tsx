@@ -2,7 +2,7 @@ import NextLink from 'next/link'
 import { useRouter } from 'next/router'
 import React, { useEffect, useMemo, useState } from 'react'
 
-export default function Link({ href, children, ...props }: React.ComponentProps<'a'>) {
+export default function Link({ href, children, className, ...props }: React.ComponentProps<'a'>) {
   const { asPath } = useRouter()
   const [origin, setOrigin] = useState<string | null>(null)
 
@@ -18,13 +18,20 @@ export default function Link({ href, children, ...props }: React.ComponentProps<
     [href, origin, asPath]
   )
 
-  if (href === undefined) return <a>{children}</a>
+  if (href === undefined)
+    return (
+      <a className={className} {...props}>
+        {children}
+      </a>
+    )
 
   return isAnchor ? (
     <a href={href} {...props}>
       {children}
     </a>
   ) : (
-    <NextLink href={href}>{children}</NextLink>
+    <NextLink href={href} className={className}>
+      {children}
+    </NextLink>
   )
 }
