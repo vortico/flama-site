@@ -14,6 +14,7 @@ export default function Link({ href, children, className, ...props }: React.Comp
     () =>
       href === undefined ||
       href.startsWith('#') ||
+      href.startsWith('?') ||
       (origin !== null && new URL(asPath, origin).pathname === new URL(href, origin).pathname),
     [href, origin, asPath]
   )
@@ -26,7 +27,7 @@ export default function Link({ href, children, className, ...props }: React.Comp
     )
 
   return isAnchor ? (
-    <a href={href} {...props}>
+    <a href={href} className={className} {...props}>
       {children}
     </a>
   ) : (
