@@ -72,7 +72,7 @@ export function withTOC({ title, titleSlug, activeClassNames }: withTOCProps) {
             })
           })
         },
-        { rootMargin: '-60px 0px 0px 0px' }
+        { rootMargin: '-112px 0px 0px 0px' }
       )
 
       // Register all entries

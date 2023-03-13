@@ -33,7 +33,7 @@ export function H1({ id, children, ...props }: React.ComponentProps<'h1'>) {
     <h1
       {...props}
       id={id}
-      className="group -ml-8 mb-4 mt-10 flex scroll-mt-28 items-center whitespace-pre-wrap pl-8 text-3xl font-bold tracking-tight text-primary-700 dark:text-primary-200"
+      className="group -ml-8 mb-4 mt-10 flex items-center whitespace-pre-wrap pl-8 text-3xl font-bold tracking-tight text-primary-700 dark:text-primary-200"
     >
       <HeaderLink href={`#${id}`} />
       {children}
@@ -46,7 +46,7 @@ export function H2({ id, children, ...props }: React.ComponentProps<'h2'>) {
     <h2
       {...props}
       id={id}
-      className="group -ml-8 mb-4 mt-10 flex scroll-mt-28 items-center whitespace-pre-wrap pl-8 text-2xl font-bold tracking-tight text-primary-700 dark:text-primary-200"
+      className="group -ml-8 mb-4 mt-10 flex items-center whitespace-pre-wrap pl-8 text-2xl font-bold tracking-tight text-primary-700 dark:text-primary-200"
     >
       <HeaderLink href={`#${id}`} />
       {children}
@@ -59,7 +59,7 @@ export function H3({ id, children, ...props }: React.ComponentProps<'h3'>) {
     <h3
       {...props}
       id={id}
-      className="group -ml-8 mb-3 mt-10 flex scroll-mt-28 items-center whitespace-pre-wrap pl-8 text-xl font-bold tracking-tight text-primary-700 dark:text-primary-200"
+      className="group -ml-8 mb-3 mt-10 flex items-center whitespace-pre-wrap pl-8 text-xl font-bold tracking-tight text-primary-700 dark:text-primary-200"
     >
       <HeaderLink href={`#${id}`} />
       {children}
@@ -72,7 +72,7 @@ export function H4({ id, children, ...props }: React.ComponentProps<'h4'>) {
     <h4
       {...props}
       id={id}
-      className="group -ml-8 mt-8 mb-2 flex scroll-mt-28 items-center whitespace-pre-wrap pl-8 text-lg font-semibold text-primary-700 dark:text-primary-200"
+      className="group -ml-8 mt-8 mb-2 flex items-center whitespace-pre-wrap pl-8 text-lg font-semibold text-primary-700 dark:text-primary-200"
     >
       <HeaderLink href={`#${id}`} />
       {children}
@@ -85,7 +85,7 @@ export function H5({ id, children, ...props }: React.ComponentProps<'h5'>) {
     <h5
       {...props}
       id={id}
-      className="group -ml-8 mt-8 mb-2 flex scroll-mt-28 items-center whitespace-pre-wrap pl-8 text-base font-semibold text-primary-700 dark:text-primary-200"
+      className="group -ml-8 mt-8 mb-2 flex items-center whitespace-pre-wrap pl-8 text-base font-semibold text-primary-700 dark:text-primary-200"
     >
       <HeaderLink href={`#${id}`} />
       {children}
@@ -98,7 +98,7 @@ export function H6({ id, children, ...props }: React.ComponentProps<'h6'>) {
     <h6
       {...props}
       id={id}
-      className="group -ml-8 mt-8 mb-2 flex scroll-mt-28 items-center whitespace-pre-wrap pl-8 text-sm font-semibold text-primary-700 dark:text-primary-200"
+      className="group -ml-8 mt-8 mb-2 flex items-center whitespace-pre-wrap pl-8 text-sm font-semibold text-primary-700 dark:text-primary-200"
     >
       <HeaderLink href={`#${id}`} />
       {children}

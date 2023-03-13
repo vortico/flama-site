@@ -10,6 +10,10 @@
   @apply scroll-mt-28;
 }
 
+html {
+  @apply scroll-smooth;
+}
+
 body {
   @apply bg-primary-100 text-primary-600 transition-colors duration-500 dark:bg-primary-800 dark:text-primary-400;
 }
