@@ -1,8 +1,10 @@
 import flama
-from sklearn.linear_model import LogisticRegression
+from sklearn.neural_network import MLPClassifier
 
-model = LogisticRegression()
-model.fit(x_train, y_train)
+model = MLPClassifier(activation="tanh", max_iter=2000, hidden_layer_sizes=(10,))
+model.fit(
+    np.array([[0, 0], [0, 1], [1, 0], [1, 1]]),
+    np.array([0, 1, 1, 0]),
+)
 
-with open("sk_model.flm", "wb") as f:
-    flama.dump("sklearn", model, f)
+flama.dump(model, "sklearn_model.flm")
