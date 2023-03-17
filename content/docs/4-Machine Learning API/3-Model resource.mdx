@@ -302,11 +302,11 @@ class MyModel(ModelResource, metaclass=ModelResourceType):
 
 With this, we have finished the implementation of our model resource. Now, we can run the app and test it. We can do so
 by either running the **app** directly from our editor, or by using the **flama run** command line.
-In the latter case, we can use the `--dev` flag to enable the development mode, which will allow us to use the interactive
+In the latter case, we can use the `--app-debug` flag to enable the debugging mode, which will allow us to use the interactive
 debugger in case of an error. The following code shows how to run the app using the **flama run** command line:
 
 ```commandline
-> flama run add_model_resource:app --dev
+> flama run add_model_resource:app --app-debug
 ```
 
 ## Examples

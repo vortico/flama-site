@@ -26,6 +26,30 @@ for the sake of simplicity, but FLM stands for **Flama Lightweight Model**. This
 a lightweight representation of ML models, which come with useful metadata needed for later purposes, e.g. building a
 wrapper <FlamaName/> app containing the model.
 
+### FLM file structure
+
+The structure of an FLM file is thought to be as simple as possible, and aims at keeping in a single file all the
+information needed to load and use the model. The structure of an FLM file is as follows:
+
+```text
+├── model.flm
+│   └── model
+│       ├── model (python object)
+│       └── meta
+│           ├── id
+│           ├── timestamp
+│           ├── framework
+│           ├── model
+│           │   ├── obj
+│           │   ├── info
+│           │   ├── params
+│           │   └── metrics
+│           └── extra
+└── artifacts
+    ├── foo.json
+    └── bar.csv
+```
+
 ## Dump & load
 
 Let's consider the following familiar situation, which is the day-to-day routine of many data scientists. After careful
@@ -52,13 +76,40 @@ example of usage of this method:
 ```python
 import flama
 
-with open("path/to/file.flm", "wb") as fs:
-    flama.dump(
-        lib=flama.ModelFormat.pytorch, # library the model is built with
-        model=model,                   # the model object itsel
-        fs=fs,                         # BinaryIO where the model will be stored
-    )
+flama.dump(
+    model,
+    "path/to/file.flm",
+    model_id=uuid.uuid4(),
+    compression="high",
+    timestamp=datetime.datetime(2023, 3, 10, 11, 30, 0),
+    params={"optimizer": "adams"},
+    metrics={"recall": "0.95"},
+    extra={
+        "model_version": "1.0.0",
+        "model_description": "This is a test model",
+        "model_author": "John Doe",
+        "model_license": "MIT",
+        "tags": ["test", "example"],
+    },
+    artifacts={"foo.json": "path/to/artifact.json"},
+)
 ```
+
+The first two parameters are the model object itself, and the path where the resulting file will be stored. The
+remaining parameters are optional, and are used to add metadata to the resulting file
+which might be quite useful for model management purposes:
+
+- **model_id**: a unique identifier for the model. If not provided, a random UUID will be generated.
+- **compression**: the compression level to be used. It can be one of the following: "fast", "standard", or "high".
+  The default value is "standard".
+- **timestamp**: the timestamp of the model. If not provided, the current timestamp will be used.
+- **params**: a dictionary containing hyper-parameters used to train the model.
+- **metrics**: a dictionary containing metrics of the model, e.g. accuracy, recall, precision, etc.
+- **extra**: a dictionary containing any other metadata you might want to add to the model. This is a good place to add
+  information about model version, description, author, license, tags, etc.
+- **artifacts**: a dictionary containing any artifacts associated with the model. The keys are the names of the
+  artifacts, and the values are the paths to the files containing the artifacts. These files will be automatically
+  packed and unpacked when the model is loaded.
 
 ### Load method
 
@@ -70,15 +121,17 @@ usage of this method:
 ```python
 import flama
 
-with open("path/to/file.flm", "rb") as fs:
-    flama.load(
-        lib=flama.ModelFormat.pytorch, # library the model is built with
-        model=model,                   # the model object itsel
-        fs=fs,                         # BinaryIO where the model is stored
-    )
+model_artifact = flama.load("path/to/file.flm")
 ```
 
-Having introduced the methods which allow for packing (**flama.dump**) and loading (**flama.load**), we can proceed and
+The only parameter is the path to the file containing the model. The method returns a **ModelArtifact** object, which
+contains the attributes used with the **dump** method, plus the model itself. The model can be accessed through the
+**model** attribute of the **ModelArtifact** object. As you can easily check, this object contains
+the artifacts dictionary, which you can inspect to find the path where the artifacts were unpacked automatically.
+This is a very convenient feature, which allows you to keep track of the artifacts associated with your model, and
+access them easily, all within the same binary file.
+
+Once we have introduced the methods which allow for packing (**flama.dump**) and loading (**flama.load**), we can proceed and
 introduce how the example files we've been using so far were generated. These files were:
 
 - [Scikit Learn model](/models/sklearn_model.flm)
@@ -112,8 +165,6 @@ with open("sklearn_model.flm", "wb") as f:
 
 ```python
 import flama
-import tensorflow as tf
-
 import tensorflow as tf
 
 model = tf.keras.models.Sequential(

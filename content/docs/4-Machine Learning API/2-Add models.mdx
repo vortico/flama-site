@@ -13,7 +13,7 @@ app, e.g. amongst other reasons you might want:
 
 This is perfectly okay, and normal. <FlamaName/> CLI is not a "one size fits all" answer. Indeed, there are some
 characteristics of a <FlamaName/> App which we may need to customise, for which we need to develop the application
-ourselves, e.g. **on-startup** or **on-shutdown** events, to name some examples.
+ourselves, e.g. **startup** or **shutdown** events, to name some examples.
 
 ## Base application
 
@@ -25,17 +25,6 @@ from flama import Flama, Route
 
 class AppStatus:
     loaded = False
-
-
-def startup():
-    print("\nStarting up the ML API...\n")
-    # Here, whatever action we want to be run at the startup of the application
-    AppStatus.loaded = True
-
-
-def shutdown():
-    print("\nShutting down the ML API...\n")
-    # Here, whatever action we want to be run at the shutdown of the application
 
 
 def home():
@@ -87,24 +76,69 @@ app = Flama(
         Route('/user/me', user_me),
         Route('/user/{username}', user),
     ],
-    on_startup=[startup],
-    on_shutdown=[shutdown]
 )
 ```
 
 As can be seen, we have used a non-standard configuration of the application by using the parameters:
 
 - **routes**: A list of routes to serve incoming HTTP and WebSocket requests. In this particular case,
-- **on_startup**: A list of callables to run on application startup. Startup handler callables do not take any
-  arguments, and may be either standard functions, or async functions.
-- **on_shutdown**: A list of callables to run on application shutdown. Shutdown handler callables do not take any
-  arguments, and may be either standard functions, or async functions.
+- **events**: A dictionary of events to run on application startup and shutdown. The dictionary has two keys:
+  - **startup**: A list of callables to run on application startup. Startup handler callables do not take any
+    arguments, and may be either standard functions, or async functions.
+  - **shutdown**: A list of callables to run on application shutdown. Shutdown handler callables do not take any
+    arguments, and may be either standard functions, or async functions.
 
-We suggest to save the previous example in a local file, say **examples/add_models.py**, and run it with the CLI in
-development mode:
+We suggest to save the previous example in a local file, say **examples/add_models.py**, and run it with the CLI:
 
 ```commandline
-> flama run examples.base_application:app --dev
+> flama run examples.base_application:app
+
+INFO:     Will watch for changes in these directories: ['/home/miguel/Dev/personal/flama']
+INFO:     Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
+INFO:     Started reloader process [35011] using WatchFiles
+INFO:     Started server process [35034]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+```
+
+### Adding events
+
+Let us now add the **startup** and **shutdown** events to the application. We can do this by adding the following
+functions to the application, and then adding them to the **events** dictionary to the **Flama** constructor:
+
+```python
+# Here the same code as before
+
+def startup():
+    print("\nStarting up the ML API...\n")
+    # Here, whatever action we want to be run at the startup of the application
+    AppStatus.loaded = True
+
+
+def shutdown():
+    print("\nShutting down the ML API...\n")
+    # Here, whatever action we want to be run at the shutdown of the application
+
+app = Flama(
+    title="Flama ML",
+    version="0.1.0",
+    description="Machine learning API using Flama 🔥",
+    routes=[
+        Route("/", home),
+        Route('/user/me', user_me),
+        Route('/user/{username}', user),
+    ],
+    events={
+        "startup": [startup],
+        "shutdown": [shutdown],
+    },
+)
+```
+
+If we run the application again, we should get the following output:
+
+```commandline
+> flama run examples.base_application:app
 
 INFO:     Will watch for changes in these directories: ['/home/miguel/Dev/personal/flama']
 INFO:     Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
@@ -124,9 +158,44 @@ browser:
 "The API is ready. Loaded = True"
 ```
 
-This is just a quick example to show the effect of **on_startup** and **on_shutdown** parameters. They are very
+### Events decorators
+
+There is an alternative way of adding the events to the application, which is to use the **on_event** decorator.
+The following example shows how to achieve the same result as the previous one:
+
+```python
+from flama import Flama, Route
+
+# Here the same code as before but removing the definitions of startup and shutdown functions
+
+app = Flama(
+    title="Flama ML",
+    version="0.1.0",
+    description="Machine learning API using Flama 🔥",
+    routes=[
+        Route("/", home),
+        Route('/user/me', user_me),
+        Route('/user/{username}', user),
+    ],
+)
+
+@app.on_event("startup")
+def startup():
+    print("\nStarting up the ML API...\n")
+    # Here, whatever action we want to be run at the startup of the application
+    AppStatus.loaded = True
+
+@app.on_event("shutdown")
+def shutdown():
+    print("\nShutting down the ML API...\n")
+    # Here, whatever action we want to be run at the shutdown of the application
+```
+
+This is just a quick example to show the effect of **startup** and **shutdown** events. They are very
 convenient when we need the application to have some initialisation or deactivation steps which are specific of our
 particular situation.
+
+## Add models
 
 Following the steps described in the previous [section](/docs/machine-learning-api/packaging-models), it should be
 straightforward to produce ML models packaged in FLM format. What we want now is to expose such models as
@@ -135,8 +204,6 @@ as a Flama ML API.
 
 We already have the base <FlamaName/> App up and running in development mode. Let's start adding ML models to it in
 live. This will be a good example to see by ourselves the advantages of running the app in development mode.
-
-## Add models
 
 Any <FlamaName/> App will have accessible the attribute **models**, which will have the method **add_model** at our
 disposal. The standard usage of this method will be as follows:

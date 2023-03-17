@@ -68,32 +68,6 @@ INFO:     Application startup complete.
 INFO:     Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
 ```
 
-### Development mode
-
-If you run your app as specified above, everything will be running with the code as it was at the moment you run the
-command. However, more often than not, you might need to make some changes in the code of your app, which would require
-you to stop and rerun it again for the changes to take effect. In such scenario, you might be interested in running the
-app in **development mode**. When running in development mode, the webserver will autodetect changes in the underlying
-code, and will reload the app automatically for you.
-
-For this, we only need to run one of the following two options:
-
-#### Using option argument
-
-```commandLine
-> flama run --dev
-```
-
-#### Using environment variable
-
-```commandLine
-> export FLAMA_DEV=True
-> flama run
-```
-
-The convenience of this mode of execution does not stop here. Running in development mode also brings useful tools which
-make the debugging of the code easier, e.g. highly-detailed error messages, and interactive error webpages.
-
 ### Server parameters
 
 <FlamaName /> CLI uses **uvicorn** as webserver, and it is because of this that it accepts every argument of the uvicorn
@@ -104,14 +78,13 @@ CLI:
 
 Usage: flama run [OPTIONS] FLAMA_APP
 
-  Run a Flama Application.
+  Run a Flama Application based on a route.
 
   <FLAMA_APP> is the route to the Flama object to be served, e.g.
   'examples.hello_flama:app'. This can be passed directly as argument of the
   command line, or by environment variable.
 
 Options:
-  --dev                           Development mode.
   --server-host TEXT              Bind socket to this host.  [default:
                                   127.0.0.1]
   --server-port INTEGER           Bind socket to this port.  [default: 8000]

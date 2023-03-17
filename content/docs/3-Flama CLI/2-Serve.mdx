@@ -74,11 +74,11 @@ available, but also gives you the equivalent `curl` statement. For instance, in 
   --header 'Content-Type: application/json'
 
 {
-  "id": "13e09755-0925-4b27-839e-cf144c5c1309",
-  "timestamp": "2023-01-19T16:39:19.282700",
+  "id": "621c1d8a-144a-4a86-9a9c-9157f80bfa2d",
+  "timestamp": "2023-03-10T11:30:00",
   "framework": {
     "lib": "sklearn",
-    "version": "1.2.0"
+    "version": "1.2.1"
   },
   "model": {
     "obj": "MLPClassifier",
@@ -89,7 +89,7 @@ available, but also gives you the equivalent `curl` statement. For instance, in 
       "beta_1": 0.9,
       "beta_2": 0.999,
       "early_stopping": false,
-      "epsilon": 1e-08,
+      "epsilon": 1e-8,
       "hidden_layer_sizes": [
         10
       ],
@@ -109,10 +109,23 @@ available, but also gives you the equivalent `curl` statement. For instance, in 
       "verbose": false,
       "warm_start": false
     },
-    "params": null,
-    "metrics": null
+    "params": {
+      "optimizer": "adams"
+    },
+    "metrics": {
+      "recall": "0.95"
+    }
   },
-  "extra": null
+  "extra": {
+    "model_version": "1.0.0",
+    "model_description": "This is a test model",
+    "model_author": "John Doe",
+    "model_license": "MIT",
+    "tags": [
+      "test",
+      "example"
+    ]
+  }
 }
 ```
 
@@ -158,12 +171,15 @@ inputs of the CLI:
 
 Usage: flama serve [OPTIONS] MODEL_PATH
 
-  Serve the ML model file at <MODEL_PATH> within a Flama Application.
+  Serve an ML model file within a Flama Application.
+
+  Serve the ML model file specified by <MODEL_PATH> within a Flama
+  Application.
 
 Options:
-  --dev                           Development mode.
   --model-url TEXT                Route of the model  [default: /]
   --model-name TEXT               Name of the model  [default: model]
+  --app-debug BOOLEAN             Debug mode  [default: False]
   --app-title TEXT                Name of the application  [default: Flama]
   --app-version TEXT              Version of the application  [default: 0.1.0]
   --app-description TEXT          Description of the application  [default:
@@ -289,11 +305,15 @@ We can readily see the following groups of parameters:
 
 ### App parameters
 
+- **app-debug**: Enable debug mode (default: False)
 - **app-title**: Name of the application (default: Flama)
 - **app-version**: Version of the application (default: 0.1.0)
 - **app-description**: Description of the application (default: Fire up) with the flame]
 - **app-docs**: Description of the application (default: Fire up) with the flame]
 - **app-schema**: Description of the application (default: Fire up) with the flame]
+
+The parameter **app-debug** brings with it useful tools which make the debugging of the code easier,
+e.g. highly-detailed error messages, and interactive error webpages.
 
 ### Server parameters
 
@@ -333,6 +353,7 @@ As a quick usage example which populates all application and models parameters, 
 > flama serve sklearn_model.flm \
     --model-url="/xor" \
     --model-name="XOR dummy model" \
+    --app-debug \
     --app-title="ML API" \
     --app-version="1.0.0" \
     --app-description="XOR model serving for predictions" \

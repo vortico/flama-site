@@ -26,7 +26,10 @@ As always, the command **flama start** also comes with help:
 
 Usage: flama start [OPTIONS] [FLAMA_CONFIG]
 
+  Start a Flama Application based on a config file.
+
   Start a Flama Application with the configuration specified in <FLAMA_CONFIG>
+  file (default: flama.json).
 
 Options:
   --create-config [simple|full]  Create a config file: 'simple' only includes
@@ -48,8 +51,8 @@ Let's dig into it a bit:
 
 ```json
 {
-  "dev": false,
   "app": {
+    "debug": false,
     "title": "API title",
     "version": "0.1.0",
     "description": "API description",
@@ -63,12 +66,11 @@ Let's dig into it a bit:
 
 ### Sections
 
-As you can readily check, the definition file consists of a set of sections which define our application. The first
-section we find is **"dev"**, this is a boolean option that will make the app run under development mode or not (which
-quite convenient whilst developing). By default, this option comes as **False**, i.e. not active. The second section you
+As you can readily check, the definition file consists of a set of sections which define our application. The first section you
 will find is **"app"**, which encapsulates all the options defining an application, including the models and routes that
 can be served in it. In particular, we find the following fields, which we can populate according to our needs:
 
+- **Debug**: Whether the app is in debug mode or not. This is the same as the parameter `--app-debug` of [serve](/docs/flama-cli/serve).
 - **Title**: This is the name of the app which will be serving the ML models (e.g., "ML API"). This is the same as the
   parameter `--app-title` of [serve](/docs/flama-cli/serve)
 - **Version**: Version of the application (e.g., "0.1.0"). This is the same as the parameter `--app-version` of
@@ -94,7 +96,6 @@ definition:
 
 ```json
 {
-  "dev": false,
   "app": "examples.hello_flama:app",
   "server": { "host": "127.0.0.1", "port": 8000 }
 }
@@ -121,8 +122,8 @@ Let us start with the simplest example, which is using a definition file which o
 
 ```json
 {
-  "dev": false,
   "app": {
+    "debug": false,
     "title": "Scikit Learn Model API",
     "version": "0.1.0",
     "description": "This API is serving a scikit-learn classifier",
@@ -156,8 +157,8 @@ configuration parameters of the app, in a single definition file. Let's try the 
 
 ```json
 {
-  "dev": false,
   "app": {
+    "debug": false,
     "title": "Multi ML Model API",
     "version": "0.1.0",
     "description": "This API is serving multiple machine-learning models codeless",

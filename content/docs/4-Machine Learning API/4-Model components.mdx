@@ -85,9 +85,8 @@ which will be exposed as routes of our application. If we wanted to instantiate 
 **MyCustomModel**, we would need to pass the model object as an argument to the constructor, as follows:
 
 ```python
-with open("sklearn_model.flm", "rb") as f:
-    model = pickle.load(f)
-model = MyCustomModel(flama.load(f).model)
+model_artifact = flama.load("sklearn_model.flm")
+model = MyCustomModel(model_artifact.model)
 ```
 
 ### ModelComponent
@@ -114,9 +113,8 @@ class MyCustomModelComponent(ModelComponent):
         self.model = MyCustomModel(None, meta=None)
 
     def load_model(self):
-        with open(self._model_path, "rb") as f:
-            model_obj = flama.load(f)
-            self.model = MyCustomModel(model_obj.model, meta=model_obj.meta)
+        model_obj = flama.load(self._model_path)
+        self.model = MyCustomModel(model_obj.model, meta=model_obj.meta)
 
     def unload_model(self):
         self.model = MyCustomModel(None, meta=None)
@@ -287,8 +285,7 @@ class MyCustomModelComponent(ModelComponent):
         self.model = MyCustomModel(None)
 
     def load_model(self):
-        with open(self._model_path, "rb") as f:
-            self.model = MyCustomModel(flama.load(f).model)
+        self.model = MyCustomModel(flama.load(self._model_path).model)
 
     def unload_model(self):
         self.model = MyCustomModel(None)

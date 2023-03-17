@@ -63,11 +63,14 @@ After running this command line, you'll have <FlamaName /> installed and ready t
 You have installed the core functionality of <FlamaName /> already. However, you might need some extra functionality
 when working in your project:
 
+- [Pydantic](https://docs.pydantic.dev/): A library for data validation and settings management with
+  support for type hints.
+
 - [Typesystem](https://www.encode.io/typesystem/): A comprehensive library for data validation typically used to define
   typed data schemas which provides data validation and object serialization & deserialization tools.
 
-- [Marshmallow](https://marshmallow.readthedocs.io/en/stable/quickstart.html#): An alternative library to **typesystem**
-  for data validation.
+- [Marshmallow](https://marshmallow.readthedocs.io/en/stable/quickstart.html#): A library for data validation and
+  serialization/deserialization.
 
 - [Forge (python)](https://python-forge.readthedocs.io/en/latest/): An elegant library for revising function signatures
   at runtime.
@@ -75,16 +78,23 @@ when working in your project:
 - [SQlAlchemy](https://www.sqlalchemy.org/): SQL toolkit and Object Relational Mapper that gives application developers
   the full power and flexibility of SQL.
 
-These dependencies are required if you want to use typed data schemas (**typesystems** or **marshmallow**), or if you
-are going to use pagination (**python-forge**), or if you need to include a database (**sqlalchemy**) in your project.
+These dependencies are required if you want to use typed data schemas (**pydantic**, **typesystems**, **marshmallow**),
+or if you are going to use pagination (**python-forge**), or if you need to include a database (**sqlalchemy**) in your
+project.
 
-If you use **typesystem** schemas, run:
+If you use **pydantic** schemas, run:
+
+```commandline
+> pip install flama[pydantic, pagination, database]
+```
+
+In case you want to use **typesystem** schemas, run:
 
 ```commandline
 > pip install flama[typesystem, pagination, database]
 ```
 
-If you use **marshmallow** schemas instead, run:
+Or, if you prefer to use **marshmallow** schemas instead, run:
 
 ```commandline
 > pip install flama[marshmallow, pagination, database]
@@ -120,8 +130,8 @@ Options:
   --help     Get help about how to use Flama CLI
 
 Commands:
-  run    Run a Flama Application.
-  serve  Serve the ML model file at <MODEL_PATH> within a Flama Application.
+  run    Run a Flama Application based on a route.
+  serve  Serve an ML model file within a Flama Application.
   start  Start a Flama Application based on a config file.
 ```
 
