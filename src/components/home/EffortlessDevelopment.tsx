@@ -1,5 +1,5 @@
-import FlamaName from '@/components/FlamaName'
 import HomeSection from '@/components/home/HomeSection'
+import { FlamaName } from '@/components/names'
 import { IconBolt, IconChevronRight } from '@tabler/icons-react'
 import { motion } from 'framer-motion'
 import React, { useCallback, useMemo, useState } from 'react'

@@ -1,5 +1,5 @@
 import CodeWindow from '@/components/CodeWindow'
-import FlamaName from '@/components/FlamaName'
+import { FlamaName } from '@/components/names'
 import Link from '@/components/Link'
 import { QuickSearchButton } from '@/components/QuickSearchButton'
 import { Sample } from '@/lib/samples'

@@ -1,6 +1,6 @@
 import CodeWindow from '@/components/CodeWindow'
-import FlamaName from '@/components/FlamaName'
 import HomeSection from '@/components/home/HomeSection'
+import { FlamaName } from '@/components/names'
 import { Sample } from '@/lib/samples'
 import { IconPlug } from '@tabler/icons-react'
 import { motion } from 'framer-motion'

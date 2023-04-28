@@ -1,0 +1,6 @@
+export { default as BosqueName } from '@/components/names/BosqueName'
+export { default as BrumaName } from '@/components/names/BrumaName'
+export { default as CiclonName } from '@/components/names/CiclonName'
+export { default as FlamaName } from '@/components/names/FlamaName'
+export { default as PythonName } from '@/components/names/PythonName'
+export { default as VorticoName } from '@/components/names/VorticoName'

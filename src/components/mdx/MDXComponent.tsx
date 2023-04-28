@@ -1,9 +1,8 @@
-import FlamaName from '@/components/FlamaName'
 import Label from '@/components/Label'
 import Link from '@/components/Link'
 import { Code, Pre } from '@/components/mdx/code'
 import { H1, H2, H3, H4, H5, H6 } from '@/components/mdx/header'
-import PythonName from '@/components/PythonName'
+import { BosqueName, BrumaName, CiclonName, FlamaName, PythonName, VorticoName } from '@/components/names'
 import { useLiveReload, useMDXComponent } from 'next-contentlayer/hooks' // eslint-disable-line import/no-unresolved
 import Image from 'next/image'
 import { ComponentType } from 'react'
@@ -16,8 +15,12 @@ export interface MDXComponentProps {
 const defaultComponents = {
   Image,
   Label,
+  BosqueName,
+  BrumaName,
+  CiclonName,
   FlamaName,
   PythonName,
+  VorticoName,
   a: Link,
   h1: H1,
   h2: H2,
