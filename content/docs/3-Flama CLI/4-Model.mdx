@@ -1,0 +1,256 @@
+---
+title: Model
+wip: false
+---
+
+## Serverless interaction
+
+We've discussed how to serve models as APIs with which we can interact
+with via HTTP requests. However, it might be the case that we want to interact with
+the model directly without the overhead of a server, e.g.:
+
+- **Development & testing**: We are working with a model locally and want to try it out on some data to
+  quickly see whether everything is working as expected. This is typically what happens
+  when we're in the development stage of the ML lifecycle.
+
+- **Streaming workflow**: This is also the case when we want to use a model as part of a larger pipeline
+  where the model acts as a data processor in a stream of data, in which case we want to be able to pipe data
+  into the model and get the output back.
+
+It is then clear that we need a different way to make use of the model than the
+client-server approach we've discussed so far.
+
+The command **model** allows us to interact with models directly from the command line
+without the need for a server. To inspect the command options, run:
+
+```commanline
+> flama model --help
+
+Usage: flama model [OPTIONS] MODEL_PATH COMMAND [ARGS]...
+
+  Interact with an ML model without server. TU PUTA MADRE
+
+  This command is used to directly interact with an ML model without the need
+  of a server. This command can be used to perform any operation that is
+  supported by the model, such as inspect, or predict. <FLAMA_MODEL_PATH> is
+  the path of the model to be used, e.g. 'path/to/model.flm'. This can be
+  passed directly as argument of the command line, or by environment variable.
+
+Options:
+  --help  Show this message and exit.
+
+Commands:
+  inspect  Inspect an ML model.
+  predict  Make a prediction using an ML model.
+```
+
+### Inspect
+
+The sub-command **inspect** allows us to get access to the model metadata,
+as well as the list of artifacts packaged with the model, in a human-readable
+format. To access the documentation of the command, run:
+
+```commanline
+> flama model path/to/model.flm inspect --help
+
+Usage: flama model FLAMA_MODEL_PATH inspect [OPTIONS]
+
+  Inspect an ML model.
+
+  This command is used to inspect an ML model without the need of a server.
+  This command can be used to extract the ML model metadata, including the ID,
+  time when the model was created, information of the framework, and the model
+  info; and the list of artifacts packaged with the model.
+
+Options:
+  -p, --pretty  Pretty print the model inspection.
+  --help        Show this message and exit.
+```
+
+### Predict
+
+The sub-command **predict** allows us to make predictions using the model. To access
+the documentation of the command, run:
+
+```commanline
+> flama model path/to/model.flm predict --help
+
+Usage: flama model FLAMA_MODEL_PATH predict [OPTIONS]
+
+  Make a prediction using an ML model.
+
+  This command is used to make a prediction using an ML model without the need
+  of a server. It can be used for batch predictions, so both input and output
+  arguments must be json files containing a list of input values, each input
+  value being a list of values associated to the input of the model. The
+  output will be the list of predictions associated to the input, with each
+  prediction being a list of values representing the output of the model.
+
+  Example:
+
+  - input.json: [[0, 0], [0, 1], [1, 0], [1, 1]]
+
+  - output.json: [[0], [1], [1], [0]]
+
+Options:
+  -f, --file FILENAME    File to be used as input for the model prediction in
+                         JSON format. (default: stdin).
+  -o, --output FILENAME  File to be used as output for the model prediction in
+                         JSON format. (default: stdout).
+  -p, --pretty           Pretty print the model prediction.
+  --help                 Show this message and exit.
+```
+
+## Examples
+
+To illustrate the usage of the **model** command, we'll use one of the models introduced
+before in the [Serve](/docs/flama-cli/serve#example-files) section, e.g. the **SciKit-Learn** model.
+
+### Model inspection
+
+To start with, let's inspect the model:
+
+```commanline
+> flama model sklearn_model.flm inspect
+
+{"meta": {"id": "621c1d8a-144a-4a86-9a9c-9157f80bfa2d", "timestamp": "2023-03-10T11:30:00", "framework": {"lib": "sklearn", "version": "1.2.1"}, "model": {"obj": "MLPClassifier", "info": {"activation": "tanh", "alpha": 0.0001, "batch_size": "auto", "beta_1": 0.9, "beta_2": 0.999, "early_stopping": false, "epsilon": 1e-08, "hidden_layer_sizes": [10], "learning_rate": "constant", "learning_rate_init": 0.001, "max_fun": 15000, "max_iter": 2000, "momentum": 0.9, "n_iter_no_change": 10, "nesterovs_momentum": true, "power_t": 0.5, "random_state": null, "shuffle": true, "solver": "adam", "tol": 0.0001, "validation_fraction": 0.1, "verbose": false, "warm_start": false}, "params": {"optimizer": "adams"}, "metrics": {"recall": "0.95"}}, "extra": {"model_version": "1.0.0", "model_description": "This is a test model", "model_author": "John Doe", "model_license": "MIT", "tags": ["test", "example"]}}, "artifacts": {"foo.json": "/var/folders/_s/cvfnpmcn5clbnlsrmd5n1fqw0000gn/T/tmphtxxdfav/artifacts/foo.json"}}
+```
+
+As we can see, the model metadata is returned in JSON format. If we want to get a more
+human-readable output, we can use the **--pretty** option:
+
+```commanline
+> flama model sklearn_model.flm inspect --pretty
+
+{
+    "artifacts": {
+        "foo.json": "/var/folders/_s/cvfnpmcn5clbnlsrmd5n1fqw0000gn/T/tmpdf16p79o/artifacts/foo.json"
+    },
+    "meta": {
+        "extra": {
+            "model_author": "John Doe",
+            "model_description": "This is a test model",
+            "model_license": "MIT",
+            "model_version": "1.0.0",
+            "tags": [
+                "test",
+                "example"
+            ]
+        },
+        "framework": {
+            "lib": "sklearn",
+            "version": "1.2.1"
+        },
+        "id": "621c1d8a-144a-4a86-9a9c-9157f80bfa2d",
+        "model": {
+            "info": {
+                "activation": "tanh",
+                "alpha": 0.0001,
+                "batch_size": "auto",
+                "beta_1": 0.9,
+                "beta_2": 0.999,
+                "early_stopping": false,
+                "epsilon": 1e-08,
+                "hidden_layer_sizes": [
+                    10
+                ],
+                "learning_rate": "constant",
+                "learning_rate_init": 0.001,
+                "max_fun": 15000,
+                "max_iter": 2000,
+                "momentum": 0.9,
+                "n_iter_no_change": 10,
+                "nesterovs_momentum": true,
+                "power_t": 0.5,
+                "random_state": null,
+                "shuffle": true,
+                "solver": "adam",
+                "tol": 0.0001,
+                "validation_fraction": 0.1,
+                "verbose": false,
+                "warm_start": false
+            },
+            "metrics": {
+                "recall": "0.95"
+            },
+            "obj": "MLPClassifier",
+            "params": {
+                "optimizer": "adams"
+            }
+        },
+        "timestamp": "2023-03-10T11:30:00"
+    }
+}
+```
+
+The usefulness of the inspect command is that it allows us to visualise
+all the relevant information associated to the model without having to load it,
+and with the ease of a single command. This can be used to verify the model
+integrity and version, amongst other things, within the context of a **continuous
+integration and continuous deployment process**.
+
+### Inline input prediction
+
+Now that we know how to inspect a model, let's make a prediction by using the
+predict command:
+
+```commanline
+> echo '[[0, 0], [0, 1], [1, 0], [1, 1]]' | flama model sklearn_model.flm predict
+
+[0, 1, 1, 0]
+```
+
+If we want to get a more human-readable output, we can use the **--pretty** option:
+
+```commanline
+> echo '[[0, 0], [0, 1], [1, 0], [1, 1]]' | flama model sklearn_model.flm predict --pretty
+
+[
+    0,
+    1,
+    1,
+    0
+]
+```
+
+### File input prediction
+
+The predict command can also be used to make predictions from a file:
+
+```commanline
+> flama model sklearn_model.flm predict --file input.json --pretty
+
+[
+    0,
+    1,
+    1,
+    0
+]
+```
+
+The output of any prediction can be stored in a file by using the **--output** option:
+
+```commanline
+> flama model sklearn_model.flm predict --input input.json --output output.json
+```
+
+### Piping several models together
+
+The default behaviour of the predict command is to receive and return data through
+the standard input and output. This allows us to pipe several models together
+in a single command. For example, let's say we have models **model_a.flm** and **model_b.flm**,
+and we need to make a prediction with **model_a.flm** and then use the output of that
+prediction as input for **model_b.flm**. This can be done by using the following command:
+
+```commanline
+> echo '[0, 1, 2, 3]' | flama model model_a.flm predict | flama model model_b.flm predict
+
+[1, 0, 1, 0]
+```
+
+This can be generalised to consider as many models as you need by following the general
+pattern:
+
+```commanline
+> echo 'input' | flama model model_1.flm predict | flama model model_2.flm predict | ... | flama model model_n.flm predict
+```
