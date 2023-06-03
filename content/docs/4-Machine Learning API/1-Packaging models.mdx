@@ -157,8 +157,7 @@ model.fit(
     np.array([0, 1, 1, 0]),
 )
 
-with open("sklearn_model.flm", "wb") as f:
-    flama.dump(model, f)
+flama.dump(model, "sklearn_model.flm")
 ```
 
 ### TensorFlow
@@ -183,8 +182,7 @@ model.fit(
     verbose=0,
 )
 
-with open("tensorflow_model.flm", "wb") as f:
-    flama.dump(model, f)
+flama.dump(model, "tensorflow_model.flm")
 ```
 
 ### PyTorch
@@ -230,6 +228,5 @@ Y = torch.Tensor([0, 1, 1, 0]).view(-1, 1)
 model = Model()
 model._train(X, Y, loss=torch.nn.BCELoss(), optimizer=torch.optim.Adam(model.parameters()))
 
-with open("pytorch_model.flm", "wb") as f:
-    flama.dump(model, f)
+flama.dump(model, "pytorch_model.flm")
 ```
