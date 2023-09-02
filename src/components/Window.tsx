@@ -27,9 +27,9 @@ export default function Window({ title, contentRef, className, children }: Windo
       )}
       <div
         className={`h-fit overflow-hidden rounded-xl bg-primary-800 shadow-xl ${
-          state === 'closed' ? 'relative max-h-[30px] dark:bg-primary-900/70' : ''
-        } ${state === 'full' ? 'fixed inset-x-4 inset-y-[5vh] dark:bg-primary-900 sm:inset-x-6 md:inset-x-8' : ''} ${
-          state === 'open' ? 'relative dark:bg-primary-900/70' : ''
+          state === 'closed' ? 'relative max-h-[30px] dark:bg-primary-950/70' : ''
+        } ${state === 'full' ? 'fixed inset-x-4 inset-y-[5vh] dark:bg-primary-950 sm:inset-x-6 md:inset-x-8' : ''} ${
+          state === 'open' ? 'relative dark:bg-primary-950/70' : ''
         } ${className || ''}`}
       >
         <div className="mb-px flex h-8 w-full items-center justify-between border-b border-primary-500 px-4 text-primary-400 dark:border-primary-500/30 dark:text-primary-500">
