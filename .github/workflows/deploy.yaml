@@ -1,0 +1,67 @@
+name: 'Deploy'
+
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+
+jobs:
+  terraform:
+    name: 'Deploy'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      pull-requests: write
+      id-token: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: Authenticate to GCP
+        id: auth
+        uses: google-github-actions/auth@v1
+        with:
+          token_format: access_token
+          workload_identity_provider: ${{ secrets.GCP_WORKLOAD_IDENTITY_PROVIDER }}
+          service_account: ${{ secrets.GCP_SERVICE_ACCOUNT }}
+      - name: Install dependencies
+        id: deps
+        run: npm ci
+      - name: Build
+        id: build
+        run: npm run build
+      - name: Clear bucket
+        id: clear
+        run: gcloud storage rm -c gs://${{ secrets.GCP_STORAGE_BUCKET_NAME }}/** || true
+      - name: Deploy
+        id: deploy
+        run: gcloud storage cp -c -r out/* gs://${{ secrets.GCP_STORAGE_BUCKET_NAME }}
+      - name: Update permissions
+        id: permissions
+        run: gcloud storage objects update -r gs://${{ secrets.GCP_STORAGE_BUCKET_NAME }}/* --add-acl-grant=entity=AllUsers,role=READER
+      - name: Update Pull Request
+        uses: actions/github-script@v6
+        if: github.event_name == 'pull_request'
+        env:
+          PLAN: ${{ steps.plan.outputs.stdout }}
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const output = `#### Steps
+            | Step                  | Status                                                       |
+            | --------------------- | ------------------------------------------------------------ |
+            | 📦 Build and export   | ${{ steps.build.outcome == 'success' && '✔' || '❌' }}       |
+            | 🧹 Clear bucket       | ${{ steps.clear.outcome == 'success' && '✔' || '❌' }}       |
+            | 🚀 Deploy             | ${{ steps.deploy.outcome == 'success' && '✔' || '❌' }}      |
+            | 🛂 Update permissions | ${{ steps.permissions.outcome == 'success' && '✔' || '❌' }} |
+
+            *Pushed by: @${{ github.actor }}, Action: \`${{ github.event_name }}\`*`;
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: output
+            })

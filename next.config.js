@@ -1,4 +1,17 @@
 const { withContentlayer } = require('next-contentlayer')
+
+/** @type {import('next').NextConfig} */
+const nextConfig = {
+  output: 'export',
+  images: {
+    unoptimized: true,
+  },
+  reactStrictMode: true,
+  eslint: {
+    dirs: ['src'],
+  },
+}
+
 const withPWA = require('next-pwa')({
   dest: 'public',
   disable: process.env.NODE_ENV === 'development',
@@ -6,21 +19,4 @@ const withPWA = require('next-pwa')({
   sw: 'service-worker.js',
 })
 
-/** @type {import('next').NextConfig} */
-module.exports = withPWA(
-  withContentlayer({
-    reactStrictMode: true,
-    eslint: {
-      dirs: ['src'],
-    },
-    async redirects() {
-      return [
-        {
-          source: '/docs',
-          destination: '/docs/getting-started/installation',
-          permanent: true,
-        },
-      ]
-    },
-  })
-)
+module.exports = withPWA(withContentlayer(nextConfig))

@@ -119,7 +119,7 @@ export default function EffortlessDevelopment() {
       icon={<IconBolt className="h-full w-full" />}
       title="Effortless Development"
       docRef="/docs/"
-      content={
+      body={
         <>
           <p>
             <FlamaName /> is designed to be quick to learn and use. This goal is accomplished with a simple and clear

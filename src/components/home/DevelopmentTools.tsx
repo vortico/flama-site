@@ -46,7 +46,7 @@ export default function DevelopmentTools() {
       icon={<IconTools className="h-full w-full" />}
       title="Development Tools"
       docRef="/docs/"
-      content={
+      body={
         <>
           <p>
             The process of developing APIs for Machine Learning can be complex and time-consuming, especially when it

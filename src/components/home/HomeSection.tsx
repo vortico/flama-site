@@ -4,7 +4,7 @@ import React, { ReactNode } from 'react'
 interface HomeSectionProps extends React.ComponentProps<'section'> {
   icon: ReactNode
   title: string
-  content: string | ReactNode
+  body: string | ReactNode
   docRef?: string
   selectableList?: ReactNode
   children?: ReactNode

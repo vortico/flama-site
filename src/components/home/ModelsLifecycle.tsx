@@ -19,7 +19,7 @@ export default function ModelsLifecycle({ samples }: ModelsLifecycleProps) {
       icon={<IconRefresh className="h-full w-full" />}
       title="Models Lifecycle"
       docRef="/docs/"
-      content={
+      body={
         <>
           <p>
             Loading ML models in a production application is a demanding and prone-to-error task, which also depends on

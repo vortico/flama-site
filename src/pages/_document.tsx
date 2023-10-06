@@ -7,8 +7,8 @@ class MyDocument extends Document {
       <Html lang="en">
         <Head>
           <link rel="preconnect" href="https://fonts.googleapis.com" />
-          <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="true" />
-          <link rel="preconnect" href={`https://${Algolia.APP_ID}-dsn.algolia.net`} crossOrigin="true" />
+          <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+          <link rel="preconnect" href={`https://${Algolia.APP_ID}-dsn.algolia.net`} crossOrigin="anonymous" />
           <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Montserrat&display=swap" />
           <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Lato&display=swap" />
           <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fira+Mono&display=swap" />

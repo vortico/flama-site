@@ -37,7 +37,7 @@ export default function ProductionReadyFirst({ samples }: ProductionReadyFirstPr
     (id: string) => {
       setSelected(id)
     },
-    [setSelected]
+    [setSelected],
   )
 
   const selectedSample = useMemo(() => samples.find(({ id }) => id === selected), [selected, samples])
@@ -55,7 +55,7 @@ export default function ProductionReadyFirst({ samples }: ProductionReadyFirstPr
           onSelect={onSelect}
         />
       }
-      content={
+      body={
         <>
           <p>
             Need your models serving ASAP? It does not feel right to have to wait months to see if your models work

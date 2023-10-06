@@ -37,7 +37,7 @@ export default function MachineLearningResponsive({ samples }: MachineLearningRe
     (id: string) => {
       setSelected(id)
     },
-    [setSelected]
+    [setSelected],
   )
 
   const selectedSample = useMemo(() => samples.find(({ id }) => id === selected), [selected, samples])
@@ -55,7 +55,7 @@ export default function MachineLearningResponsive({ samples }: MachineLearningRe
           onSelect={onSelect}
         />
       }
-      content={
+      body={
         <>
           <p>
             Let’s face it, there isn’t a single ML framework. Models developed in such different frameworks should be

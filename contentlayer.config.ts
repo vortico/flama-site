@@ -1,8 +1,4 @@
-import {
-  defineDocumentType,
-  defineNestedType,
-  makeSource,
-} from 'contentlayer/source-files'
+import { defineDocumentType, defineNestedType, makeSource } from '@contentlayer/source-files'
 import { MDXOptions } from '@contentlayer/core'
 import readingTime from 'reading-time'
 import remarkGfm from 'remark-gfm'
@@ -47,8 +43,7 @@ export const Docs = defineDocumentType(() => ({
     readingTime: { type: 'json', resolve: (doc) => readingTime(doc.body.raw) },
     order: {
       type: 'number',
-      resolve: (item) =>
-        parseInt(item._raw.sourceFileName.match(/^(\d+)-.*/)?.[1] || ''),
+      resolve: (item) => parseInt(item._raw.sourceFileName.match(/^(\d+)-.*/)?.[1] || ''),
     },
     path: {
       type: 'string',
@@ -97,10 +92,7 @@ export const Blog = defineDocumentType(() => ({
     },
     date: {
       type: 'date',
-      resolve: (item) =>
-        new Date(
-          item._raw.sourceFileName.match(/(\d{4}-\d{2}-\d{2}).*/)?.[1] || ''
-        ),
+      resolve: (item) => new Date(item._raw.sourceFileName.match(/(\d{4}-\d{2}-\d{2}).*/)?.[1] || ''),
     },
     slug: {
       type: 'string',

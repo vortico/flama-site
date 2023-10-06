@@ -19,7 +19,7 @@ export default function Extensibility({ samples }: ExtensibilityProps) {
       icon={<IconPlug className="h-full w-full" />}
       title="Extensibility"
       docRef="/docs/"
-      content={
+      body={
         <>
           <p>
             <FlamaName /> consists of a core of functionality for creating, maintaining and deploying ML-APIs. However,
