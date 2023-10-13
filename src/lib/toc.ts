@@ -1,3 +1,11 @@
+export interface TOCItem<T> {
+  path: string
+  title: string
+  url: string
+  order: number
+  content: T
+}
+
 export interface TOCLink<T> {
   title: string
   url: string
@@ -20,16 +28,7 @@ export interface TOCCategory<T> extends TOC<T> {
   order: number
 }
 
-function _tableOfContent<T>(
-  rawLinks: {
-    path: string
-    title: string
-    url: string
-    order: number
-    content: T
-  }[],
-  rawName: string
-): TOCCategory<T> {
+function _tableOfContent<T>(rawLinks: TOCItem<T>[], rawName: string): TOCCategory<T> {
   const nameMatch = rawName.match(/^(\d+)-(.*)/)
   const name = nameMatch?.[2] || ''
   const order = parseInt(nameMatch?.[1] || '')
@@ -45,7 +44,7 @@ function _tableOfContent<T>(
       .reduce((rv: { [key: string]: GroupedTOCLink<T>[] }, x: GroupedTOCLink<T>) => {
         ;(rv[x.group] = rv[x.group] || []).push(x)
         return rv
-      }, {})
+      }, {}),
   )
 
   const links =
@@ -71,7 +70,7 @@ export function tableOfContent<T>(
     url: string
     order: number
     content: T
-  }[]
+  }[],
 ): TOC<T> {
   const toc = _tableOfContent(rawLinks, '')
   return { categories: toc.categories, links: toc.links }

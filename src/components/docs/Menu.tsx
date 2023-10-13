@@ -1,5 +1,5 @@
 import { allDocs, Docs as IDocs } from '@/contentlayer'
-import { tableOfContent, TOC, TOCCategory, TOCLink } from '@/lib/toc'
+import { tableOfContent, TOC, TOCCategory, TOCItem, TOCLink } from '@/lib/toc'
 import Link from 'next/link'
 import { useRouter } from 'next/router'
 import React, { useMemo } from 'react'
@@ -13,7 +13,7 @@ function DocsMenuCategoryItem({ link }: DocsMenuCategoryItemProps) {
   const router = useRouter()
   const isActive = useMemo<boolean>(
     () => router.asPath.match(/([^#?]+)([#?].+)*/)?.[1] == link.url,
-    [router.asPath, link.url]
+    [router.asPath, link.url],
   )
 
   React.useEffect(() => {
@@ -69,13 +69,17 @@ function DocsMenuCategory({ category }: DocsMenuCategoryProps) {
 }
 
 export function DocsMenu() {
-  const links = allDocs.map((docs) => ({
-    title: docs.title,
-    path: docs.path,
-    url: `/docs/${docs.slug}`,
-    order: docs.order,
-    content: docs,
-  }))
+  const links = useMemo<TOCItem<IDocs>[]>(
+    () =>
+      allDocs.map((docs) => ({
+        title: docs.title,
+        path: docs.path,
+        url: `/docs/${docs.slug}`,
+        order: docs.order,
+        content: docs,
+      })),
+    [allDocs],
+  )
   const toc = useMemo<TOC<IDocs>>(() => tableOfContent(links), [links])
 
   return (
