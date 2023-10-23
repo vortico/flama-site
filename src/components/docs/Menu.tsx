@@ -78,7 +78,7 @@ export function DocsMenu() {
         order: docs.order,
         content: docs,
       })),
-    [allDocs],
+    [],
   )
   const toc = useMemo<TOC<IDocs>>(() => tableOfContent(links), [links])
 
