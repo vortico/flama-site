@@ -52,9 +52,9 @@ export function DocsLayout({ docs, next, prev, children }: DocLayoutProps) {
           {children}
           <PrevNextNavigation
             prevTitle={prev?.title}
-            prevHref={`/docs/${prev?.slug}`}
+            prevHref={`/docs/${prev?.slug}/`}
             nextTitle={next?.title}
-            nextHref={`/docs/${next?.slug}`}
+            nextHref={`/docs/${next?.slug}/`}
           />
         </article>
       </SidebarLayout>

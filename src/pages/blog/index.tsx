@@ -19,7 +19,7 @@ function BlogPreview({ blog }: BlogPreviewProps) {
     <article className="relative flex max-w-3xl flex-col space-y-4 lg:ml-auto xl:w-[50rem] xl:max-w-none">
       <div>
         <h3 className="text-xl font-bold tracking-tight text-primary-700 dark:text-primary-200">
-          <Link href={`/blog/${blog.slug}`}>{blog.title}</Link>
+          <Link href={`/blog/${blog.slug}/`}>{blog.title}</Link>
         </h3>
         <div className="text-sm italic leading-7 dark:text-primary-400 lg:absolute lg:top-0 lg:right-full lg:mr-8 lg:whitespace-nowrap">
           <time dateTime={blog.date}>{dateFormatter.format(new Date(blog.date))}</time>

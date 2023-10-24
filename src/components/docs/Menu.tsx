@@ -74,7 +74,7 @@ export function DocsMenu() {
       allDocs.map((docs) => ({
         title: docs.title,
         path: docs.path,
-        url: `/docs/${docs.slug}`,
+        url: `/docs/${docs.slug}/`,
         order: docs.order,
         content: docs,
       })),

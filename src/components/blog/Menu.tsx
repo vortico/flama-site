@@ -16,7 +16,7 @@ export function Menu() {
     <div className="mb-16 text-sm leading-6 xl:mb-0">
       <div className="mb-5 hidden border-b border-primary-200 pb-5 dark:border-primary-200/5 xl:block">
         <Link
-          href="/blog"
+          href="/blog/"
           className="group flex items-center space-x-2 text-primary-600 hover:text-brand-500 dark:text-primary-400 dark:hover:text-brand-400"
         >
           <IconChevronsLeft className="h-4" />

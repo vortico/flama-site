@@ -6,34 +6,34 @@ const links = [
   {
     name: 'Getting Started',
     links: [
-      { name: 'Installation', url: '/docs/getting-started/installation' },
-      { name: 'Quickstart', url: '/docs/getting-started/quickstart' },
+      { name: 'Installation', url: '/docs/getting-started/installation/' },
+      { name: 'Quickstart', url: '/docs/getting-started/quickstart/' },
     ],
   },
   {
     name: 'Interact with Flama',
     links: [
-      { name: 'Run applications', url: '/docs/flama-cli/run' },
-      { name: 'Serve machine-learning models', url: '/docs/flama-cli/serve' },
-      { name: 'Start with definition files', url: '/docs/flama-cli/start' },
+      { name: 'Run applications', url: '/docs/flama-cli/run/' },
+      { name: 'Serve machine-learning models', url: '/docs/flama-cli/serve/' },
+      { name: 'Start with definition files', url: '/docs/flama-cli/start/' },
     ],
   },
   {
     name: 'Core Concepts',
     links: [
-      { name: 'Flama Artifacts', url: '/docs/machine-learning-api/packaging-models' },
-      { name: 'Flama Applications', url: '/docs/machine-learning-api/add-models' },
-      { name: 'Model Resources', url: '/docs/machine-learning-api/model-resource' },
-      { name: 'Model Components', url: '/docs/machine-learning-api/model-components' },
+      { name: 'Flama Artifacts', url: '/docs/machine-learning-api/packaging-models/' },
+      { name: 'Flama Applications', url: '/docs/machine-learning-api/add-models/' },
+      { name: 'Model Resources', url: '/docs/machine-learning-api/model-resource/' },
+      { name: 'Model Components', url: '/docs/machine-learning-api/model-components/' },
     ],
   },
   {
     name: 'About Flama',
     links: [
-      { name: 'GitHub', url: 'https://github.com/vortico/flama' },
-      { name: 'Releases', url: 'https://github.com/vortico/flama/releases' },
-      { name: 'Issues', url: 'https://github.com/vortico/flama/issues' },
-      { name: 'Contribute', url: '/docs/contributing/how-to-contribute' },
+      { name: 'GitHub', url: 'https://github.com/vortico/flama/' },
+      { name: 'Releases', url: 'https://github.com/vortico/flama/releases/' },
+      { name: 'Issues', url: 'https://github.com/vortico/flama/issues/' },
+      { name: 'Contribute', url: '/docs/contributing/how-to-contribute/' },
     ],
   },
 ]

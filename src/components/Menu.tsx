@@ -18,8 +18,8 @@ function Logo() {
 
 function NavList({ ...props }: React.ComponentProps<'ul'>) {
   const entries = [
-    { href: '/docs', title: 'Docs' },
-    { href: '/blog', title: 'Blog' },
+    { href: '/docs/', title: 'Docs' },
+    { href: '/blog/', title: 'Blog' },
   ]
 
   return (
