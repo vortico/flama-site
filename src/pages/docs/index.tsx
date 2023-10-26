@@ -30,17 +30,17 @@ function DocsDashboard() {
       <DocsDashboardItem
         title="Quickstart"
         description="Follow this guide to develop your first API, and explore the main functionality offered by Flama. In this guide, you will learn how to create a new project, define your first endpoint, and run your API locally."
-        url="/docs/getting-started/quickstart"
+        url="/docs/getting-started/quickstart/"
       />
       <DocsDashboardItem
         title="Core"
         description="Deep dive into the core functionality of Flama. Learn how to package your models as binary files for reusability, and how to integrate them into your API. Also, customise the interaction with models through Components and Resources."
-        url="/docs/machine-learning-api/packaging-models"
+        url="/docs/machine-learning-api/packaging-models/"
       />
       <DocsDashboardItem
         title="CLI"
         description="Discover the Flama command line interface, and uncover the power of serving ML models codeless. This guide shows how to run an API locally, serve ML models with, and interact with them, without typing a single line of code."
-        url="/docs/flama-cli/run"
+        url="/docs/flama-cli/run/"
       />
     </div>
   )
@@ -48,7 +48,7 @@ function DocsDashboard() {
 export default function Docs() {
   return (
     <>
-      <NextSeo title="Docs" canonical="https://flama.dev/docs" />
+      <NextSeo title="Docs" canonical="https://flama.dev/docs/" />
       <PlainLayout>
         <header className="space-y-4 px-4 pt-16 pb-9 sm:px-6 sm:pb-16 sm:text-center md:px-8">
           <h1 className="text-3xl font-extrabold tracking-tight text-primary-700 dark:text-primary-200 sm:text-4xl">

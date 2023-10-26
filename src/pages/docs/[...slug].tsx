@@ -40,7 +40,7 @@ interface DocsProps {
 export default function Docs({ docs, next, prev }: DocsProps) {
   return (
     <>
-      <NextSeo title={docs.title} canonical={`https://flama.dev/docs/${docs.slug}`} />
+      <NextSeo title={docs.title} canonical={`https://flama.dev/docs/${docs.slug}/`} />
       <DocsLayout docs={docs} next={next} prev={prev}>
         <MDXComponent
           code={docs.body.code}

@@ -6,15 +6,15 @@ wip: false
 Any machine-learning model built using one of the mainstream data-science frameworks, e.g.
 [Scikit-Learn](https://scikit-learn.org/stable/), [TensorFlow](https://www.tensorflow.org/) or
 [PyTorch](https://pytorch.org/), can be served using <FlamaName/>. This, indeed, is what we have been explaining in the
-previous sections on <FlamaName/> CLI commands [run](/docs/flama-cli/run), [serve](/docs/flama-cli/serve), and
-[start](/docs/flama-cli/start). For this to happen, we needed either of the following two options:
+previous sections on <FlamaName/> CLI commands [run](/docs/flama-cli/run/), [serve](/docs/flama-cli/serve/), and
+[start](/docs/flama-cli/start/). For this to happen, we needed either of the following two options:
 
 - A model packaged as a binary file (**.flm** files)
 - A model embedded in a <FlamaName/> App
 
 The second option will be explained in detail in the following sections:
-[add models](/docs/machine-learning-api/add-models), [model resource](/docs/machine-learning-api/model-resource), and
-[model components](/docs/machine-learning-api/model-components). The first option (which is the one we are going to
+[add models](/docs/machine-learning-api/add-models/), [model resource](/docs/machine-learning-api/model-resource/), and
+[model components](/docs/machine-learning-api/model-components/). The first option (which is the one we are going to
 discuss in what follows) requires us to save the models following a certain procedure. For the sake of convenience and
 speeding up the process of integrating these models into an API, <FlamaName /> comes with the functionality required to
 serialise and package them, automatically adding important metadata which make the resulting files operational.
@@ -60,7 +60,7 @@ first thing we think about is [pickling](https://docs.python.org/3/library/pickl
 which will have to eventually _unpickle_ (i.e., using **pickle.load**) the object, and expose the **predict** method. It
 seems like a very repetitive and boring task, doesn't it?
 
-As we have seen already when we introduced [serve](/docs/flama-cli/serve) and [start](/docs/flama-cli/start),
+As we have seen already when we introduced [serve](/docs/flama-cli/serve/) and [start](/docs/flama-cli/start/),
 
 <FlamaName /> comes equipped with a very convenient CLI which does all the boring part for you seamlessly, just with a
 single line of code. For this, we only need our models to be packaged with the <FlamaName /> counterparts of pickle's

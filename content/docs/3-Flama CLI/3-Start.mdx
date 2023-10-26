@@ -6,7 +6,7 @@ wip: false
 ## Start with definition files
 
 At this point, you've probably already learned how to quickly serve **flama** applications, and ML models codeless, with
-the [run](/docs/flama-cli/run) and [serve](/docs/flama-cli/serve) methods, respectively. But that's not the end of the
+the [run](/docs/flama-cli/run/) and [serve](/docs/flama-cli/serve/) methods, respectively. But that's not the end of the
 story. Indeed, we could say the fun part is just about to start.
 
 <FlamaName /> CLI comes with the very convenient command **start**, which builds on top of what we have already seen,
@@ -70,13 +70,13 @@ As you can readily check, the definition file consists of a set of sections whic
 will find is **"app"**, which encapsulates all the options defining an application, including the models and routes that
 can be served in it. In particular, we find the following fields, which we can populate according to our needs:
 
-- **Debug**: Whether the app is in debug mode or not. This is the same as the parameter `--app-debug` of [serve](/docs/flama-cli/serve).
+- **Debug**: Whether the app is in debug mode or not. This is the same as the parameter `--app-debug` of [serve](/docs/flama-cli/serve/).
 - **Title**: This is the name of the app which will be serving the ML models (e.g., "ML API"). This is the same as the
-  parameter `--app-title` of [serve](/docs/flama-cli/serve)
+  parameter `--app-title` of [serve](/docs/flama-cli/serve/)
 - **Version**: Version of the application (e.g., "0.1.0"). This is the same as the parameter `--app-version` of
-  [serve](/docs/flama-cli/serve)
+  [serve](/docs/flama-cli/serve/)
 - **Description**: Description of the application (e.g., "API serving several models"). This is the same as the
-  parameter `--app-description` of [serve](/docs/flama-cli/serve)
+  parameter `--app-description` of [serve](/docs/flama-cli/serve/)
 - **Schema**: Route where the API schema will be served (e.g., **/schema/**).
 - **Docs**: Route where the API documentation website will be served (e.g., **/docs/**)
 - **Models**: This represents a list of models that will be served via our API. Each model will be represented by the
@@ -84,7 +84,7 @@ can be served in it. In particular, we find the following fields, which we can p
 
 We can refer to this way of specifying the app properties as **import dictionary**. But, there is still another way of
 populating the "app" section of the definition file with a single line, which is the **import string**. Indeed, we have
-already used the import strings when we introduced the command [run](/docs/flama-cli/run), the import string was the
+already used the import strings when we introduced the command [run](/docs/flama-cli/run/), the import string was the
 path to the app object expressed in the format **module:attribute** (e.g. **src.main:app**).
 
 ## Examples

@@ -3,8 +3,8 @@ title: Model resources
 wip: false
 ---
 
-Thus far we have shown how to [package models](/docs/machine-learning-api/packaging-models) in order to
-[add them](/docs/machine-learning-api/) to a <FlamaName/> App. The way in which ML models are added or what they
+Thus far we have shown how to [package models](/docs/machine-learning-api/packaging-models/) in order to
+[add them](/docs/machine-learning-api/add-models/) to a <FlamaName/> App. The way in which ML models are added or what they
 represent internally was not discussed in detail before, as that was not necessary for the purpose of previous sections.
 However, it should be no surprise for us, _something_ happens under the hood when we add models. And, that "something"
 is responsible for making the model object(s) accessible via HTTP request to certain URL(s). When we serve/add models
@@ -23,7 +23,7 @@ model via the URL which is specified as parameter **path**. Here, interacting me
 This means, when we serve/add models, <FlamaName/> takes care of creating a **Resource** object per model automatically,
 specifically a **ModelResource** object, which represents an API resource in the REST sense of the word. This object
 defines the default way of interaction with the model itself by providing the methods just mentioned. A more thorough
-discussion about the **Resource** class and its children classes can be found in [here](/docs/api-reference/resource).
+discussion about the **Resource** class and its children classes can be found in [here](/docs/api-reference/resource/).
 However, the convenience of the method **add_models** might not be sufficient for your purposes for the following
 reasons:
 
@@ -188,7 +188,7 @@ You will notice the following changes:
 
 - **typesystem.Schema**s: We've added two schemas to define the data type of the input and the output. We have
   used _typesystem_ for this purpose. If you don't remember how this python package got there, go back to
-  [Quickstart](/docs/getting-started/quickstart). Also, remember that <FlamaName /> is also compatible with
+  [Quickstart](/docs/getting-started/quickstart/). Also, remember that <FlamaName /> is also compatible with
   **Marshmallow**. For more information about how to define schemas, we refer to their official documentation
   websites: [typesystem](https://www.encode.io/typesystem/), and [marshmallow](https://marshmallow.readthedocs.io/en/stable/),
   respectively.

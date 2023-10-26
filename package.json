@@ -15,8 +15,9 @@
   "scripts": {
     "start": "npm run dev",
     "dev": "next",
-    "build": "contentlayer build && next build",
-    "postbuild": "next-sitemap",
+    "prebuild": "contentlayer build",
+    "build": "next build",
+    "postbuild": "next-sitemap --config next-sitemap.config.js",
     "serve": "next start",
     "lint": "next lint",
     "lint:fix": "npm run lint -- --fix",

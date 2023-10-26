@@ -1,13 +1,11 @@
-name: 'Deploy'
+name: 'Test'
 
 on:
-  push:
-    branches:
-      - master
+  pull_request:
 
 jobs:
   terraform:
-    name: 'Deploy'
+    name: 'Test'
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -43,3 +41,21 @@ jobs:
       - name: Update permissions
         id: permissions
         run: gcloud storage objects update -r gs://${{ secrets.GCP_STORAGE_BUCKET_NAME }}/* --add-acl-grant=entity=AllUsers,role=READER
+      - name: Update Pull Request
+        uses: actions/github-script@v6
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const output = `#### Steps
+            | Step                  | Status                                                       |
+            | --------------------- | ------------------------------------------------------------ |
+            | 📦 Build and export   | ${{ steps.build.outcome == 'success' && '✔' || '❌' }}       |
+
+            *Pushed by: @${{ github.actor }}, Action: \`${{ github.event_name }}\`*`;
+
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: output
+            })
