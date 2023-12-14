@@ -13,7 +13,7 @@ interface HomeSectionProps extends React.ComponentProps<'section'> {
 export default function HomeSection({
   icon,
   title,
-  content,
+  body,
   docRef,
   selectableList,
   children,
@@ -30,7 +30,7 @@ export default function HomeSection({
           </div>
           <h2 className="text-3xl font-semibold text-primary-700 dark:text-primary-200 lg:text-5xl">{title}</h2>
         </div>
-        <div className="mt-4 max-w-3xl">{typeof content === 'string' ? <p>{content}</p> : content}</div>
+        <div className="mt-4 max-w-3xl">{typeof body === 'string' ? <p>{body}</p> : body}</div>
         {docRef && (
           <div className="mt-8 h-8 max-w-3xl">
             <LinkButton href={docRef} text="Learn more in our Docs" rightIcon />
