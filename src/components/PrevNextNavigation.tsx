@@ -1,6 +1,8 @@
-import Link from '@/components/Link'
-import { IconChevronLeft, IconChevronRight } from '@tabler/icons-react'
 import React from 'react'
+
+import { IconChevronLeft, IconChevronRight } from '@tabler/icons-react'
+
+import Link from '@/components/Link'
 
 interface PrevNextNavigationProps {
   prevTitle: string

@@ -36,9 +36,7 @@ export default function Label({ color = 'primary', children }: LabelProps) {
   const classColor = colorSelector?.[color] || colorSelector.primary
 
   return (
-    <span
-      className={`rounded-sm px-2 py-1 align-middle text-xs text-primary-50 shadow-xl dark:text-primary-200 ${classColor}`}
-    >
+    <span className={`rounded-sm px-2 py-1 text-xs text-primary-50 shadow-xl dark:text-primary-200 ${classColor}`}>
       {children}
     </span>
   )

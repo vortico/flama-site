@@ -1,12 +1,13 @@
 import fs from 'fs'
 import path from 'path'
+
 import type { Language } from 'prism-react-renderer'
 
 export interface Sample {
   id: string
   title: string
   code: string
-  language: Language
+  language?: Language
   lineNumbers?: string | boolean
 }
 

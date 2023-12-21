@@ -89,12 +89,7 @@ const colors = {
 module.exports = {
   darkMode: 'class',
   mode: 'jit',
-  content: [
-    './src/pages/**/*.{js,ts,jsx,tsx}',
-    './src/layouts/**/*.{js,ts,jsx,tsx}',
-    './src/components/**/*.{js,ts,jsx,tsx}',
-    './.contentlayer/generated/**/*.{js,ts,jsx,tsx,json}',
-  ],
+  content: ['./src/app/**/*.{js,ts,jsx,tsx}', './src/components/**/*.{js,ts,jsx,tsx}'],
   theme: {
     extend: {
       colors: {
@@ -205,9 +200,14 @@ module.exports = {
               color: theme('colors.primary.500'),
               a: {
                 color: theme('colors.primary.500'),
+                transitionProperty: 'color, background-color, border-color, text-decoration-color, fill, stroke',
+                transitionTimingFunction: 'cubic-bezier(0.4, 0, 0.2, 1)',
+                transitionDuration: '200ms',
                 '&:hover': {
                   color: theme('colors.primary.900'),
                 },
+                fontSize: '0.875rem',
+                lineHeight: '1.25rem',
               },
               ol: {
                 listStyleType: 'none',
@@ -220,6 +220,8 @@ module.exports = {
                   marginTop: '1rem',
                   '> a': {
                     fontWeight: theme('fontWeight.semibold'),
+                    fontSize: '1rem',
+                    lineHeight: '1.5rem',
                   },
                 },
                 ol: {
@@ -232,11 +234,11 @@ module.exports = {
                     '&::before': {
                       content: '""',
                       display: 'inline-block',
-                      width: '0.4rem',
-                      height: '0.4rem',
-                      borderRight: '0.15rem solid',
-                      borderTop: '0.15rem solid',
-                      transform: 'rotate(45deg)',
+                      width: '0.35rem',
+                      height: '0.35rem',
+                      borderRight: '0.125rem solid',
+                      borderTop: '0.125rem solid',
+                      transform: 'translateY(-30%) rotate(45deg)',
                       marginRight: '0.75rem',
                     },
 
@@ -254,7 +256,7 @@ module.exports = {
         },
         dark: {
           css: {
-            color: theme('colors.primary.400'),
+            color: theme('colors.primary.300'),
             hr: {
               borderColor: theme('colors.primary.600'),
             },
@@ -295,9 +297,9 @@ module.exports = {
               },
             },
             '.prose-toc': {
-              color: theme('colors.primary.400'),
+              color: theme('colors.primary.300'),
               a: {
-                color: theme('colors.primary.400'),
+                color: theme('colors.primary.300'),
                 '&:hover': {
                   color: theme('colors.primary.200'),
                 },
@@ -308,9 +310,9 @@ module.exports = {
       }),
     },
     fontFamily: {
-      serif: ['Montserrat', ...defaultTheme.fontFamily.serif],
-      sans: ['Lato', ...defaultTheme.fontFamily.sans],
-      mono: ['"Fira Mono"', ...defaultTheme.fontFamily.mono],
+      sans: ['var(--font-lato)', ...defaultTheme.fontFamily.sans],
+      alternative: ['var(--font-montserrat)', ...defaultTheme.fontFamily.sans],
+      mono: ['var(--font-fira-mono)', ...defaultTheme.fontFamily.mono],
     },
   },
   plugins: [

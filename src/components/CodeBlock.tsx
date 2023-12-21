@@ -1,7 +1,9 @@
-import ClipboardButton from '@/components/ClipboardButton'
+import React, { MutableRefObject } from 'react'
+
 import type { Language } from 'prism-react-renderer'
 import Highlight, { defaultProps } from 'prism-react-renderer'
-import React, { MutableRefObject } from 'react'
+
+import ClipboardButton from '@/components/ClipboardButton'
 
 interface LineNumbersProps {
   lines: number

@@ -1,3 +1,5 @@
+'use client'
+
 import React, { useEffect } from 'react'
 
 interface TOCItem {
@@ -18,14 +20,14 @@ function getItemFromAnchor(anchor: HTMLAnchorElement, children?: TOCItem[]): TOC
 
 function getTOC() {
   return Array.from(
-    document.querySelectorAll<HTMLAnchorElement>('nav.prose-toc > a, nav.prose-toc > ol > li > a.prose-toc-link')
+    document.querySelectorAll<HTMLAnchorElement>('nav.prose-toc > a, nav.prose-toc > ol > li > a.prose-toc-link'),
   ).map((firstLevel) =>
     getItemFromAnchor(
       firstLevel,
       Array.from(
-        firstLevel.parentElement?.querySelectorAll<HTMLAnchorElement>(':scope > ol > li > a.prose-toc-link') || []
-      ).map((secondLevel) => getItemFromAnchor(secondLevel))
-    )
+        firstLevel.parentElement?.querySelectorAll<HTMLAnchorElement>(':scope > ol > li > a.prose-toc-link') || [],
+      ).map((secondLevel) => getItemFromAnchor(secondLevel)),
+    ),
   )
 }
 
@@ -72,7 +74,7 @@ export function withTOC({ title, titleSlug, activeClassNames }: withTOCProps) {
             })
           })
         },
-        { rootMargin: '-112px 0px 0px 0px' }
+        { rootMargin: '-112px 0px 0px 0px' },
       )
 
       // Register all entries
@@ -89,7 +91,7 @@ export function withTOC({ title, titleSlug, activeClassNames }: withTOCProps) {
     return (
       <nav
         {...props}
-        className="not-prose prose-toc fixed top-20 bottom-0 right-[max(0px,calc(50%-45rem))] z-20 hidden w-72 overflow-y-auto px-8 lg:block"
+        className="prose-toc fixed bottom-0 right-[max(0px,calc(50%-45rem))] top-20 z-20 hidden w-72 overflow-y-auto px-8 lg:block"
       >
         <h5 className="mb-4 mt-8 text-sm font-semibold text-primary-900 dark:text-primary-100">On this page</h5>
         {titleSlug && (
