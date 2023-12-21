@@ -6,8 +6,14 @@ import { VerticalLogo } from '@/components/logos'
 
 export const metadata: Metadata = {
   title: 'Not found',
+  description: 'Not found',
   alternates: {
     canonical: '/404/',
+  },
+  robots: {
+    index: false,
+    follow: false,
+    nocache: true,
   },
 }
 

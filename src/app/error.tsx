@@ -8,6 +8,12 @@ import { VerticalLogo } from '@/components/logos'
 
 export const metadata: Metadata = {
   title: 'Error',
+  description: 'Error',
+  robots: {
+    index: false,
+    follow: false,
+    nocache: true,
+  },
 }
 
 interface ErrorProps {
