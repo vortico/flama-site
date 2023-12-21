@@ -21,6 +21,9 @@ export async function generateMetadata({ params }: Params) {
   return {
     title: document.frontmatter.title,
     description: document.frontmatter.description,
+    alternates: {
+      canonical: `/docs/${params.slug.join('/')}/`,
+    },
   }
 }
 

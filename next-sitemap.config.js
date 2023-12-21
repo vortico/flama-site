@@ -4,4 +4,5 @@ module.exports = {
   generateRobotsTxt: true,
   output: 'export',
   trailingSlash: true,
+  exclude: ['/404/'],
 }

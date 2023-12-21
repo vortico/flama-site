@@ -5,6 +5,10 @@ import { getBlogDocuments } from './mdx'
 
 export const metadata: Metadata = {
   title: 'Blog',
+  description: 'Flama blog',
+  alternates: {
+    canonical: '/blog/',
+  },
 }
 
 export default async function Blog() {

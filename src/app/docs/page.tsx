@@ -48,6 +48,10 @@ function DocsDashboard() {
 
 export const metadata: Metadata = {
   title: 'Docs',
+  description: 'Flama documentation',
+  alternates: {
+    canonical: `/docs/`,
+  },
 }
 
 export default function Docs() {
