@@ -1,11 +1,15 @@
+'use client'
+
+import React, { useCallback, useState } from 'react'
+
+import { DocSearchModal } from '@docsearch/react'
+import { useRouter } from 'next/navigation'
+import { createPortal } from 'react-dom'
+
 import Algolia from '@/algolia.config'
 import { SearchContext } from '@/components/Search/Context'
 import { Hit, HitProps } from '@/components/Search/Hit'
 import { useDocSearchKeyboardEvents } from '@/hooks/useDocSearchKeyboardEvents'
-import { DocSearchModal } from '@docsearch/react'
-import { useRouter } from 'next/router'
-import React, { useCallback, useState } from 'react'
-import { createPortal } from 'react-dom'
 
 interface SearchProviderProps {
   children: React.ReactNode
@@ -29,7 +33,7 @@ export function SearchProvider({ children }: SearchProviderProps) {
       setIsOpen(true)
       setInitialQuery(e.key)
     },
-    [setIsOpen, setInitialQuery]
+    [setIsOpen, setInitialQuery],
   )
 
   useDocSearchKeyboardEvents({
@@ -83,7 +87,7 @@ export function SearchProvider({ children }: SearchProviderProps) {
               })
             }}
           />,
-          document.body
+          document.body,
         )}
     </>
   )

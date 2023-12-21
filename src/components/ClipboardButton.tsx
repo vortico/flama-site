@@ -1,5 +1,8 @@
-import { IconCheck, IconClipboardCopy } from '@tabler/icons-react'
+'use client'
+
 import React, { useCallback, useState } from 'react'
+
+import { IconCheck, IconClipboardCopy } from '@tabler/icons-react'
 
 export interface ClipboardButtonProps {
   code: string
