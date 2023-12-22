@@ -1,7 +1,7 @@
 import React from 'react'
 
 import { getDocsDocument, getDocsDocuments, listDocsDocuments } from '../mdx'
-import { Body, Breadcrumbs, Header } from './_components'
+import { Body, Breadcrumbs, Header, PrevNextNavigation } from './_components'
 
 interface Params {
   params: { slug: string[] }
@@ -32,14 +32,15 @@ export default async function Docs({ params }: Params) {
   const documents = await getDocsDocuments()
 
   return (
-    <>
+    <div className="lg:mr-64">
       <Breadcrumbs documents={documents} current={document} />
-      <article className="prose pr-4 dark:prose-dark sm:pr-6 md:pr-8 lg:mr-64">
+      <article className="prose dark:prose-dark">
         <section>
           <Header document={document} />
         </section>
         <Body document={document} />
       </article>
-    </>
+      <PrevNextNavigation documents={documents} current={document} />
+    </div>
   )
 }
