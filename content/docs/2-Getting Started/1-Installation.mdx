@@ -5,17 +5,16 @@ wip: false
 
 ## Python version
 
-<FlamaName /> is fully compatible with <PythonName /> 3.8 and newer versions. If you do not have any preference, we
-recommend you to use the latest version.
+<FlamaName /> is fully compatible with all <PythonName /> [supported versions](https://devguide.python.org/versions/).
+If you do not have any preference, we recommend you to use the latest version available.
 
 As a first step, check the version of your active <PythonName /> environment:
 
 ```commandline
 > python --version
-  Python 3.11.5
 ```
 
-If the version is prior to 3.8, we suggest you to create a virtual environment with the latest version.
+If the version is prior to the oldest supported version, we suggest you to create a virtual environment with the latest version.
 
 ### Creating a virtual environment
 
@@ -32,15 +31,15 @@ last command line in both code snippets precisely activate the environment with 
 ##### Creation of virtual environment with conda
 
 ```commandline
-> conda create --name flama-dev python=3.8 --yes
+> conda create --name flama-dev python=<PYTHON_VERSION> --yes
 > conda activate flama-dev
 ```
 
 ##### Creation of virtual environment with pyenv
 
 ```commandline
-> pyenv install 3.8
-> pyenv virtualenv 3.8 flama-dev
+> pyenv install <PYTHON_VERSION>
+> pyenv virtualenv <PYTHON_VERSION> flama-dev
 > pyenv local flama-dev
 ```
 
@@ -60,8 +59,8 @@ After running this command line, you'll have <FlamaName /> installed and ready t
 
 ### Extras
 
-You have installed the core functionality of <FlamaName /> already. However, you might need some extra functionality
-when working in your project:
+You have installed the core functionality of <FlamaName /> already. However, you might need some dependencies to
+add extra functionality to your project:
 
 - [Pydantic](https://docs.pydantic.dev/): A library for data validation and settings management with
   support for type hints.
@@ -72,32 +71,24 @@ when working in your project:
 - [Marshmallow](https://marshmallow.readthedocs.io/en/stable/quickstart.html#): A library for data validation and
   serialization/deserialization.
 
-- [Forge (python)](https://python-forge.readthedocs.io/en/latest/): An elegant library for revising function signatures
-  at runtime.
-
 - [SQlAlchemy](https://www.sqlalchemy.org/): SQL toolkit and Object Relational Mapper that gives application developers
   the full power and flexibility of SQL.
 
-These dependencies are required if you want to use typed data schemas (**pydantic**, **typesystems**, **marshmallow**),
-or if you are going to use pagination (**python-forge**), or if you need to include a database (**sqlalchemy**) in your
-project.
+- [HTTPX](https://www.python-httpx.org/): HTTPX is a fully featured HTTP client for Python 3, which provides sync and async APIs, and support for both HTTP/1.1 and HTTP/2.
 
-If you use **pydantic** schemas, run:
+These dependencies are automatically included when installing <FlamaName /> if the appropriate [extra](https://packaging.python.org/en/latest/tutorials/installing-packages/#installing-extras)
+is specified:
 
-```commandline
-> pip install flama[pydantic, pagination, database]
-```
+- **pydantic** to make use of `Pydantic` schemas
+- **typesystem** to make use of `Typesystem` schemas
+- **marshmallow** to make use of `Marshmallow` schemas
+- **database** to interact with a database through `SQlAlchemy` functionality
+- **client** to interact with a <FlamaName /> model, or a <FlamaName /> application (e.g., for testing purposes), or any other HTTP resource
 
-In case you want to use **typesystem** schemas, run:
-
-```commandline
-> pip install flama[typesystem, pagination, database]
-```
-
-Or, if you prefer to use **marshmallow** schemas instead, run:
+An example of installation including **pydantic**, **database**, and **client** would be as follows:
 
 ```commandline
-> pip install flama[marshmallow, pagination, database]
+> pip install flama[pydantic, database, client]
 ```
 
 ### Development
@@ -130,6 +121,7 @@ Options:
   --help     Get help about how to use Flama CLI
 
 Commands:
+  model  Interact with an ML model without server.
   run    Run a Flama Application based on a route.
   serve  Serve an ML model file within a Flama Application.
   start  Start a Flama Application based on a config file.
@@ -140,7 +132,7 @@ To check what version of the library you have installed, simply run:
 ```commandline
 > flama --version
 
-flama, version 1.5.2
+Flama <VERSION>
 ```
 
 If you get something similar to the above output, you are completely set. We recommend you to keep reading the
