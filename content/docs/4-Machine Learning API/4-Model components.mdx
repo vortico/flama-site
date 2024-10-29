@@ -5,7 +5,7 @@ wip: false
 
 In the previous section we covered the fundamentals of building custom model resources. Understanding
 what model resources are, and how to use them, was the first step in building a custom model. We took
-advantage of the <FlamaName /> built-in's **ModelResource** and **ModelResourceType** to create a custom
+advantage of the <FlamaName /> built-in **ModelResource** to create a custom
 model resource that incorporated custom methods and exposed them as routes of our API,
 beyond the standard **/predict/** and **/inspect/** routes added by default when using <FlamaName /> CLI,
 or the syntax **app.models.add_model** (see the sections about [adding models](/docs/machine-learning-api/add-models/#add-models) and
@@ -154,7 +154,7 @@ internally. However, we have our own **ModelComponent** class, so we don't want 
 and this is what we are going to do. Let's see how:
 
 ```python
-class MyCustomModelResource(ModelResource, metaclass=ModelResourceType):
+class MyCustomModelResource(ModelResource):
     name = "custom_model"
     verbose_name = "Lazy-loaded ScikitLearn Model"
     component = component
@@ -214,7 +214,7 @@ check whether the lazy loading mechanism is working as expected. Finally, we cou
 This would look something like this:
 
 ```python
-class MyCustomModelResource(ModelResource, metaclass=ModelResourceType):
+class MyCustomModelResource(ModelResource):
     name = "custom_model"
     verbose_name = "Lazy-loaded ScikitLearn Model"
     component = MyCustomModelComponent("sklearn_model.flm")
@@ -266,7 +266,7 @@ from datetime import datetime
 
 import flama
 from flama import Flama
-from flama.models import Model, ModelResource, ModelResourceType, ModelComponent
+from flama.models import Model, ModelResource, ModelComponent
 from flama.resources import resource_method
 
 
@@ -300,7 +300,7 @@ class MyCustomModelComponent(ModelComponent):
 component = MyCustomModelComponent("sklearn_model.flm")
 
 
-class MyCustomModelResource(ModelResource, metaclass=ModelResourceType):
+class MyCustomModelResource(ModelResource):
     name = "custom_model"
     verbose_name = "Lazy-loaded ScikitLearn Model"
     component = component
@@ -443,7 +443,7 @@ class attribute **component**.
 ```python
 component = MyCustomModelComponent("pytorch_model.flm")
 
-class MyModelResource(ModelResource, metaclass=ModelResourceType):
+class MyModelResource(ModelResource):
     name = "custom_model"
     verbose_name = "Lazy-loaded PyTorch Model"
     component = component
@@ -456,7 +456,7 @@ class MyModelResource(ModelResource, metaclass=ModelResourceType):
 ```python
 component = MyCustomModelComponent("sklearn_model.flm")
 
-class MyModelResource(ModelResource, metaclass=ModelResourceType):
+class MyModelResource(ModelResource):
     name = "custom_model"
     verbose_name = "Lazy-loaded ScikitLearn Model"
     component = component
@@ -469,7 +469,7 @@ class MyModelResource(ModelResource, metaclass=ModelResourceType):
 ```python
 component = MyCustomModelComponent("tensorflow_model.flm")
 
-class MyModelResource(ModelResource, metaclass=ModelResourceType):
+class MyModelResource(ModelResource):
     name = "custom_model"
     verbose_name = "Lazy-loaded TensorFlow Model"
     component = component

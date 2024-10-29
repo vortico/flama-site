@@ -39,8 +39,8 @@ concepts. For this reason, we are going to re-implement the endpoints **/predict
 default when using the tools seen before to serve/add models automatically) as a good starting point to showcase the
 steps and ingredients required. With these two examples you will develop a better understanding of the _magic_ which
 happens under the hood when using either the CLI **serve/start**, or the method **app.models.add_model**.
-After these examples, you'll learn how to implement a custom method to be served as an endpoint, together with
-the built-ins provided by default (actually, via the [metaclass](https://docs.python.org/3/reference/datamodel.html#metaclasses) **ModelResourceType**).
+After these examples, you'll know how to implement a custom method to be served as an endpoint, together with
+the built-ins provided by default for this purpose.
 
 ### Preamble
 
@@ -53,7 +53,7 @@ import flama
 from flama import Flama
 
 # New imports (not seen so far):
-from flama.models import ModelResource, ModelResourceType
+from flama.models import ModelResource
 from flama.resources import resource_method
 
 # Flama app instantiation:
@@ -71,19 +71,21 @@ if __name__ == "__main__":
     flama.run(flama_app="__main__:app", server_host="0.0.0.0", server_port=8080, server_reload=True)
 ```
 
-As can be seen, there are three ingredients imported which we haven't seen yet, namely:
+As can be seen, there are two ingredients imported which we haven't seen yet, namely:
 
 - **ModelResource**: This is a <FlamaName /> built-in class which derives from the most fundamental resource
-  class **BaseResource**. These classes can be seen as the interface that any custom model class will need to adhere
-  to. In case you're not familiar with the interface design pattern, we like the definition given by [RealPython](https://realpython.com/python-interface/):
+  class **Resource**, and the [metaclass](https://docs.python.org/3/reference/datamodel.html#metaclasses) **ModelResourceType**.
+  These classes can be seen as the interface that any custom model class will need to adhere to.
+  In case you're not familiar with the interface design pattern, we like the definition given
+  by [RealPython](https://realpython.com/python-interface/):
 
   > At a high level, an interface acts as a blueprint for designing classes.
   > Like classes, interfaces define methods. Unlike classes, these methods are abstract.
   > An abstract method is one that the interface simply defines. It doesn’t implement the methods.
   > This is done by classes, which then implement the interface and give concrete meaning to the interface’s abstract methods.
 
-- **ModelResourceType**: This is a <FlamaName /> built-in metaclass which derives from the most fundamental
-  resource type metaclass **ResourceType**. The concept of metaclass is a bit less intuitive, and some highly
+  Regarding **ModelResourceType**, this is a <FlamaName /> built-in metaclass
+  which derives from the most fundamental resource type metaclass **ResourceType**. The concept of metaclass is a bit less intuitive, and some highly
   recognised pythonists recommend to avoid them:
 
   > Metaclasses are deeper magic than 99% of users should ever worry about. If you wonder whether you need them,
@@ -92,8 +94,8 @@ As can be seen, there are three ingredients imported which we haven't seen yet, 
   >
   > - Tim Peters
 
-  We agree with such a claim, which is why you won't need to worry about them, apart from having to import the
-  **ModelResourceType**, and use it as an argument when building your custom model class.
+  We agree with such a claim, which is why you won't need to worry about them because you won't even have to import **ModelResourceType**,
+  since this is already handled for you by the **ModelResource** class.
 
 - **resource_method**: This is a <FlamaName /> built-in decorator which allows us to convert a given class method into
   an **app** endpoint, with the following main arguments:
@@ -111,7 +113,7 @@ straightforward, we only need to use the following pattern:
 ```python
 # FIXME: Missing schemas
 
-class MySKModel(ModelResource, metaclass=ModelResourceType):
+class MySKModel(ModelResource):
     # special names:
     verbose_name = "My ScikitLearn Model"
     model_path = "sklearn_model.flm"
@@ -127,10 +129,9 @@ class MySKModel(ModelResource, metaclass=ModelResourceType):
 As we already said, this example is not functional (just yet). However, it contains a good
 amount of the pieces required, so we can start talking about these ingredients:
 
-- **MySKModel(ModelResource, metaclass=ModelResourceType)**: The very first thing needed is to
-  create our own model-resource class, which means inheriting from **ModelResource**. However,
-  that's only the interface, and we also need some extra magic which lives in the metaclass **ModelResourceType**.
-  Only with these two ingredients, your model-resource class will be <FlamaName /> compliant.
+- **MySKModel(ModelResource)**: The very first thing needed is to
+  create our own model-resource class, which means inheriting from **ModelResource**.
+  Just with this, your model-resource class will be <FlamaName /> compliant.
 
 - **Special attribute names**: These three attributes are mandatory for several purposes.
   The attribute **model_path** specifies where to find the binary file with the model,
@@ -161,7 +162,7 @@ Y = ts.Schema(fields={"output": ts.fields.Array()})
 app.schema.register_schema("X", X)
 app.schema.register_schema("Y", Y)
 
-class MySKModel(ModelResource, metaclass=ModelResourceType):
+class MySKModel(ModelResource):
     # special names:
     verbose_name = "My ScikitLearn Model"
     model_path = "sklearn_model.flm"
@@ -216,7 +217,7 @@ is completely analogous to the previous example. In the following code, we intro
 under a different route in order to be able to compare both:
 
 ```python
-class MyModel(ModelResource, metaclass=ModelResourceType):
+class MyModel(ModelResource):
     name = "my_model"
     verbose_name = "My ML model"
     model_path = "path/to/your_model_file.flm"
@@ -245,7 +246,7 @@ In particular, the method will return metadata information about the model, such
 the version of the library used to train it, and the version of the model itself. The code is as follows:
 
 ```python
-class MyModel(ModelResource, metaclass=ModelResourceType):
+class MyModel(ModelResource):
     name = "my_model"
     verbose_name = "My ML model"
     model_path = "path/to/your_model_file.flm"
@@ -286,7 +287,7 @@ on top of the model-resource class definition. Let's see both ways:
 ### Explicit
 
 ```python
-class MyModel(ModelResource, metaclass=ModelResourceType):
+class MyModel(ModelResource):
     ...
 
 app.models.add_model_resource(path="/my_model", resource=MyModel)
@@ -296,7 +297,7 @@ app.models.add_model_resource(path="/my_model", resource=MyModel)
 
 ```python
 @app.models.model("/model")
-class MyModel(ModelResource, metaclass=ModelResourceType):
+class MyModel(ModelResource):
     ...
 ```
 
@@ -327,7 +328,7 @@ namely:
 
 ```python
 @app.models.model("/pytorch_model/")
-class PyTorchModel(ModelResource, metaclass=ModelResourceType):
+class PyTorchModel(ModelResource):
     name = "pythorch_model"
     verbose_name = "PyTorch model"
     model_path = "pytorch_model.flm"
@@ -361,7 +362,7 @@ class PyTorchModel(ModelResource, metaclass=ModelResourceType):
 
 ```python
 @app.models.model("/sklearn_model/")
-class SKLearnModel(ModelResource, metaclass=ModelResourceType):
+class SKLearnModel(ModelResource):
     name = "pythorch_model"
     verbose_name = "ScikitLearn model"
     model_path = "sklearn_model.flm"
@@ -395,7 +396,7 @@ class SKLearnModel(ModelResource, metaclass=ModelResourceType):
 
 ```python
 @app.models.model("/tensorflow_model/")
-class SKLearnModel(ModelResource, metaclass=ModelResourceType):
+class SKLearnModel(ModelResource):
     name = "tensorflow_model"
     verbose_name = "TensorFlow model"
     model_path = "tensorflow_model.flm"
