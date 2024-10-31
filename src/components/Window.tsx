@@ -1,3 +1,5 @@
+'use client'
+
 import React, { MutableRefObject, useCallback, useState } from 'react'
 
 import { IconCircleMinus, IconCirclePlus, IconCircleX } from '@tabler/icons-react'
@@ -8,7 +10,7 @@ export interface WindowProps extends React.ComponentProps<'div'> {
 }
 
 export default function Window({ title, contentRef, className, children }: WindowProps) {
-  const [state, setState] = useState<string>('open')
+  const [state, setState] = useState<'open' | 'closed' | 'full'>('open')
 
   const onMinimize = useCallback(() => setState(state === 'open' ? 'closed' : 'open'), [state, setState])
   const onMaximize = useCallback(() => setState('full'), [setState])

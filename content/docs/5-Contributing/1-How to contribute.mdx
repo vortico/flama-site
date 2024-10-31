@@ -32,7 +32,7 @@ feature, which is why we encourage you to follow the procedure depicted above as
 Our code formatting rules are implicitly defined by using multiple tools. You can check your code against these
 standards by running:
 
-```commandline
+```console
 make lint
 ```
 
@@ -44,7 +44,7 @@ can be done individually as follows:
 <FlamaName /> uses Black for formatting the code to adhere to the Black code style ([PEP
 8](https://peps.python.org/pep-0008/) compliant):
 
-```commandline
+```console
 make black
 ```
 
@@ -52,7 +52,7 @@ make black
 
 Isort is used to reorganize library imports:
 
-```commandline
+```console
 make isort
 ```
 
@@ -60,7 +60,7 @@ make isort
 
 Flake8 is used to determine if the code quality is high enough as required to be accepted:
 
-```commandline
+```console
 make flake8
 ```
 
@@ -69,7 +69,7 @@ make flake8
 <FlamaName /> is completely static typed. To make sure your code fulfils this constraint, you can check it using
 pyright:
 
-```commandline
+```console
 make pyright
 ```
 
@@ -79,7 +79,7 @@ This will automatically fix any style violations in your code.
 
 You can run the test suite using the following commands:
 
-```commandline
+```console
 make test
 ```
 

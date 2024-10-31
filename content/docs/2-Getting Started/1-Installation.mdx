@@ -10,7 +10,7 @@ If you do not have any preference, we recommend you to use the latest version av
 
 As a first step, check the version of your active <PythonName /> environment:
 
-```commandline
+```console
 > python --version
 ```
 
@@ -30,14 +30,14 @@ last command line in both code snippets precisely activate the environment with 
 
 ##### Creation of virtual environment with conda
 
-```commandline
+```console
 > conda create --name flama-dev python=<PYTHON_VERSION> --yes
 > conda activate flama-dev
 ```
 
 ##### Creation of virtual environment with pyenv
 
-```commandline
+```console
 > pyenv install <PYTHON_VERSION>
 > pyenv virtualenv <PYTHON_VERSION> flama-dev
 > pyenv local flama-dev
@@ -51,7 +51,7 @@ last command line in both code snippets precisely activate the environment with 
 with [pip](https://pip.pypa.io/en/stable/) (the package installer for Python). Within the previously created and
 activated virtual environment, run the following command:
 
-```commandline
+```console
 > pip install flama
 ```
 
@@ -87,7 +87,7 @@ is specified:
 
 An example of installation including **pydantic**, **database**, and **client** would be as follows:
 
-```commandline
+```console
 > pip install flama[pydantic, database, client]
 ```
 
@@ -96,7 +96,7 @@ An example of installation including **pydantic**, **database**, and **client** 
 If you want to contribute to <FlamaName /> development, you will need to install it from the local folder where you have
 cloned the repository. Run the following command if this is your case:
 
-```commandline
+```console
 > git clone git@github.com:vortico/flama.git
 > cd flama
 > make install
@@ -110,7 +110,7 @@ After installing <FlamaName /> you will have the <FlamaName /> command-line inte
 
 The easiest and more practical way to check that everything was correctly installed is by running:
 
-```commandline
+```console
 > flama --help
 Usage: flama [OPTIONS] COMMAND [ARGS]...
 
@@ -129,7 +129,7 @@ Commands:
 
 To check what version of the library you have installed, simply run:
 
-```commandline
+```console
 > flama --version
 
 Flama <VERSION>

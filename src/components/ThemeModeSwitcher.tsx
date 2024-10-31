@@ -1,3 +1,5 @@
+'use client'
+
 import React, { useCallback, useEffect, useState } from 'react'
 
 import { IconBrushOff, IconMoon, IconSun } from '@tabler/icons-react'

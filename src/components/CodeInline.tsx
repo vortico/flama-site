@@ -1,31 +1,31 @@
 import React from 'react'
 
-import type { Language } from 'prism-react-renderer'
-import Highlight, { defaultProps } from 'prism-react-renderer'
+import { codeToHtml, type BundledLanguage } from 'shiki'
 
-function CodeWrapper({ children }: React.ComponentProps<'code'>) {
-  return <code className="relative inline flex-auto overflow-auto whitespace-normal">{children}</code>
+import { theme } from '@/lib/highlighter'
+
+function PlainCode({ code }: { code: string }) {
+  return <span className="relative inline flex-auto overflow-auto whitespace-normal">{code}</span>
+}
+
+async function HighlightCode({ code, language }: { code: string; language: BundledLanguage }) {
+  return (
+    <span
+      className="relative inline flex-auto overflow-auto whitespace-normal"
+      dangerouslySetInnerHTML={{ __html: await codeToHtml(code, { lang: language, theme }) }}
+    />
+  )
 }
 
 export interface CodeInlineProps {
   code: string
-  language: Language
+  language?: BundledLanguage | string
 }
 
 export default function CodeInline({ code, language }: CodeInlineProps) {
-  const { theme, ...props } = defaultProps
-
-  return language ? (
-    <Highlight {...props} code={code} language={language}>
-      {({ tokens, getTokenProps }) => (
-        <CodeWrapper>
-          {tokens[0].map((token, i) => (
-            <span key={`token-${i}`} {...getTokenProps({ token })} />
-          ))}
-        </CodeWrapper>
-      )}
-    </Highlight>
-  ) : (
-    <CodeWrapper>{code}</CodeWrapper>
+  return (
+    <code className="relative inline flex-auto overflow-auto whitespace-normal">
+      {language ? <HighlightCode code={code} language={language as BundledLanguage} /> : <PlainCode code={code} />}
+    </code>
   )
 }

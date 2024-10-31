@@ -11,8 +11,6 @@ const nextConfig = {
   },
 }
 
-const withMDX = require('@next/mdx')()
-
 const withPWA = require('next-pwa')({
   dest: 'public',
   disable: process.env.NODE_ENV === 'development',
@@ -20,4 +18,4 @@ const withPWA = require('next-pwa')({
   sw: 'service-worker.js',
 })
 
-module.exports = withPWA(withMDX(nextConfig))
+module.exports = withPWA(nextConfig)

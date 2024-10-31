@@ -26,7 +26,7 @@ The code does the following:
 
 You can download this code in your **examples** folder by running:
 
-```commandline
+```console
 > cd examples
 > wget https://raw.githubusercontent.com/vortico/flama/master/examples/hello_flama.py
 ```
@@ -35,7 +35,7 @@ You can download this code in your **examples** folder by running:
 
 To run your first <FlamaName /> application:
 
-```commandline
+```console
 > flama run examples.hello_flama:app
 
 INFO:     Started server process [78260]
@@ -74,7 +74,7 @@ There are several reasons why the server might not start after running `flama ru
 
 If there is another service already using the port **8000** you will see an error like:
 
-```commandline
+```console
 > flama run examples.hello_flama:app
 
 INFO:     Started server process [54203]
@@ -88,7 +88,7 @@ INFO:     Application shutdown complete.
 
 If you get an error similar to:
 
-```commandline
+```console
 > flama run examples.hello_flama:app
 
 command not found: flama
@@ -100,7 +100,7 @@ this means the virtual environment where <FlamaName /> was installed is not acti
 Another possibility is that the application path (i.e. **examples.hello_flama:app**) is wrong. This is the case when you
 have an error like:
 
-```commandline
+```console
 > flama run hello_flama:app
 ERROR:    Error loading ASGI app. Could not import module "hello_flama".
 ```
@@ -108,7 +108,7 @@ ERROR:    Error loading ASGI app. Could not import module "hello_flama".
 The only way of fixing this is by providing the correct application path. In this example, the path must be
 **examples.hello_flama:app** given that we are running <FlamaName /> CLI at the same level as the folder **examples**:
 
-```commandline
+```console
 examples/
 └── hello_flama.py
     └── app
@@ -150,7 +150,7 @@ if __name__ == "__main__":
 
 We can proceed, and run:
 
-```commandline
+```console
 > flama run examples.hello_flama:app
 
 INFO:     Started server process [3267]
@@ -161,7 +161,7 @@ INFO:     Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
 
 This time, let's visit **http://127.0.0.1:8000/docs/** and see what's there waiting for us.
 
-<Image src="/images/docs/docs-hello-flama-docs.png" alt="hello-flama-docs" width="1600" height="920" />
+<img src="/images/docs/docs-hello-flama-docs.png" alt="hello-flama-docs" width="1600" height="920" />
 
 Yup, <FlamaName /> automatically generates the API schema following the OpenAPI standard, and provides a convenient
 interface to interact with the documentation.

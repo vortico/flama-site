@@ -31,7 +31,7 @@ Once you have downloaded any of the files listed above, you will be able to serv
 Let's pick up one of the example model files we have just introduced in the previous section, say **sklearn_model.flm**.
 Now, let's run:
 
-```commandline
+```console
 > flama serve sklearn_model.flm
 
 INFO:     Started server process [15822]
@@ -63,12 +63,12 @@ As mentioned in the previous section, we recommend inspecting the documentation 
 model serving. To do that you only need to **flama serve** whatever model which you have packaged previously, and you'll
 get something like:
 
-<Image src="/images/docs/docs-schema-get.png" alt="docs-get-schema" width="1600" height="400" />
+<img src="/images/docs/docs-schema-get.png" alt="docs-get-schema" width="1600" height="400" />
 
 As you can see, the documentation page not only gives you a handy way to interact with the different endpoints
 available, but also gives you the equivalent `curl` statement. For instance, in order to get the schema of the model:
 
-```commandLine
+```console
 > curl --request GET \
   --url http://127.0.0.1:8000/ \
   --header 'Content-Type: application/json'
@@ -131,9 +131,9 @@ available, but also gives you the equivalent `curl` statement. For instance, in 
 
 Or, in case we want to make a prediction:
 
-<Image src="/images/docs/docs-predict-post.png" alt="docs-post-predict" width="1600" height="1135" />
+<img src="/images/docs/docs-predict-post.png" alt="docs-post-predict" width="1600" height="1135" />
 
-```commandLine
+```console
 > curl --request POST \
   --url http://127.0.0.1:8000/predict/ \
   --header 'Content-Type: application/json' \
@@ -166,7 +166,7 @@ result. For instance, you might want to serve the model at a different route (i.
 name of the model (i.e., not **model**), and so on. Such a customisation is possible thanks to the different optional
 inputs of the CLI:
 
-```commandline
+```console
 > flama serve --help
 
 Usage: flama serve [OPTIONS] MODEL_PATH
@@ -333,13 +333,13 @@ can do it by any of the following two equivalent ways:
 
 #### Using option argument
 
-```commandline
+```console
 > flama serve sklearn_model.flm --model-url=/xor
 ```
 
 #### Using environment variable
 
-```commandline
+```console
 > export FLAMA_MODEL_PATH=sklearn_model.flm
 > export FLAMA_MODEL_URL=/xor
 > flama serve sklearn_model.flm
@@ -349,7 +349,7 @@ can do it by any of the following two equivalent ways:
 
 As a quick usage example which populates all application and models parameters, we can run the following command line:
 
-```commandline
+```console
 > flama serve sklearn_model.flm \
     --model-url="/xor" \
     --model-name="XOR dummy model" \
@@ -363,4 +363,4 @@ As a quick usage example which populates all application and models parameters, 
 
 With these changes, the documentation at **http://127.0.0.1:8000/docs/** will look like:
 
-<Image src="/images/docs/docs-serve-params.png" alt="docs-post-predict" width="1600" height="999" />
+<img src="/images/docs/docs-serve-params.png" alt="docs-post-predict" width="1600" height="999" />

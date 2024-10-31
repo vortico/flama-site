@@ -1,107 +1,126 @@
 import React, { MutableRefObject } from 'react'
 
-import type { Language } from 'prism-react-renderer'
-import Highlight, { defaultProps } from 'prism-react-renderer'
+import { codeToTokens, getTokenStyleObject, type BundledLanguage } from 'shiki'
 
 import ClipboardButton from '@/components/ClipboardButton'
+import { theme } from '@/lib/highlighter'
 
-interface LineNumbersProps {
-  lines: number
+type LineType = 'number' | 'token'
+export type Lines = { type: LineType; token?: string }
+
+interface LineNumberProps {
+  type: LineType
+  lines?: number
   token?: string
 }
 
-function LineNumbers({ lines, token }: LineNumbersProps) {
+function LineNumbers({ type, lines, token }: LineNumberProps) {
   return (
-    <div className="hidden flex-none select-none py-4 pl-4 text-right text-primary-500 md:block" aria-hidden="true">
+    <div className="hidden flex-none select-none p-2 text-right font-mono text-primary-500 md:block" aria-hidden="true">
       {Array.from(Array(lines).keys()).map((line) => (
         <div key={`line-number-${line + 1}`} className="line-number">
-          {token ? token : line + 1}
+          {type === 'token' ? token : line + 1}
         </div>
       ))}
     </div>
   )
 }
 
-interface CodeWrapperProps extends React.ComponentProps<'pre'> {
-  lines: number
-  token?: string | boolean
+function PlainCode({
+  code,
+  selectedLine,
+}: {
   code: string
-  copyButton?: boolean
+  selectedLine?: {
+    number: number
+    ref?: MutableRefObject<HTMLDivElement | null>
+  }
+}) {
+  return (
+    <code>
+      {code.split('\n').map((line, i) => (
+        <div
+          key={i}
+          ref={selectedLine?.number === i + 1 ? selectedLine.ref : undefined}
+          className={`line w-fit px-2 ${selectedLine?.number === i + 1 ? 'bg-brand-700' : ''}`}
+        >
+          {line.split(' ').map((token, j) => (
+            <span key={j} className="token">
+              {token}
+            </span>
+          ))}
+        </div>
+      ))}
+    </code>
+  )
 }
 
-function CodeWrapper({ lines, token, code, copyButton, children, className }: CodeWrapperProps) {
+async function HighlightCode({
+  code,
+  language,
+  selectedLine,
+}: {
+  code: string
+  language: BundledLanguage
+  selectedLine?: {
+    number: number
+    ref?: MutableRefObject<HTMLDivElement | null>
+  }
+}) {
+  const tokens = await codeToTokens(code, { lang: language, theme })
+
   return (
-    <pre
-      className={`group relative flex h-fit w-full overflow-hidden whitespace-pre text-left text-sm leading-6 ${className}`}
-    >
-      {token && <LineNumbers lines={lines} token={typeof token === 'string' ? token : undefined} />}
-      <code className="relative block h-fit w-fit flex-auto overflow-auto p-4 text-primary-200">{children}</code>
-      {copyButton && <ClipboardButton code={code} />}
-    </pre>
+    <code>
+      {tokens.tokens.map((line, i) => (
+        <div
+          key={i}
+          ref={selectedLine?.number === i + 1 ? selectedLine.ref : undefined}
+          className={`line w-fit px-2 ${selectedLine?.number === i + 1 ? 'bg-brand-700' : ''}`}
+        >
+          {line.length === 0 ? (
+            <br />
+          ) : (
+            line.map((token, j) => (
+              <span key={j} className="token" style={getTokenStyleObject(token)}>
+                {token.content}
+              </span>
+            ))
+          )}
+        </div>
+      ))}
+    </code>
   )
 }
 
 export interface CodeBlockProps {
   code: string
-  language?: Language
-  lineNumbers?: string | boolean
+  language?: BundledLanguage | string
+  lines?: Lines
   copyButton?: boolean
-  selectedLine?: number
-  selectedLineRef?: MutableRefObject<HTMLDivElement | null>
+  selectedLine?: {
+    number: number
+    ref?: MutableRefObject<HTMLDivElement | null>
+  }
 }
 
-export default function CodeBlock({
+export default async function CodeBlock({
   code,
   language,
-  selectedLine,
-  selectedLineRef,
-  lineNumbers = true,
+  lines = { type: 'number' },
   copyButton = true,
+  selectedLine,
 }: CodeBlockProps) {
-  const { theme, ...props } = defaultProps
-
-  return language ? (
-    <Highlight {...props} code={code} language={language}>
-      {({ className, tokens, getLineProps, getTokenProps }) => (
-        <CodeWrapper
-          lines={tokens.length}
-          token={lineNumbers}
-          code={code}
-          copyButton={copyButton}
-          className={className}
-        >
-          {tokens.map((line, i) => {
-            const {
-              className: lineClassName,
-              key: lineKey,
-              ...lineProps
-            } = getLineProps({
-              line,
-              key: i,
-            })
-            return (
-              <div
-                key={lineKey}
-                ref={selectedLine === i + 1 ? selectedLineRef : undefined}
-                className={`${lineClassName} ${selectedLine === i + 1 ? 'token-line-selected' : ''}`}
-                {...lineProps}
-              >
-                {line.map((token, j) => {
-                  const { key: tokenKey, ...tokenProps } = getTokenProps({
-                    token,
-                    key: j,
-                  })
-                  return <span key={tokenKey} {...tokenProps} />
-                })}
-              </div>
-            )
-          })}
-        </CodeWrapper>
-      )}
-    </Highlight>
-  ) : (
-    <CodeWrapper lines={code.split('\n').length} token={lineNumbers} code={code} copyButton={copyButton}>
-      {code}
-    </CodeWrapper>
+  return (
+    <div className="group relative flex h-fit w-full overflow-hidden whitespace-pre text-left text-sm leading-6">
+      {lines && <LineNumbers lines={code.split('\n').length} type={lines.type} token={lines.token} />}
+      <pre className="relative block flex-auto overflow-auto py-2">
+        {language ? (
+          <HighlightCode code={code} language={language as BundledLanguage} selectedLine={selectedLine} />
+        ) : (
+          <PlainCode code={code} selectedLine={selectedLine} />
+        )}
+      </pre>
+      {copyButton && <ClipboardButton code={code} />}
+    </div>
   )
 }

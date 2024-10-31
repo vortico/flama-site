@@ -1,24 +1,21 @@
-'use client'
-
+import { TOC } from '@/components/mdx/components'
 import MDXContent from '@/components/mdx/MDXContent'
-import { withTOC } from '@/components/mdx/toc'
 
 import { type DocsDocument } from '../../mdx'
 
-interface MDXContentProps {
-  document: DocsDocument
-}
-
-export default function Body({ document }: MDXContentProps) {
+export default function Body({ document }: { document: DocsDocument }) {
   return (
     <MDXContent
       document={document}
       components={{
-        nav: withTOC({
-          title: document.frontmatter.title,
-          titleSlug: document.metadata.titleSlug,
-          activeClassNames: '!text-brand-500',
-        }),
+        nav: (props) => (
+          <TOC
+            title={document.frontmatter.title}
+            titleSlug={document.metadata.titleSlug}
+            activeClassNames="!text-brand-500"
+            {...props}
+          />
+        ),
       }}
     />
   )

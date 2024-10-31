@@ -21,7 +21,7 @@ and schemas will be served, besides the models we want to add from our local sys
 
 As always, the command **flama start** also comes with help:
 
-```commandline
+```console
 > flama start --help
 
 Usage: flama start [OPTIONS] [FLAMA_CONFIG]
@@ -42,7 +42,7 @@ Options:
 
 The best way to start with definition files is by example. For this purpose, you can simply run:
 
-```commandline
+```console
 > flama start --create-config simple
 ```
 
@@ -103,7 +103,7 @@ definition:
 
 Now, we can run the following command (assuming your definition file is named **flama.json**):
 
-```commandline
+```console
 > flama start flama.json
 
 INFO:     Started server process [96911]
@@ -114,7 +114,7 @@ INFO:     Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
 
 Open the browser and check the docs URL **http://127.0.0.1:8000/docs/** for your enjoyment.
 
-<Image src="/images/docs/docs-hello-flama-docs.png" alt="hello-flama-docs" width="1600" height="920" />
+<img src="/images/docs/docs-hello-flama-docs.png" alt="hello-flama-docs" width="1600" height="920" />
 
 ### Serving a single model
 
@@ -137,7 +137,7 @@ Let us start with the simplest example, which is using a definition file which o
 
 We only have to run the following command to get it running (assuming your definition file is named **flama.json**):
 
-```commandline
+```console
 > flama start flama.json
 
 INFO:     Started server process [94140]
@@ -148,7 +148,7 @@ INFO:     Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
 
 Open the browser and check the docs URL **http://127.0.0.1:8000/docs/** for your enjoyment.
 
-<Image src="/images/docs/docs-start-simple.png" alt="docs-start-simple" width="1600" height="920" />
+<img src="/images/docs/docs-start-simple.png" alt="docs-start-simple" width="1600" height="920" />
 
 ### Serving several models
 
@@ -176,7 +176,7 @@ configuration parameters of the app, in a single definition file. Let's try the 
 
 Now, we can run the following command (assuming your definition file is named **flama.json**):
 
-```commandline
+```console
 > flama start flama.json
 
 INFO:     Started server process [96911]
@@ -187,4 +187,4 @@ INFO:     Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
 
 Open the browser and check the docs URL **http://127.0.0.1:8000/docs/** for your enjoyment.
 
-<Image src="/images/docs/docs-start-multi.png" alt="docs-start-simple" width="1600" height="920" />
+<img src="/images/docs/docs-start-multi.png" alt="docs-start-simple" width="1600" height="920" />

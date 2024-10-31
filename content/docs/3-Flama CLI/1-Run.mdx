@@ -33,7 +33,7 @@ app = Flama()
 As we did in the [Quickstart](/docs/getting-started/quickstart/), let's assume that the file containing these lines is
 **main.py**, which is located at:
 
-```commandLine
+```console
 project_folder/
 └── src
     └── main.py
@@ -47,7 +47,7 @@ following two ways:
 
 #### Using option argument
 
-```commandLine
+```console
 > flama run src.main:app
 
 INFO:     Started server process [3267]
@@ -58,7 +58,7 @@ INFO:     Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
 
 #### Using environment variable
 
-```commandLine
+```console
 > export FLAMA_APP=src.main:app
 > flama run
 
@@ -73,7 +73,7 @@ INFO:     Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
 <FlamaName /> CLI uses **uvicorn** as webserver, and it is because of this that it accepts every argument of the uvicorn
 CLI:
 
-```commandline
+```console
 > flama run --help
 
 Usage: flama run [OPTIONS] FLAMA_APP

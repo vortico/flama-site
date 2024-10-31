@@ -90,7 +90,7 @@ As can be seen, we have used a non-standard configuration of the application by 
 
 We suggest to save the previous example in a local file, say **examples/add_models.py**, and run it with the CLI:
 
-```commandline
+```console
 > flama run examples.base_application:app
 
 INFO:     Will watch for changes in these directories: ['/{YOUR_WORKING_DIRECTORY}/']
@@ -137,7 +137,7 @@ app = Flama(
 
 If we run the application again, we should get the following output:
 
-```commandline
+```console
 > flama run examples.base_application:app
 
 INFO:     Will watch for changes in these directories: ['/{YOUR_WORKING_DIRECTORY}/']
@@ -154,7 +154,7 @@ INFO:     Application startup complete.
 If we click on the URL given above (i.e., **http://127.0.0.1:8000**), we should get the following message in our
 browser:
 
-```commandline
+```console
 "The API is ready. Loaded = True"
 ```
 
@@ -250,7 +250,7 @@ app.models.add_model(
 Right after adding and saving the document, we should see the reloading of the application happening on our terminal,
 something like:
 
-```commandline
+```console
 ...
 WARNING:  WatchFiles detected changes in 'examples/add_models.py'. Reloading...
 INFO:     Started server process [48286]
@@ -271,7 +271,7 @@ automatically have associated the following endpoints:
 
 Check the documentation at **http://127.0.0.1:8000/docs/**, you should see something like:
 
-<Image src="/images/docs/docs-mlapi-sklearn.png" alt="docs-mlapi-sklearn" width="1600" height="925" />
+<img src="/images/docs/docs-mlapi-sklearn.png" alt="docs-mlapi-sklearn" width="1600" height="925" />
 
 ### TensorFlow
 
@@ -288,7 +288,7 @@ app.models.add_model(
 Right after adding and saving the document, we should see the reloading of the application happening on our terminal,
 something like:
 
-```commandline
+```console
 ...
 WARNING:  WatchFiles detected changes in 'examples/add_models.py'. Reloading...
 INFO:     Started server process [48286]
@@ -309,7 +309,7 @@ following endpoints:
 
 Check the documentation at **http://127.0.0.1:8000/docs/**, you should see something like:
 
-<Image src="/images/docs/docs-mlapi-sklearn.png" alt="docs-mlapi-sklearn" width="1600" height="925" />
+<img src="/images/docs/docs-mlapi-sklearn.png" alt="docs-mlapi-sklearn" width="1600" height="925" />
 
 ### PyTorch
 
@@ -326,7 +326,7 @@ app.models.add_model(
 Right after adding and saving the document, we should see the reloading of the application happening on our terminal,
 something like:
 
-```commandline
+```console
 ...
 WARNING:  WatchFiles detected changes in 'examples/add_models.py'. Reloading...
 INFO:     Started server process [48286]
@@ -356,7 +356,7 @@ have associated the following endpoints:
 
 Check the documentation at **http://127.0.0.1:8000/docs/**, you should see something like:
 
-<Image src="/images/docs/docs-mlapi-sklearn.png" alt="docs-mlapi-sklearn" width="1600" height="925" />
+<img src="/images/docs/docs-mlapi-sklearn.png" alt="docs-mlapi-sklearn" width="1600" height="925" />
 
 ### Multiple models
 
