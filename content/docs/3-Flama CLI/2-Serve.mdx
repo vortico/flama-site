@@ -32,7 +32,7 @@ Let's pick up one of the example model files we have just introduced in the prev
 Now, let's run:
 
 ```console
-> flama serve sklearn_model.flm
+flama serve sklearn_model.flm
 
 INFO:     Started server process [15822]
 INFO:     Waiting for application startup.
@@ -69,7 +69,7 @@ As you can see, the documentation page not only gives you a handy way to interac
 available, but also gives you the equivalent `curl` statement. For instance, in order to get the schema of the model:
 
 ```console
-> curl --request GET \
+curl --request GET \
   --url http://127.0.0.1:8000/ \
   --header 'Content-Type: application/json'
 
@@ -134,7 +134,7 @@ Or, in case we want to make a prediction:
 <img src="/images/docs/docs-predict-post.png" alt="docs-post-predict" width="1600" height="1135" />
 
 ```console
-> curl --request POST \
+curl --request POST \
   --url http://127.0.0.1:8000/predict/ \
   --header 'Content-Type: application/json' \
   --data '{
@@ -167,7 +167,7 @@ name of the model (i.e., not **model**), and so on. Such a customisation is poss
 inputs of the CLI:
 
 ```console
-> flama serve --help
+flama serve --help
 
 Usage: flama serve [OPTIONS] MODEL_PATH
 
@@ -334,15 +334,15 @@ can do it by any of the following two equivalent ways:
 #### Using option argument
 
 ```console
-> flama serve sklearn_model.flm --model-url=/xor
+flama serve sklearn_model.flm --model-url=/xor
 ```
 
 #### Using environment variable
 
 ```console
-> export FLAMA_MODEL_PATH=sklearn_model.flm
-> export FLAMA_MODEL_URL=/xor
-> flama serve sklearn_model.flm
+export FLAMA_MODEL_PATH=sklearn_model.flm
+export FLAMA_MODEL_URL=/xor
+flama serve sklearn_model.flm
 ```
 
 ## Example
@@ -350,7 +350,7 @@ can do it by any of the following two equivalent ways:
 As a quick usage example which populates all application and models parameters, we can run the following command line:
 
 ```console
-> flama serve sklearn_model.flm \
+flama serve sklearn_model.flm \
     --model-url="/xor" \
     --model-name="XOR dummy model" \
     --app-debug \

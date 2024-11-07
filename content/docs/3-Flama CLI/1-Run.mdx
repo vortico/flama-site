@@ -48,7 +48,7 @@ following two ways:
 #### Using option argument
 
 ```console
-> flama run src.main:app
+flama run src.main:app
 
 INFO:     Started server process [3267]
 INFO:     Waiting for application startup.
@@ -59,8 +59,8 @@ INFO:     Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
 #### Using environment variable
 
 ```console
-> export FLAMA_APP=src.main:app
-> flama run
+export FLAMA_APP=src.main:app
+flama run
 
 INFO:     Started server process [3267]
 INFO:     Waiting for application startup.
@@ -74,7 +74,7 @@ INFO:     Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
 CLI:
 
 ```console
-> flama run --help
+flama run --help
 
 Usage: flama run [OPTIONS] FLAMA_APP
 

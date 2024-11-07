@@ -27,8 +27,8 @@ The code does the following:
 You can download this code in your **examples** folder by running:
 
 ```console
-> cd examples
-> wget https://raw.githubusercontent.com/vortico/flama/master/examples/hello_flama.py
+cd examples
+wget https://raw.githubusercontent.com/vortico/flama/master/examples/hello_flama.py
 ```
 
 ## Running your App
@@ -36,7 +36,7 @@ You can download this code in your **examples** folder by running:
 To run your first <FlamaName /> application:
 
 ```console
-> flama run examples.hello_flama:app
+flama run examples.hello_flama:app
 
 INFO:     Started server process [78260]
 INFO:     Waiting for application startup.
@@ -75,7 +75,7 @@ There are several reasons why the server might not start after running `flama ru
 If there is another service already using the port **8000** you will see an error like:
 
 ```console
-> flama run examples.hello_flama:app
+flama run examples.hello_flama:app
 
 INFO:     Started server process [54203]
 INFO:     Waiting for application startup.
@@ -89,7 +89,7 @@ INFO:     Application shutdown complete.
 If you get an error similar to:
 
 ```console
-> flama run examples.hello_flama:app
+flama run examples.hello_flama:app
 
 command not found: flama
 ```
@@ -101,7 +101,8 @@ Another possibility is that the application path (i.e. **examples.hello_flama:ap
 have an error like:
 
 ```console
-> flama run hello_flama:app
+flama run hello_flama:app
+
 ERROR:    Error loading ASGI app. Could not import module "hello_flama".
 ```
 
@@ -151,7 +152,7 @@ if __name__ == "__main__":
 We can proceed, and run:
 
 ```console
-> flama run examples.hello_flama:app
+flama run examples.hello_flama:app
 
 INFO:     Started server process [3267]
 INFO:     Waiting for application startup.
