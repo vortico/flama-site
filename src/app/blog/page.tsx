@@ -25,7 +25,7 @@ export default async function Blog() {
         <p className="text-lg">All the latest news about Flama directly from the team.</p>
       </header>
       <main className="mx-auto mb-20 max-w-5xl space-y-16 px-4 sm:mb-32 sm:px-6 md:mb-40 md:px-8">
-        {documents.map((document, i) => (
+        {documents.reverse().map((document, i) => (
           <BlogPreview key={i} document={document} />
         ))}
       </main>
