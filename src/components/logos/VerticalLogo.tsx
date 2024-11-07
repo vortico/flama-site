@@ -1,3 +1,5 @@
+import React from 'react'
+
 import { FlamaIcon } from '@/components/icons'
 
 export default function VerticalLogo() {

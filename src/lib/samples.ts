@@ -1,16 +1,12 @@
 import fs from 'fs'
-import path from 'path'
+import p from 'path'
 
-import type { Language } from 'prism-react-renderer'
-
-export interface Sample {
+export interface ISample {
   id: string
   title: string
-  code: string
-  language?: Language
-  lineNumbers?: string | boolean
+  code: React.ReactNode
 }
 
-export async function loadSample(samplePath: string) {
-  return (await fs.promises.readFile(path.join('src/samples', samplePath))).toString().trim()
+export async function loadSample(path: string) {
+  return (await fs.promises.readFile(p.join('src/samples', path))).toString().trim()
 }

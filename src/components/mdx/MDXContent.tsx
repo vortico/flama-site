@@ -11,8 +11,7 @@ import remarkMath from 'remark-math'
 // @ts-ignore
 import remarkSectionize from 'remark-sectionize'
 
-import Label from '@/components/Label'
-import Link from '@/components/Link'
+import { Label, Link } from '@/components/elements'
 import { Code, H1, H2, H3, H4, H5, H6, Image, Pre } from '@/components/mdx/components'
 import { BosqueName, BrumaName, CiclonName, FlamaName, PythonName, VorticoName } from '@/components/names'
 import { type Document } from '@/lib/mdx'

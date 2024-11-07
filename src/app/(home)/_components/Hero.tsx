@@ -4,17 +4,11 @@ import React, { useCallback, useMemo, useState } from 'react'
 
 import { IconChevronRight } from '@tabler/icons-react'
 
-import CodeWindow from '@/components/CodeWindow'
-import Link from '@/components/Link'
+import { Link, QuickSearchButton, Window } from '@/components/elements'
 import { FlamaName } from '@/components/names'
-import { QuickSearchButton } from '@/components/QuickSearchButton'
-import { Sample } from '@/lib/samples'
+import { ISample } from '@/lib/samples'
 
-interface SamplesProps {
-  samples: Sample[]
-}
-
-function Samples({ samples }: SamplesProps) {
+function Samples({ samples }: { samples: ISample[] }) {
   const [selected, setSelected] = useState<string>(samples[0].id)
 
   const onSelect = useCallback((value: string) => () => setSelected(value), [setSelected])
@@ -42,25 +36,13 @@ function Samples({ samples }: SamplesProps) {
         ))}
       </div>
       <div className="h-full min-h-[17.5rem] w-full basis-full lg:basis-2/3">
-        {selectedSample && (
-          <CodeWindow
-            title={selectedSample.title}
-            code={selectedSample.code}
-            language={selectedSample.language}
-            lineNumbers={selectedSample.lineNumbers}
-            className="max-h-64"
-          />
-        )}
+        {selectedSample && <Window title={selectedSample.title}>{selectedSample.code}</Window>}
       </div>
     </div>
   )
 }
 
-export interface HeroProps {
-  samples: Sample[]
-}
-
-export default function Hero({ samples }: HeroProps) {
+export default function Hero({ samples }: { samples: ISample[] }) {
   return (
     <>
       <section className="mx-auto max-w-5xl px-8 pt-20 text-center sm:pt-24 lg:pt-32">

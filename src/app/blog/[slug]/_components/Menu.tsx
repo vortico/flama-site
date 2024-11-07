@@ -1,6 +1,8 @@
+import React from 'react'
+
 import { IconChevronsLeft } from '@tabler/icons-react'
 
-import Link from '@/components/Link'
+import { Link } from '@/components/elements'
 
 import { type BlogDocument } from '../../mdx'
 
@@ -20,7 +22,7 @@ function Metadata({ document }: { document: BlogDocument }) {
   const dateFormatter = Intl.DateTimeFormat(['en'], { month: 'long', year: 'numeric', day: 'numeric' })
 
   return (
-    <header className="justify-center space-y-4">
+    <header className="flex w-full flex-col justify-center gap-12 md:flex-row xl:flex-col">
       <div>
         <h5 className="mb-4 text-primary-700 dark:text-primary-200">{`${
           document.frontmatter.authors && document.frontmatter.authors.length > 1 ? 'Authors' : 'Author'
@@ -55,11 +57,13 @@ interface MenuProps {
 
 export default function Menu({ document }: MenuProps) {
   return (
-    <div className="mb-16 xl:mb-0">
+    <div className="mb-4 flex flex-col md:mb-8 xl:mb-0">
       <div className="mb-5 hidden border-b border-primary-200 pb-5 dark:border-primary-200/5 xl:block">
         <BackButton />
       </div>
-      <Metadata document={document} />
+      <div className="w-full">
+        <Metadata document={document} />
+      </div>
     </div>
   )
 }

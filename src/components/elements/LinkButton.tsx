@@ -2,7 +2,7 @@ import React from 'react'
 
 import { IconChevronLeft, IconChevronRight } from '@tabler/icons-react'
 
-import Link from '@/components/Link'
+import { Link } from '@/components/elements'
 
 interface LinkButtonProps extends React.ComponentProps<'a'> {
   text: string

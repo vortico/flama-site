@@ -4,7 +4,7 @@ import React, { useMemo } from 'react'
 
 import { usePathname } from 'next/navigation'
 
-import Link from '@/components/Link'
+import { Link } from '@/components/elements'
 import { type TOCLink } from '@/lib/toc'
 
 import { type DocsDocument } from '../../mdx'

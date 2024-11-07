@@ -41,7 +41,7 @@ interface SelectableListProps {
   onSelect(id: string): void
 }
 
-export function SelectableList({ items, selected, onSelect }: SelectableListProps) {
+export default function SelectableList({ items, selected, onSelect }: SelectableListProps) {
   return (
     <ul className="inline-grid w-full grid-cols-4 items-center">
       {items.map(({ id, name, icon }) => (

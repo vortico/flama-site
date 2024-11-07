@@ -1,3 +1,5 @@
+import React from 'react'
+
 import { BlogDocument } from '../../mdx'
 
 interface HeaderProps {

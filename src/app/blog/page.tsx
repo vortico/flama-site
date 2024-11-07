@@ -1,3 +1,5 @@
+import React from 'react'
+
 import { Metadata } from 'next'
 
 import { BlogPreview } from './_components'

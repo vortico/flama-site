@@ -1,6 +1,6 @@
 import React, { ReactNode } from 'react'
 
-import LinkButton from '@/components/LinkButton'
+import { LinkButton } from '@/components/elements'
 
 interface HomeSectionProps extends React.ComponentProps<'section'> {
   icon: ReactNode

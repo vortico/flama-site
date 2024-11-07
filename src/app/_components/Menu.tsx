@@ -5,11 +5,11 @@ import React, { useCallback, useState } from 'react'
 import { IconMenu2, IconSearch, IconX } from '@tabler/icons-react'
 import { createPortal } from 'react-dom'
 
+import { Link, Tooltip } from '@/components/elements'
 import { FlamaIcon, GithubIcon } from '@/components/icons'
-import Link from '@/components/Link'
 import { SearchButton } from '@/components/Search'
-import ThemeModeSwitcher from '@/components/ThemeModeSwitcher'
-import Tooltip from '@/components/Tooltip'
+
+import ThemeModeSwitcher from './ThemeModeSwitcher'
 
 const primaryIconClass =
   'text-primary-400 transition-colors duration-200 hover:text-primary-500 dark:text-primary-500 dark:hover:text-primary-400'

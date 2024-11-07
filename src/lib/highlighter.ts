@@ -1,3 +1,6 @@
+import { getSingletonHighlighterCore, getTokenStyleObject, type HighlighterCore, type ThemedToken } from 'shiki/core'
+import { createOnigurumaEngine } from 'shiki/engine/oniguruma'
+
 export const theme = {
   name: 'vortico',
   settings: [
@@ -112,4 +115,28 @@ export const theme = {
       },
     },
   ],
+}
+
+export function tokenStyle(token: ThemedToken) {
+  return getTokenStyleObject(token)
+}
+
+let highlighter: HighlighterCore
+
+export default async function getHighlighter() {
+  if (highlighter === undefined)
+    highlighter = await getSingletonHighlighterCore({
+      themes: [theme],
+      langs: [
+        import('shiki/langs/bash.mjs'),
+        import('shiki/langs/console.mjs'),
+        import('shiki/langs/javascript.mjs'),
+        import('shiki/langs/json.mjs'),
+        import('shiki/langs/python.mjs'),
+        import('shiki/langs/toml.mjs'),
+      ],
+      engine: createOnigurumaEngine(import('shiki/wasm')),
+    })
+
+  return highlighter
 }

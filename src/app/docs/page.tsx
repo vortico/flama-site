@@ -2,7 +2,7 @@ import React from 'react'
 
 import { Metadata } from 'next'
 
-import LinkButton from '@/components/LinkButton'
+import { LinkButton } from '@/components/elements'
 
 interface DocsDashboardItemProps {
   title: string

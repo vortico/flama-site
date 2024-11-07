@@ -5,13 +5,13 @@ import React, { useCallback, useMemo, useState } from 'react'
 import { IconRobot } from '@tabler/icons-react'
 import { motion } from 'framer-motion'
 
-import CodeWindow from '@/components/CodeWindow'
+import { Window } from '@/components/elements'
 import { PyTorchIcon, ScikitLearnIcon, TensorFlowIcon } from '@/components/icons'
 import { FlamaName } from '@/components/names'
-import { Sample } from '@/lib/samples'
+import { ISample } from '@/lib/samples'
 
 import HomeSection from './HomeSection'
-import { ISelectableItem, SelectableList } from './SelectableList'
+import SelectableList, { ISelectableItem } from './SelectableList'
 
 const frameworks: ISelectableItem[] = [
   {
@@ -31,11 +31,7 @@ const frameworks: ISelectableItem[] = [
   },
 ]
 
-interface MachineLearningResponsiveProps {
-  samples: Sample[]
-}
-
-export default function MachineLearningResponsive({ samples }: MachineLearningResponsiveProps) {
+export default function MachineLearningResponsive({ samples }: { samples: ISample[] }) {
   const [selected, setSelected] = useState<string>(frameworks[0].id)
 
   const onSelect = useCallback(
@@ -81,14 +77,7 @@ export default function MachineLearningResponsive({ samples }: MachineLearningRe
         viewport={{ once: true }}
         className="-mt-16 ml-auto w-full max-w-3xl"
       >
-        {selectedSample && (
-          <CodeWindow
-            title={selectedSample.title}
-            code={selectedSample.code}
-            language={selectedSample.language}
-            lineNumbers={selectedSample.lineNumbers}
-          />
-        )}
+        {selectedSample && <Window title={selectedSample.title}>{selectedSample.code}</Window>}
       </motion.div>
     </HomeSection>
   )

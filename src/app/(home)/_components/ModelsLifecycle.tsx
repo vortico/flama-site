@@ -5,17 +5,13 @@ import React from 'react'
 import { IconRefresh } from '@tabler/icons-react'
 import { motion } from 'framer-motion'
 
-import CodeWindow from '@/components/CodeWindow'
+import { Window } from '@/components/elements'
 import { FlamaName } from '@/components/names'
-import { Sample } from '@/lib/samples'
+import type { ISample } from '@/lib/samples'
 
 import HomeSection from './HomeSection'
 
-interface ModelsLifecycleProps {
-  samples: Sample[]
-}
-
-export default function ModelsLifecycle({ samples }: ModelsLifecycleProps) {
+export default function ModelsLifecycle({ samples }: { samples: ISample[] }) {
   const selectedSample = samples[0]
 
   return (
@@ -43,12 +39,7 @@ export default function ModelsLifecycle({ samples }: ModelsLifecycleProps) {
         viewport={{ once: true }}
         className="-mt-16 ml-auto w-full max-w-3xl"
       >
-        <CodeWindow
-          title={selectedSample.title}
-          code={selectedSample.code}
-          language={selectedSample.language}
-          lineNumbers={selectedSample.lineNumbers}
-        />
+        <Window title={selectedSample.title}>{selectedSample.code}</Window>
       </motion.div>
     </HomeSection>
   )

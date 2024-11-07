@@ -1,6 +1,7 @@
 import React from 'react'
 
-import { loadSample, Sample } from '@/lib/samples'
+import { Code } from '@/components/elements'
+import { loadSample, type ISample } from '@/lib/samples'
 
 import {
   DevelopmentTools,
@@ -13,11 +14,11 @@ import {
 } from './_components'
 
 interface Samples {
-  hero: Sample[]
-  machineLearningResponsive: Sample[]
-  productionReadyFirst: Sample[]
-  modelsLifecycle: Sample[]
-  extensibility: Sample[]
+  hero: ISample[]
+  machineLearningResponsive: ISample[]
+  productionReadyFirst: ISample[]
+  modelsLifecycle: ISample[]
+  extensibility: ISample[]
 }
 
 async function getSamples(): Promise<Samples> {
@@ -26,83 +27,100 @@ async function getSamples(): Promise<Samples> {
       {
         id: 'framework',
         title: 'Framework',
-        code: await loadSample('home/hero_framework.py'),
-        language: 'python',
-        lineNumbers: true,
+        code: <Code code={await loadSample('home/hero_framework.py')} language="python" lines={{ type: 'number' }} />,
       },
       {
         id: 'application',
         title: 'Application',
-        code: await loadSample('home/hero_application.sh'),
-        lineNumbers: false,
+        code: (
+          <Code
+            code={await loadSample('home/hero_application.sh')}
+            language="console"
+            lines={{ type: 'token', token: '>' }}
+          />
+        ),
       },
     ],
     machineLearningResponsive: [
       {
         id: 'tf',
         title: 'TensorFlow',
-        code: await loadSample('home/ml_responsive_tensorflow.py'),
-        language: 'python',
-        lineNumbers: true,
+        code: (
+          <Code
+            code={await loadSample('home/ml_responsive_tensorflow.py')}
+            language="python"
+            lines={{ type: 'number' }}
+          />
+        ),
       },
       {
         id: 'sklearn',
         title: 'Scikit Learn',
-        code: await loadSample('home/ml_responsive_sklearn.py'),
-        language: 'python',
-        lineNumbers: true,
+        code: (
+          <Code code={await loadSample('home/ml_responsive_sklearn.py')} language="python" lines={{ type: 'number' }} />
+        ),
       },
       {
         id: 'pytorch',
         title: 'PyTorch',
-        code: await loadSample('home/ml_responsive_pytorch.py'),
-        language: 'python',
-        lineNumbers: true,
+        code: (
+          <Code code={await loadSample('home/ml_responsive_pytorch.py')} language="python" lines={{ type: 'number' }} />
+        ),
       },
     ],
     productionReadyFirst: [
       {
         id: 'cli',
         title: 'Command Line',
-        code: await loadSample('home/production_ready_first_cli.sh'),
-        lineNumbers: false,
+        code: (
+          <Code
+            code={await loadSample('home/production_ready_first_cli.sh')}
+            language="console"
+            lines={{ type: 'token', token: '>' }}
+          />
+        ),
       },
       {
         id: 'python',
         title: 'Python',
-        code: await loadSample('home/production_ready_first_python.py'),
-        language: 'python',
-        lineNumbers: true,
+        code: (
+          <Code
+            code={await loadSample('home/production_ready_first_python.py')}
+            language="python"
+            lines={{ type: 'number' }}
+          />
+        ),
       },
       {
         id: 'docker',
         title: 'Docker',
-        code: await loadSample('home/production_ready_first_docker.sh'),
-        lineNumbers: '>',
+        code: (
+          <Code
+            code={await loadSample('home/production_ready_first_docker.sh')}
+            language="console"
+            lines={{ type: 'token', token: '>' }}
+          />
+        ),
       },
     ],
     modelsLifecycle: [
       {
         id: 'models-lifecycle',
         title: 'Models Lifecycle',
-        code: await loadSample('home/models_lifecycle.py'),
-        language: 'python',
-        lineNumbers: true,
+        code: <Code code={await loadSample('home/models_lifecycle.py')} language="python" lines={{ type: 'number' }} />,
       },
     ],
     extensibility: [
       {
         id: 'extensibility',
         title: 'Extensibility',
-        code: await loadSample('home/extensibility.py'),
-        language: 'python',
-        lineNumbers: true,
+        code: <Code code={await loadSample('home/extensibility.py')} language="python" lines={{ type: 'number' }} />,
       },
     ],
   }
 }
 
-export default async function Home() {
+export default async function Page() {
   const samples = await getSamples()
 
   return (

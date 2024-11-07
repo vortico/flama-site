@@ -2,7 +2,7 @@ import React, { useMemo } from 'react'
 
 import { IconChevronsLeft, IconChevronsRight } from '@tabler/icons-react'
 
-import Link from '@/components/Link'
+import { Link } from '@/components/elements'
 
 import { type DocsDocument } from '../../mdx'
 

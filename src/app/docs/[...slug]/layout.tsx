@@ -1,6 +1,6 @@
 import React, { ReactNode } from 'react'
 
-import { QuickSearchButton } from '@/components/QuickSearchButton'
+import { QuickSearchButton } from '@/components/elements'
 
 import { getDocsDocuments } from '../mdx'
 import { Menu } from './_components'

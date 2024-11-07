@@ -1,20 +1,30 @@
 'use client'
 
-import React, { MutableRefObject, useCallback, useState } from 'react'
+import React, { MutableRefObject, useCallback, useEffect, useRef, useState } from 'react'
 
 import { IconCircleMinus, IconCirclePlus, IconCircleX } from '@tabler/icons-react'
 
 export interface WindowProps extends React.ComponentProps<'div'> {
   title?: string
-  contentRef?: MutableRefObject<HTMLDivElement | null>
+  autoScroll?: MutableRefObject<HTMLDivElement | null>
 }
 
-export default function Window({ title, contentRef, className, children }: WindowProps) {
+export default function Window({ title, autoScroll, className, children }: WindowProps) {
+  const containerRef = useRef<HTMLDivElement>(null)
   const [state, setState] = useState<'open' | 'closed' | 'full'>('open')
 
   const onMinimize = useCallback(() => setState(state === 'open' ? 'closed' : 'open'), [state, setState])
   const onMaximize = useCallback(() => setState('full'), [setState])
   const onClose = useCallback(() => setState('closed'), [setState])
+
+  useEffect(() => {
+    if (containerRef.current && autoScroll?.current)
+      containerRef.current.scrollTo({
+        top: autoScroll.current.offsetTop - containerRef.current.clientHeight / 2,
+        left: 0,
+        behavior: 'smooth',
+      })
+  }, [autoScroll, containerRef])
 
   return (
     <div
@@ -50,7 +60,7 @@ export default function Window({ title, contentRef, className, children }: Windo
           </div>
         </div>
         <div
-          ref={contentRef}
+          ref={containerRef}
           className={`-mt-px w-full overflow-auto ${state === 'closed' ? 'max-h-0' : ''} ${
             state === 'full' ? 'max-h-[85vh]' : ''
           } ${state === 'open' ? 'max-h-full' : ''}`}

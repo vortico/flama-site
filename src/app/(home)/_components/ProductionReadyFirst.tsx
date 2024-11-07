@@ -5,13 +5,13 @@ import React, { useCallback, useMemo, useState } from 'react'
 import { IconSparkles, IconTerminal2 } from '@tabler/icons-react'
 import { motion } from 'framer-motion'
 
-import CodeWindow from '@/components/CodeWindow'
-import { PythonIcon } from '@/components/icons'
+import { Window } from '@/components/elements'
+import { DockerIcon, PythonIcon } from '@/components/icons'
 import { FlamaName } from '@/components/names'
-import { Sample } from '@/lib/samples'
+import { type ISample } from '@/lib/samples'
 
 import HomeSection from './HomeSection'
-import { ISelectableItem, SelectableList } from './SelectableList'
+import SelectableList, { ISelectableItem } from './SelectableList'
 
 const items: ISelectableItem[] = [
   {
@@ -24,18 +24,14 @@ const items: ISelectableItem[] = [
     name: 'Python',
     icon: <PythonIcon fillOpacity=".8" />,
   },
-  // {
-  //   id: 'docker',
-  //   name: 'Docker',
-  //   icon: <DockerIcon fillOpacity=".8" />,
-  // },
+  {
+    id: 'docker',
+    name: 'Docker',
+    icon: <DockerIcon fillOpacity=".8" />,
+  },
 ]
 
-interface ProductionReadyFirstProps {
-  samples: Sample[]
-}
-
-export default function ProductionReadyFirst({ samples }: ProductionReadyFirstProps) {
+export default function ProductionReadyFirst({ samples }: { samples: ISample[] }) {
   const [selected, setSelected] = useState<string>(items[0].id)
 
   const onSelect = useCallback(
@@ -81,15 +77,7 @@ export default function ProductionReadyFirst({ samples }: ProductionReadyFirstPr
         viewport={{ once: true }}
         className="-mt-16 ml-auto w-full max-w-3xl"
       >
-        {selectedSample && (
-          <CodeWindow
-            title={selectedSample.title}
-            code={selectedSample.code}
-            language={selectedSample.language}
-            lineNumbers={selectedSample.lineNumbers}
-            className="max-h-64"
-          />
-        )}
+        {selectedSample && <Window title={selectedSample.title}>{selectedSample.code}</Window>}
       </motion.div>
     </HomeSection>
   )

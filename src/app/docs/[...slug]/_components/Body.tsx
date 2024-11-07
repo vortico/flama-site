@@ -1,3 +1,5 @@
+import React from 'react'
+
 import { TOC } from '@/components/mdx/components'
 import MDXContent from '@/components/mdx/MDXContent'
 

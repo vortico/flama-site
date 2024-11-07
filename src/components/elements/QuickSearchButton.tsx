@@ -6,7 +6,7 @@ import { IconSearch } from '@tabler/icons-react'
 
 import { SearchButton } from '@/components/Search'
 
-export function QuickSearchButton({ className, ...props }: React.ComponentProps<'button'>) {
+export default function QuickSearchButton({ className, ...props }: React.ComponentProps<'button'>) {
   return (
     <SearchButton
       {...props}

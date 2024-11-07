@@ -5,17 +5,13 @@ import React from 'react'
 import { IconPlug } from '@tabler/icons-react'
 import { motion } from 'framer-motion'
 
-import CodeWindow from '@/components/CodeWindow'
+import { Window } from '@/components/elements'
 import { FlamaName } from '@/components/names'
-import { Sample } from '@/lib/samples'
+import { type ISample } from '@/lib/samples'
 
 import HomeSection from './HomeSection'
 
-interface ExtensibilityProps {
-  samples: Sample[]
-}
-
-export default function Extensibility({ samples }: ExtensibilityProps) {
+export default function Extensibility({ samples }: { samples: ISample[] }) {
   const selectedSample = samples[0]
 
   return (
@@ -45,12 +41,7 @@ export default function Extensibility({ samples }: ExtensibilityProps) {
         viewport={{ once: true }}
         className="-mt-16 ml-auto w-full max-w-3xl"
       >
-        <CodeWindow
-          title={selectedSample.title}
-          code={selectedSample.code}
-          language={selectedSample.language}
-          lineNumbers={selectedSample.lineNumbers}
-        />
+        <Window title={selectedSample.title}>{selectedSample.code}</Window>
       </motion.div>
     </HomeSection>
   )

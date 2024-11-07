@@ -6,7 +6,7 @@ import { ThemeProvider } from 'next-themes'
 
 import { SearchProvider } from '@/components/Search'
 
-export default function Body({ children }: { children: ReactNode }) {
+export default function Providers({ children }: { children: ReactNode }) {
   return (
     <SearchProvider>
       <ThemeProvider defaultTheme="system" attribute="class" disableTransitionOnChange>

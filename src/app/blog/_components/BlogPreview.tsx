@@ -1,5 +1,4 @@
-import Link from '@/components/Link'
-import LinkButton from '@/components/LinkButton'
+import { Link, LinkButton } from '@/components/elements'
 
 import { type BlogDocument } from '../mdx'
 

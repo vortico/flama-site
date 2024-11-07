@@ -6,8 +6,8 @@ import { IconChevronRight, IconTools } from '@tabler/icons-react'
 import { motion } from 'framer-motion'
 import Image from 'next/image'
 
+import { Window } from '@/components/elements'
 import { FlamaName } from '@/components/names'
-import Window from '@/components/Window'
 
 import HomeSection from './HomeSection'
 

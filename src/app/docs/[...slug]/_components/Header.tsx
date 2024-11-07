@@ -1,3 +1,5 @@
+import React from 'react'
+
 import { DocsDocument } from '../../mdx'
 
 interface HeaderProps {

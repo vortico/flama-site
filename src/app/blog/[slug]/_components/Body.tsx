@@ -1,3 +1,5 @@
+import React from 'react'
+
 import MDXContent from '@/components/mdx/MDXContent'
 
 import { type BlogDocument } from '../../mdx'

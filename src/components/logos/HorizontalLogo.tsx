@@ -1,3 +1,5 @@
+import React from 'react'
+
 import { VorticoIcon } from '@/components/icons'
 
 export default function HorizontalLogo() {

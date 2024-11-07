@@ -9,6 +9,9 @@ const nextConfig = {
   eslint: {
     dirs: ['src'],
   },
+  experimental: {
+    optimizePackageImports: ['shiki'],
+  },
 }
 
 const withPWA = require('next-pwa')({

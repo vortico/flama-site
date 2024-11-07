@@ -23,7 +23,7 @@ client-server approach we've discussed so far.
 The command **model** allows us to interact with models directly from the command line
 without the need for a server. To inspect the command options, run:
 
-```commanline
+```console
 > flama model --help
 
 Usage: flama model [OPTIONS] MODEL_PATH COMMAND [ARGS]...
@@ -50,7 +50,7 @@ The sub-command **inspect** allows us to get access to the model metadata,
 as well as the list of artifacts packaged with the model, in a human-readable
 format. To access the documentation of the command, run:
 
-```commanline
+```console
 > flama model path/to/model.flm inspect --help
 
 Usage: flama model FLAMA_MODEL_PATH inspect [OPTIONS]
@@ -72,7 +72,7 @@ Options:
 The sub-command **predict** allows us to make predictions using the model. To access
 the documentation of the command, run:
 
-```commanline
+```console
 > flama model path/to/model.flm predict --help
 
 Usage: flama model FLAMA_MODEL_PATH predict [OPTIONS]
@@ -110,7 +110,7 @@ before in the [Serve](/docs/flama-cli/serve/#example-files) section, e.g. the **
 
 To start with, let's inspect the model:
 
-```commanline
+```console
 > flama model sklearn_model.flm inspect
 
 {"meta": {"id": "621c1d8a-144a-4a86-9a9c-9157f80bfa2d", "timestamp": "2023-03-10T11:30:00", "framework": {"lib": "sklearn", "version": "1.2.1"}, "model": {"obj": "MLPClassifier", "info": {"activation": "tanh", "alpha": 0.0001, "batch_size": "auto", "beta_1": 0.9, "beta_2": 0.999, "early_stopping": false, "epsilon": 1e-08, "hidden_layer_sizes": [10], "learning_rate": "constant", "learning_rate_init": 0.001, "max_fun": 15000, "max_iter": 2000, "momentum": 0.9, "n_iter_no_change": 10, "nesterovs_momentum": true, "power_t": 0.5, "random_state": null, "shuffle": true, "solver": "adam", "tol": 0.0001, "validation_fraction": 0.1, "verbose": false, "warm_start": false}, "params": {"optimizer": "adams"}, "metrics": {"recall": "0.95"}}, "extra": {"model_version": "1.0.0", "model_description": "This is a test model", "model_author": "John Doe", "model_license": "MIT", "tags": ["test", "example"]}}, "artifacts": {"foo.json": "/var/folders/_s/cvfnpmcn5clbnlsrmd5n1fqw0000gn/T/tmphtxxdfav/artifacts/foo.json"}}
@@ -119,7 +119,7 @@ To start with, let's inspect the model:
 As we can see, the model metadata is returned in JSON format. If we want to get a more
 human-readable output, we can use the **--pretty** option:
 
-```commanline
+```console
 > flama model sklearn_model.flm inspect --pretty
 
 {
@@ -194,7 +194,7 @@ integration and continuous deployment process**.
 Now that we know how to inspect a model, let's make a prediction by using the
 predict command:
 
-```commanline
+```console
 > echo '[[0, 0], [0, 1], [1, 0], [1, 1]]' | flama model sklearn_model.flm predict
 
 [0, 1, 1, 0]
@@ -202,7 +202,7 @@ predict command:
 
 If we want to get a more human-readable output, we can use the **--pretty** option:
 
-```commanline
+```console
 > echo '[[0, 0], [0, 1], [1, 0], [1, 1]]' | flama model sklearn_model.flm predict --pretty
 
 [
@@ -217,7 +217,7 @@ If we want to get a more human-readable output, we can use the **--pretty** opti
 
 The predict command can also be used to make predictions from a file:
 
-```commanline
+```console
 > flama model sklearn_model.flm predict --file input.json --pretty
 
 [
@@ -230,7 +230,7 @@ The predict command can also be used to make predictions from a file:
 
 The output of any prediction can be stored in a file by using the **--output** option:
 
-```commanline
+```console
 > flama model sklearn_model.flm predict --input input.json --output output.json
 ```
 
@@ -242,7 +242,7 @@ in a single command. For example, let's say we have models **model_a.flm** and *
 and we need to make a prediction with **model_a.flm** and then use the output of that
 prediction as input for **model_b.flm**. This can be done by using the following command:
 
-```commanline
+```console
 > echo '[0, 1, 2, 3]' | flama model model_a.flm predict | flama model model_b.flm predict
 
 [1, 0, 1, 0]
@@ -251,6 +251,6 @@ prediction as input for **model_b.flm**. This can be done by using the following
 This can be generalised to consider as many models as you need by following the general
 pattern:
 
-```commanline
+```console
 > echo 'input' | flama model model_1.flm predict | flama model model_2.flm predict | ... | flama model model_n.flm predict
 ```

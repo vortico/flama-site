@@ -1,3 +1,5 @@
+import React from 'react'
+
 import { type TOCCategory } from '@/lib/toc'
 
 import { type DocsDocument } from '../../mdx'
