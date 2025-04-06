@@ -4,7 +4,6 @@ import React, { useCallback, useMemo, useState } from 'react'
 
 import { IconChevronRight, IconTools } from '@tabler/icons-react'
 import { motion } from 'framer-motion'
-import Image from 'next/image'
 
 import { Window } from '@/components/elements'
 import { FlamaName } from '@/components/names'
@@ -17,13 +16,7 @@ const samples = [
     title: 'Internal Server Error',
     content: (
       <div className="dark:opacity-80">
-        <Image
-          src="/images/home/internal-server-error.gif"
-          alt="internal-server-error-page"
-          width="920"
-          height="410"
-          unoptimized={true}
-        />
+        <video src="/images/home/internal-server-error.webm" autoPlay muted loop playsInline width="920" />
       </div>
     ),
   },
@@ -32,7 +25,7 @@ const samples = [
     title: 'Not Found',
     content: (
       <div className="dark:opacity-80">
-        <Image src="/images/home/not-found.gif" alt="not-found-page" width="920" height="410" unoptimized={true} />
+        <video src="/images/home/not-found.webm" autoPlay muted loop playsInline width="920" />
       </div>
     ),
   },
