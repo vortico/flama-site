@@ -72,8 +72,13 @@ import typing
 from flama.models import Model
 
 class MyCustomModel(Model):
+    def __init__(self, model=None, meta=None, artifacts=None):
+        self.model = model
+        self.meta = meta
+        self.artifacts = artifacts
+
     def inspect(self) -> typing.Any:
-        return self.model.inspect()
+        return self.model.get_params()
 
     def predict(self, x: typing.Any) -> typing.Any:
         return self.model.predict(x)
@@ -110,19 +115,20 @@ from flama.models import ModelComponent
 class MyCustomModelComponent(ModelComponent):
     def __init__(self, model_path: str):
         self._model_path = model_path
-        self.model = MyCustomModel(None, meta=None)
+        self.model = MyCustomModel()
 
-    def load_model(self):
-        model_obj = flama.load(self._model_path)
-        self.model = MyCustomModel(model_obj.model, meta=model_obj.meta)
+    def load(self):
+        load_model = flama.load(self._model_path)
+        self.model = MyCustomModel(load_model.model, load_model.meta, load_model.artifacts)
 
-    def unload_model(self):
-        self.model = MyCustomModel(None, meta=None)
+    def reset(self):
+        self.model = MyCustomModel()
 
     def resolve(self) -> MyCustomModel:
         if not self.model.model:
-            self.load_model()
+            self.load()
 
+        assert self.model.model
         return self.model
 ```
 
@@ -154,7 +160,7 @@ internally. However, we have our own **ModelComponent** class, so we don't want 
 and this is what we are going to do. Let's see how:
 
 ```python
-class MyCustomModelResource(ModelResource):
+class MyCustomModelResource(BaseModelResource[MyCustomModelComponent]):
     name = "custom_model"
     verbose_name = "Lazy-loaded ScikitLearn Model"
     component = component
@@ -175,7 +181,7 @@ class MyCustomModelResource(ModelResource):
                     **self.info,
                     "loaded": self.component.model.model is not None,
                     "date": datetime.now().date(),
-                    "time": datetime.now().time()
+                    "time": datetime.now().time(),
                 },
             }
         }
@@ -188,7 +194,7 @@ class MyCustomModelResource(ModelResource):
         summary:
             Unload the model.
         """
-        self.component.unload_model()
+        self.component.reset()
         return self._get_metadata()
 
     @resource_method("/metadata/", methods=["GET"], name="metadata-method")
@@ -214,7 +220,7 @@ check whether the lazy loading mechanism is working as expected. Finally, we cou
 This would look something like this:
 
 ```python
-class MyCustomModelResource(ModelResource):
+class MyCustomModelResource(BaseModelResource[MyCustomModelComponent]):
     name = "custom_model"
     verbose_name = "Lazy-loaded ScikitLearn Model"
     component = MyCustomModelComponent("sklearn_model.flm")
@@ -230,9 +236,13 @@ resource in the previous section:
 
 ```python
 app = Flama(
-    title="Flama ML",
-    version="0.1.0",
-    description="Machine learning API using Flama 🔥",
+    openapi={
+        "info": {
+            "title": "Flama ML",
+            "version": "0.1.0",
+            "description": "Machine learning API using Flama 🔥",
+        }
+    },
     docs="/docs/",
 )
 
@@ -246,11 +256,15 @@ This is the most verbose way of adding it. We could also add it by using the **c
 
 ```python
 app = Flama(
-    title="Flama ML",
-    version="0.1.0",
-    description="Machine learning API using Flama 🔥",
+    openapi={
+        "info": {
+            "title": "Flama ML",
+            "version": "0.1.0",
+            "description": "Machine learning API using Flama 🔥",
+        }
+    },
     docs="/docs/",
-    components=[component],
+    components=[component]
 )
 
 app.models.add_model_resource(path="/model", resource=MyCustomModelResource)
@@ -266,41 +280,44 @@ from datetime import datetime
 
 import flama
 from flama import Flama
-from flama.models import Model, ModelResource, ModelComponent
+from flama.models import BaseModelResource, ModelComponent
+from flama.models.base import Model
 from flama.resources import resource_method
 
-
 class MyCustomModel(Model):
+    def __init__(self, model=None, meta=None, artifacts=None):
+        self.model = model
+        self.meta = meta
+        self.artifacts = artifacts
+
     def inspect(self) -> typing.Any:
         return self.model.get_params()
 
     def predict(self, x: typing.Any) -> typing.Any:
         return self.model.predict(x)
 
-
 class MyCustomModelComponent(ModelComponent):
-
     def __init__(self, model_path: str):
         self._model_path = model_path
-        self.model = MyCustomModel(None)
+        self.model = MyCustomModel()
 
-    def load_model(self):
-        self.model = MyCustomModel(flama.load(self._model_path).model)
+    def load(self):
+        load_model = flama.load(self._model_path)
+        self.model = MyCustomModel(load_model.model, load_model.meta, load_model.artifacts)
 
-    def unload_model(self):
-        self.model = MyCustomModel(None)
+    def reset(self):
+        self.model = MyCustomModel()
 
     def resolve(self) -> MyCustomModel:
         if not self.model.model:
-            self.load_model()
+            self.load()
 
+        assert self.model.model
         return self.model
-
 
 component = MyCustomModelComponent("sklearn_model.flm")
 
-
-class MyCustomModelResource(ModelResource):
+class MyCustomModelResource(BaseModelResource[MyCustomModelComponent]):
     name = "custom_model"
     verbose_name = "Lazy-loaded ScikitLearn Model"
     component = component
@@ -321,7 +338,7 @@ class MyCustomModelResource(ModelResource):
                     **self.info,
                     "loaded": self.component.model.model is not None,
                     "date": datetime.now().date(),
-                    "time": datetime.now().time()
+                    "time": datetime.now().time(),
                 },
             }
         }
@@ -334,7 +351,7 @@ class MyCustomModelResource(ModelResource):
         summary:
             Unload the model.
         """
-        self.component.unload_model()
+        self.component.reset()
         return self._get_metadata()
 
     @resource_method("/metadata/", methods=["GET"], name="metadata-method")
@@ -347,17 +364,19 @@ class MyCustomModelResource(ModelResource):
         """
         return self._get_metadata()
 
-
 app = Flama(
-    title="Flama ML",
-    version="0.1.0",
-    description="Machine learning API using Flama 🔥",
+    openapi={
+        "info": {
+            "title": "Flama ML",
+            "version": "0.1.0",
+            "description": "Machine learning API using Flama 🔥",
+        }
+    },
     docs="/docs/",
     components=[component],
 )
 
 app.models.add_model_resource(path="/model", resource=MyCustomModelResource)
-
 
 if __name__ == "__main__":
     flama.run(flama_app="__main__:app", server_host="0.0.0.0", server_port=8080, server_reload=True)
@@ -367,12 +386,7 @@ Now we only have to run the application, and we will be able to test our custom 
 As always, the best way to check that everything is working as expected is by navigating to the **/docs/** endpoint.
 This will show you the documentation of the app:
 
-<img
-  src="/images/docs/docs-add-model-component-docs.png"
-  alt="docs-add-model-component-docs"
-  width="1600"
-  height="590"
-/>
+<img src="/images/docs/docs-add-model-component-docs.png" alt="docs-add-model-component-docs" width="1600" />
 
 ### Testing the lazy loading mechanism
 
@@ -383,19 +397,13 @@ and click on _Send API Request_. This will return the following response:
   src="/images/docs/docs-add-model-component-metadata-false.png"
   alt="docs-add-model-component-metadata"
   width="1600"
-  height="1043"
 />
 
 As can be seen, the **loaded** attribute is **false**, which means that the model is not loaded. Now, we can navigate
 to the section _Retrieve the model section_ (which calls the **/inspect/** endpoint), and click on _Send API Request_.
 This will return the following response:
 
-<img
-  src="/images/docs/docs-add-model-component-inspect.png"
-  alt="docs-add-model-component-inspect"
-  width="1600"
-  height="1070"
-/>
+<img src="/images/docs/docs-add-model-component-inspect.png" alt="docs-add-model-component-inspect" width="1600" />
 
 If we navigate again to the section _Get metadata info_, and click on _Send API Request_, we will see that the **loaded**
 attribute is now **true**. This means that the model has been loaded:
@@ -443,7 +451,7 @@ class attribute **component**.
 ```python
 component = MyCustomModelComponent("pytorch_model.flm")
 
-class MyModelResource(ModelResource):
+class MyModelResource(BaseModelResource[MyCustomModelComponent]):
     name = "custom_model"
     verbose_name = "Lazy-loaded PyTorch Model"
     component = component
@@ -456,7 +464,7 @@ class MyModelResource(ModelResource):
 ```python
 component = MyCustomModelComponent("sklearn_model.flm")
 
-class MyModelResource(ModelResource):
+class MyModelResource(BaseModelResource[MyCustomModelComponent]):
     name = "custom_model"
     verbose_name = "Lazy-loaded ScikitLearn Model"
     component = component
@@ -469,7 +477,7 @@ class MyModelResource(ModelResource):
 ```python
 component = MyCustomModelComponent("tensorflow_model.flm")
 
-class MyModelResource(ModelResource):
+class MyModelResource(BaseModelResource[MyCustomModelComponent]):
     name = "custom_model"
     verbose_name = "Lazy-loaded TensorFlow Model"
     component = component

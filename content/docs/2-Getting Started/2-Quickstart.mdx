@@ -52,7 +52,7 @@ should see the greeting message `{"message": "Hello 🔥"}` on your browser.
 The previous code can be tuned a bit so that you can run it the same way from your favourite programming IDE:
 
 ```python
-import flama
+from flama import Flama
 
 app = Flama()
 
@@ -61,7 +61,7 @@ def home():
     return {"message": "Hello 🔥"}
 
 if __name__ == "__main__":
-    flama.run(flama_app=app, server_host="0.0.0.0", server_port=8080)
+    flama.run(flama_app=app, server_host="0.0.0.0", server_port=8000)
 ```
 
 You can now run the code directly from your IDE, either by clicking on the run button, or by any other key shortcut you
@@ -120,13 +120,21 @@ examples/
 Don't you miss anything in our previous code? Sure, docstrings! We know, they are very important. Let's add it:
 
 ```python
-import flama
+from flama import Flama
 
 app = flama.Flama(
-    title="Hello-🔥",
-    version="1.0",
-    description="My first API",
+    openapi={
+        "info": {
+            "title": "Hello-🔥",
+            "version": "1.0",
+            "description": "My first API",
+        },
+        "tags": [
+            {"name": "Salute", "description": "This is the salute description"},
+        ],
+    }
 )
+
 
 @app.route("/")
 def home():
@@ -141,12 +149,13 @@ def home():
         automatically in the auto-generated docs.
     responses:
         200:
-            description: Warming hello message.
+            description: Warming hello message!
     """
     return {"message": "Hello 🔥"}
 
+
 if __name__ == "__main__":
-    flama.run(flama_app=app, server_host="0.0.0.0", server_port=8080)
+    flama.run(flama_app=app, server_host="0.0.0.0", server_port=8000)
 ```
 
 We can proceed, and run:
@@ -162,7 +171,7 @@ INFO:     Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
 
 This time, let's visit **http://127.0.0.1:8000/docs/** and see what's there waiting for us.
 
-<img src="/images/docs/docs-hello-flama-docs.png" alt="hello-flama-docs" width="1600" height="920" />
+<img src="/images/docs/docs-hello-flama-docs.png" alt="hello-flama-docs" width="1600" />
 
 Yup, <FlamaName /> automatically generates the API schema following the OpenAPI standard, and provides a convenient
 interface to interact with the documentation.

@@ -113,7 +113,7 @@ To start with, let's inspect the model:
 ```console
 flama model sklearn_model.flm inspect
 
-{"meta": {"id": "621c1d8a-144a-4a86-9a9c-9157f80bfa2d", "timestamp": "2023-03-10T11:30:00", "framework": {"lib": "sklearn", "version": "1.2.1"}, "model": {"obj": "MLPClassifier", "info": {"activation": "tanh", "alpha": 0.0001, "batch_size": "auto", "beta_1": 0.9, "beta_2": 0.999, "early_stopping": false, "epsilon": 1e-08, "hidden_layer_sizes": [10], "learning_rate": "constant", "learning_rate_init": 0.001, "max_fun": 15000, "max_iter": 2000, "momentum": 0.9, "n_iter_no_change": 10, "nesterovs_momentum": true, "power_t": 0.5, "random_state": null, "shuffle": true, "solver": "adam", "tol": 0.0001, "validation_fraction": 0.1, "verbose": false, "warm_start": false}, "params": {"optimizer": "adams"}, "metrics": {"recall": "0.95"}}, "extra": {"model_version": "1.0.0", "model_description": "This is a test model", "model_author": "John Doe", "model_license": "MIT", "tags": ["test", "example"]}}, "artifacts": {"foo.json": "/var/folders/_s/cvfnpmcn5clbnlsrmd5n1fqw0000gn/T/tmphtxxdfav/artifacts/foo.json"}}
+{"meta": {"id": "43dcc9bb-528f-47e7-b68b-a8b9aa6ffd22", "timestamp": "2025-04-03T19:47:56.590410", "framework": {"lib": "sklearn", "version": "1.5.2"}, "model": {"obj": "MLPClassifier", "info": {"activation": "tanh", "alpha": 0.0001, "batch_size": "auto", "beta_1": 0.9, "beta_2": 0.999, "early_stopping": false, "epsilon": 1e-08, "hidden_layer_sizes": [10], "learning_rate": "constant", "learning_rate_init": 0.001, "max_fun": 15000, "max_iter": 2000, "momentum": 0.9, "n_iter_no_change": 10, "nesterovs_momentum": true, "power_t": 0.5, "random_state": null, "shuffle": true, "solver": "adam", "tol": 0.0001, "validation_fraction": 0.1, "verbose": false, "warm_start": false}, "params": {"solver": "adam"}, "metrics": {"recall": "0.95"}}, "extra": {"model_version": "1.0.0", "model_description": "This is a test model", "model_author": "John Doe", "model_license": "MIT", "tags": ["test", "example"]}}, "artifacts": {"foo.json": "/var/folders/h4/vc_99fk53b93ttsv18ss8vhw0000gn/T/tmppzdv2rur/artifacts/foo.json"}}
 ```
 
 As we can see, the model metadata is returned in JSON format. If we want to get a more
@@ -124,7 +124,7 @@ flama model sklearn_model.flm inspect --pretty
 
 {
     "artifacts": {
-        "foo.json": "/var/folders/_s/cvfnpmcn5clbnlsrmd5n1fqw0000gn/T/tmpdf16p79o/artifacts/foo.json"
+        "foo.json": "/var/folders/h4/vc_99fk53b93ttsv18ss8vhw0000gn/T/tmpcnw6yms0/artifacts/foo.json"
     },
     "meta": {
         "extra": {
@@ -139,9 +139,9 @@ flama model sklearn_model.flm inspect --pretty
         },
         "framework": {
             "lib": "sklearn",
-            "version": "1.2.1"
+            "version": "1.5.2"
         },
-        "id": "621c1d8a-144a-4a86-9a9c-9157f80bfa2d",
+        "id": "43dcc9bb-528f-47e7-b68b-a8b9aa6ffd22",
         "model": {
             "info": {
                 "activation": "tanh",
@@ -175,10 +175,10 @@ flama model sklearn_model.flm inspect --pretty
             },
             "obj": "MLPClassifier",
             "params": {
-                "optimizer": "adams"
+                "solver": "adam"
             }
         },
-        "timestamp": "2023-03-10T11:30:00"
+        "timestamp": "2025-04-03T19:47:56.590410"
     }
 }
 ```

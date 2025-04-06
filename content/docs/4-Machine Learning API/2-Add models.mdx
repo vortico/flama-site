@@ -20,8 +20,7 @@ ourselves, e.g. **startup** or **shutdown** events, to name some examples.
 For the sake of consistency across our examples, we are going to consider the following base application:
 
 ```python
-from flama import Flama, Route
-
+from flama import Flama, routing
 
 class AppStatus:
     loaded = False
@@ -35,7 +34,7 @@ def home():
         Returns readiness message
     description:
         The function returns a readiness message in which the global variable AppStatus.loaded is shown.
-        If the 'on_startup' function has worked as expected, the message will show the 'loaded' variable as True.
+        If the 'startup' function has worked as expected, the message will show the 'loaded' variable as True.
         Else, it'll show the variable as 'False'
     """
     return f"The API is ready. Loaded = {AppStatus.loaded}"
@@ -68,13 +67,17 @@ def user(username: str):
 
 
 app = Flama(
-    title="Flama ML",
-    version="0.1.0",
-    description="Machine learning API using Flama 🔥",
+    openapi={
+        "info": {
+            "title": "Flama ML",
+            "version": "0.1.0",
+            "description": "Machine learning API using Flama 🔥",
+        }
+    },
     routes=[
-        Route("/", home),
-        Route('/user/me', user_me),
-        Route('/user/{username}', user),
+        routing.Route("/", home),
+        routing.Route("/user/me", user_me),
+        routing.Route("/user/{username}", user),
     ],
 )
 ```
@@ -107,31 +110,30 @@ Let us now add the **startup** and **shutdown** events to the application. We ca
 functions to the application, and then adding them to the **events** dictionary to the **Flama** constructor:
 
 ```python
-# Here the same code as before
-
-def startup():
+async def startup():
     print("\nStarting up the ML API...\n")
     # Here, whatever action we want to be run at the startup of the application
     AppStatus.loaded = True
 
 
-def shutdown():
+async def shutdown():
     print("\nShutting down the ML API...\n")
     # Here, whatever action we want to be run at the shutdown of the application
 
 app = Flama(
-    title="Flama ML",
-    version="0.1.0",
-    description="Machine learning API using Flama 🔥",
-    routes=[
-        Route("/", home),
-        Route('/user/me', user_me),
-        Route('/user/{username}', user),
-    ],
-    events={
-        "startup": [startup],
-        "shutdown": [shutdown],
+    openapi={
+        "info": {
+            "title": "Flama ML",
+            "version": "0.1.0",
+            "description": "Machine learning API using Flama 🔥",
+        }
     },
+    routes=[
+        routing.Route("/", home),
+        routing.Route("/user/me", user_me),
+        routing.Route("/user/{username}", user),
+    ],
+    events={"startup": [startup], "shutdown": [shutdown]},
 )
 ```
 
@@ -164,29 +166,34 @@ There is an alternative way of adding the events to the application, which is to
 The following example shows how to achieve the same result as the previous one:
 
 ```python
-from flama import Flama, Route
+from flama import Flama, routing
 
-# Here the same code as before but removing the definitions of startup and shutdown functions
 
 app = Flama(
-    title="Flama ML",
-    version="0.1.0",
-    description="Machine learning API using Flama 🔥",
+    openapi={
+        "info": {
+            "title": "Flama ML",
+            "version": "0.1.0",
+            "description": "Machine learning API using Flama 🔥",
+        }
+    },
     routes=[
-        Route("/", home),
-        Route('/user/me', user_me),
-        Route('/user/{username}', user),
+        routing.Route("/", home),
+        routing.Route("/user/me", user_me),
+        routing.Route("/user/{username}", user),
     ],
 )
 
+
 @app.on_event("startup")
-def startup():
+async def startup():
     print("\nStarting up the ML API...\n")
     # Here, whatever action we want to be run at the startup of the application
     AppStatus.loaded = True
 
+
 @app.on_event("shutdown")
-def shutdown():
+async def shutdown():
     print("\nShutting down the ML API...\n")
     # Here, whatever action we want to be run at the shutdown of the application
 ```
@@ -264,14 +271,14 @@ INFO:     Application startup complete.
 As we already anticipated when we introduced the [serve](/docs/flama-cli/serve) command, the model added will
 automatically have associated the following endpoints:
 
-- <Label color="green">GET</Label> **/sklearn/** Returns the model resource, i.e. the model hyper-parameter's schema which
-  would be obtained with the method **get_params()**.
-- <Label color="blue">POST</Label> **/sklearn/predict/** Expects the input data (observations) to be passed as argument to
-  predict their output.
+- <Label color="green">GET</Label> **/sklearn/** Returns the model resource, i.e. the model hyper-parameter's schema
+  which would be obtained with the method **get_params()**.
+- <Label color="blue">POST</Label> **/sklearn/predict/** Expects the input data (observations) to be passed as argument
+  to predict their output.
 
 Check the documentation at **http://127.0.0.1:8000/docs/**, you should see something like:
 
-<img src="/images/docs/docs-mlapi-sklearn.png" alt="docs-mlapi-sklearn" width="1600" height="925" />
+<img src="/images/docs/docs-mlapi-sklearn.png" alt="docs-mlapi-sklearn" width="1600" />
 
 ### TensorFlow
 
@@ -302,14 +309,14 @@ INFO:     Application startup complete.
 Just like it happened with the scikit-learn model, our tensorflow models will automatically have associated the
 following endpoints:
 
-- <Label color="green">GET</Label> **/tensorflow/** Returns the model resource, i.e. the model hyper-parameter's schema which
-  would be obtained with the method **to_json()**.
-- <Label color="blue">POST</Label> **/tensorflow/predict/** Expects the input data (observations) to be passed as argument
-  to predict their output.
+- <Label color="green">GET</Label> **/tensorflow/** Returns the model resource, i.e. the model hyper-parameter's schema
+  which would be obtained with the method **to_json()**.
+- <Label color="blue">POST</Label> **/tensorflow/predict/** Expects the input data (observations) to be passed as
+  argument to predict their output.
 
 Check the documentation at **http://127.0.0.1:8000/docs/**, you should see something like:
 
-<img src="/images/docs/docs-mlapi-sklearn.png" alt="docs-mlapi-sklearn" width="1600" height="925" />
+<img src="/images/docs/docs-mlapi-tensorflow.png" alt="docs-mlapi-tensorflow" width="1600" />
 
 ### PyTorch
 
@@ -340,8 +347,8 @@ INFO:     Application startup complete.
 Just like it happened with the scikit-learn model, and with the TensorFlow model, our PyTorch models will automatically
 have associated the following endpoints:
 
-- <Label color="green">GET</Label> **/pytorch/** Returns the model resource, i.e. the model hyper-parameter's schema which
-  would be obtained with the following code:
+- <Label color="green">GET</Label> **/pytorch/** Returns the model resource, i.e. the model hyper-parameter's schema
+  which would be obtained with the following code:
 
   ```python
   {
@@ -351,12 +358,12 @@ have associated the following endpoints:
   }
   ```
 
-- <Label color="blue">POST</Label> **/pytorch/predict/** Expects the input data (observations) to be passed as argument to
-  predict their output.
+- <Label color="blue">POST</Label> **/pytorch/predict/** Expects the input data (observations) to be passed as argument
+  to predict their output.
 
 Check the documentation at **http://127.0.0.1:8000/docs/**, you should see something like:
 
-<img src="/images/docs/docs-mlapi-sklearn.png" alt="docs-mlapi-sklearn" width="1600" height="925" />
+<img src="/images/docs/docs-mlapi-pytorch.png" alt="docs-mlapi-pytorch" width="1600" />
 
 ### Multiple models
 
@@ -365,20 +372,20 @@ three models of our prior examples at once, we only need to put together the thr
 follows:
 
 ```python
-from flama import Flama, Route
+from flama import Flama, routing
 
 
 class AppStatus:
     loaded = False
 
 
-def startup():
+async def startup():
     print("\nStarting up the ML API...\n")
     # Here, whatever action we want to be run at the startup of the application
     AppStatus.loaded = True
 
 
-def shutdown():
+async def shutdown():
     print("\nShutting down the ML API...\n")
     # Here, whatever action we want to be run at the shutdown of the application
 
@@ -391,7 +398,7 @@ def home():
         Returns readiness message
     description:
         The function returns a readiness message in which the global variable AppStatus.loaded is shown.
-        If the 'on_startup' function has worked as expected, the message will show the 'loaded' variable as True.
+        If the 'startup' function has worked as expected, the message will show the 'loaded' variable as True.
         Else, it'll show the variable as 'False'
     """
     return f"The API is ready. Loaded = {AppStatus.loaded}"
@@ -424,16 +431,19 @@ def user(username: str):
 
 
 app = Flama(
-    title="Flama ML",
-    version="0.1.0",
-    description="Machine learning API using Flama 🔥",
+    openapi={
+        "info": {
+            "title": "Flama ML",
+            "version": "0.1.0",
+            "description": "Machine learning API using Flama 🔥",
+        }
+    },
     routes=[
-        Route("/", home),
-        Route('/user/me', user_me),
-        Route('/user/{username}', user),
+        routing.Route("/", home),
+        routing.Route("/user/me", user_me),
+        routing.Route("/user/{username}", user),
     ],
-    on_startup=[startup],
-    on_shutdown=[shutdown]
+    events={"startup": [startup], "shutdown": [shutdown]},
 )
 
 
@@ -460,18 +470,18 @@ app.models.add_model(
 
 If we run this example, our <FlamaName/> app will have the following endpoints:
 
-- <Label color="green">GET</Label> **/**: Returns a readiness message in which the global variable AppStatus.loaded is shown.
-  If the 'on_startup' function has worked as expected, the message will show the 'loaded' variable as True. Else, it'll show
-  the variable as 'False'
+- <Label color="green">GET</Label> **/**: Returns a readiness message in which the global variable AppStatus.loaded is
+  shown. If the 'startup' function has worked as expected, the message will show the 'loaded' variable as True. Else,
+  it'll show the variable as 'False'
 - <Label color="green">GET</Label> **/user/me/**: Returns the plain-text message "Hello John Doe"
 - <Label color="green">GET</Label> **/user/\{username\}/**: Returns the plain-text message "Hello 'username'" where the
 'username' is the user specified as query parameter
 - <Label color="green">GET</Label> **/sklearn/**: Returns the representation of the model resource, i.e. a JSON with all
   the hyper-parameters of the model
-- <Label color="blue">POST</Label> **/sklearn/predict/**: Returns a ScikitLearn model prediction when provided with an input
-  data array
-- <Label color="green">GET</Label> **/tensorflow/**: Returns the representation of the model resource, i.e. a JSON with all
-  the hyper-parameters of the model
+- <Label color="blue">POST</Label> **/sklearn/predict/**: Returns a ScikitLearn model prediction when provided with an
+  input data array
+- <Label color="green">GET</Label> **/tensorflow/**: Returns the representation of the model resource, i.e. a JSON with
+  all the hyper-parameters of the model
 - <Label color="blue">POST</Label> **/tensorflow/predict/**: Returns a TensorFlow model prediction when provided with an
   input data array
 - <Label color="green">GET</Label> **/pytorch/**: Returns the representation of the model resource, i.e. a JSON with all
