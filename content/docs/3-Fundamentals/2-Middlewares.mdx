@@ -55,10 +55,7 @@ This typically means:
     ```python
     # Continuing MyCustomMiddleware from above
     async def __call__(self, scope: types.Scope, receive: types.Receive, send: types.Send):
-       # Code to run before the request is handled by the next app/middleware
-        print(f"Middleware received request for path: {scope.get('path')}")
-        print(f"Custom argument was: {self.custom_argument}")
-
+        # Code to run before the request is handled by the next app/middleware
         if scope["type"] == "http": # Example: only operate on HTTP requests
             # To modify the response, you might need to wrap the 'send' callable
             async def modified_send(message: types.Message):
