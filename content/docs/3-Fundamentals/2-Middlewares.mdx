@@ -196,19 +196,12 @@ if __name__ == "__main__":
     flama.run(flama_app=app, server_host="0.0.0.0", server_port=8000)
 ```
 
-We can now run it and run a make **curl** to both endpoints, and check how the response comes with the expected header:
+This **TimingMiddleware** example demonstrates how to:
 
-```console
-curl -I http://localhost:8000/fast
+- Execute logic before the request hits the application (capturing **start_time**)
+- Modify the response by wrapping the **send** callable to add a custom header just before the response is sent to the client.
 
-HTTP/1.1 200 OK
-server: uvicorn
-content-length: 46
-content-type: text/plain; charset=utf-8
-x-process-time-ms: 0.21
-```
-
-And:
+When you run this application and access the `/fast` or `/slow` endpoints, the response will include the **X-Process-Time-MS** header, e.g.:
 
 ```console
 curl -I http://localhost:8000/slow
@@ -219,10 +212,3 @@ content-length: 54
 content-type: text/plain; charset=utf-8
 x-process-time-ms: 1002.49
 ```
-
-This **TimingMiddleware** example demonstrates how to:
-
-- Execute logic before the request hits the application (capturing **start_time**)
-- Modify the response by wrapping the **send** callable to add a custom header just before the response is sent to the client.
-
-When you run this application and access the `/fast` or `/slow` endpoints, the response will include the **X-Process-Time-MS** header.
