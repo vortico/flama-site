@@ -1,0 +1,214 @@
+---
+title: Pagination
+wip: false
+---
+
+In the world of API development, data is rarely static or small. A "List Users" endpoint might start by returning five users during development,
+but in production, that same table could hold millions of records.
+Attempting to return an unbounded dataset in a single HTTP response is a catastrophic pattern that leads to three major problems.
+
+First, **Server Memory Exhaustion**.
+Loading a million rows into Python objects in memory can crash your application instantly.
+Second, **Network Latency**.
+Serialising and transferring megabytes of JSON takes time, making your API feel sluggish and unresponsive to the user.
+Third, **Client Overload**.
+A mobile app trying to render a list of 100,000 items will likely freeze or crash the device.
+
+To solve this, APIs implement **Pagination**.
+This is a contract between the client and server to exchange data in manageable chunks, or "pages".
+
+<FlamaName /> treats pagination as a first-class citizen.
+Unlike frameworks that require you to manually calculate slice indices and validate query parameters in every route,
+<FlamaName /> allows you to declare your pagination strategy directly in the route decorator.
+The framework handles the validation, slicing, and response wrapping automatically.
+
+## Strategies
+
+<FlamaName /> supports the two most common pagination strategies found in modern web APIs: **Page Number** and **Limit Offset**.
+
+### Page number 
+
+This strategy follows the metaphor of a physical book. It is the most intuitive method for human-facing interfaces,
+such as search results or e-commerce catalogues, where a user explicitly navigates from "Page 1" to "Page 2".
+
+You enable it by setting `pagination="page_number"` in your route decorator.
+
+When this is active, <FlamaName /> looks for two query parameters in the incoming request:
+* `page`: The specific page number requested (default is 1).
+* `page_size`: The number of items per page (default varies, typically 10).
+
+The framework intercepts your handler's return value (which can be a full list or an iterable),
+calculates the correct slice for the requested page,
+and wraps the result in a standard response structure containing both the `data` and a `meta` object with navigation details.
+
+### Limit offset
+
+This strategy follows the metaphor of a database cursor or a window sliding over data.
+It is the preferred method for "Infinite Scroll" interfaces or programmatic data synchronisation,
+where the client needs precise control over exactly where to start reading and how many items to fetch.
+
+You enable it by setting `pagination="limit_offset"` in your route decorator.
+
+When active, <FlamaName /> looks for these parameters:
+* `limit`: The maximum number of items to return.
+* `offset`: The number of items to skip before starting to collect the result.
+
+For example, `limit=5` and `offset=10` means "skip the first 10 items, then give me the next 5".
+This allows for very specific slicing that does not depend on arbitrary page boundaries.
+
+## The response structure
+
+When pagination is enabled, <FlamaName /> modifies the JSON response schema.
+Instead of returning a raw list `[...]`, it returns a wrapper object with two keys.
+
+The `data` key contains the actual list of items for the current page.
+
+The `meta` key contains information about the total dataset and the current position.
+For page number pagination, this includes fields like `count` (total items), `page`, `page_size`, `has_next`, and `has_previous`.
+For limit-offset pagination, it includes `limit`, `offset`, and `count`.
+
+This structure is crucial because it allows the frontend application to render navigation controls
+(like "Next" buttons) without needing to query the API again to count the total records.
+
+## Example
+
+The following example demonstrates both strategies on a simulated product inventory.
+We create a dataset of 100 products and expose two endpoints to browse them.
+
+Pay close attention to the handler functions `get_catalogue` and `get_feed`.
+Notice that they simply return the **entire** `INVENTORY` list.
+They contain no logic for slicing, counting, or checking query parameters.
+<FlamaName /> injects a middleware that performs these operations efficiently before the response leaves the server.
+
+
+```python
+import asyncio
+import typing as t
+
+from flama import Flama
+from flama.client import Client
+import pydantic
+
+
+class Product(pydantic.BaseModel):
+    id: int
+    name: str
+    price: float
+
+
+# We create 100 products to simulate a database.
+INVENTORY: t.List[Product] = [
+    Product(id=i, name=f"Widget {i}", price=10.0 + i) for i in range(1, 101)
+]
+
+app = Flama(
+    openapi={
+        "info": {
+            "title": "Product API",
+            "version": "1.0",
+            "description": "A paginated API for product inventory.",
+        }
+    }
+)
+
+
+# Best for user interfaces (Next Page, Previous Page).
+# Usage: /catalogue/?page=2&page_size=10
+@app.route("/catalogue/", methods=["GET"], pagination="page_number")
+def get_catalogue(**kwargs) -> t.List[Product]:
+    """
+    tags:
+        - Products
+    summary:
+        Product Catalogue
+    description:
+        Browse products using page numbers.
+    responses:
+        200:
+            description: A paginated list of products.
+    """
+    return INVENTORY
+
+
+# Best for infinite scrolling or programmatic syncing.
+# Usage: /feed/?limit=5&offset=20
+@app.route("/feed/", methods=["GET"], pagination="limit_offset")
+def get_feed(**kwargs) -> t.List[Product]:
+    """
+    tags:
+        - Products
+    summary:
+        Product Feed
+    description:
+        Sync products using limit and offset.
+    responses:
+        200:
+            description: A paginated list of products.
+    """
+    return INVENTORY
+
+
+async def main():
+    async with Client(app=app) as client:
+        # Scenario A: Requesting Page 2 of the Catalogue
+        # We expect items 6-10 (requesting page 2 with size 5)
+        print("\nPage Number Strategy (Page 2)")
+
+        # We use the 'params' argument to pass query parameters
+        response = await client.get("/catalogue/", params={"page": 2, "page_size": 5})
+        data = response.json()
+
+        print(f" Request URL: {response.url}")
+        print(f" Meta Info:   {data['meta']}")
+        print(f" Data Count:  {len(data['data'])}")
+        # Check first item in this page (should be Widget 6)
+        print(f" First Item:  {data['data'][0]['name']}")
+
+        # Scenario B: Requesting a specific slice (Limit-Offset)
+        # We skip the first 90 items and take the next 5
+        print("\nLimit-Offset Strategy (Skip 90, Take 5)")
+
+        response = await client.get("/feed/", params={"limit": 5, "offset": 90})
+        data = response.json()
+
+        print(f" Request URL: {response.url}")
+        print(f" Meta Info:   {data['meta']}")
+        print(f" Data Count:  {len(data['data'])}")
+        # Check first item in this slice (should be Widget 91)
+        print(f" First Item:  {data['data'][0]['name']}")
+
+
+if __name__ == "__main__":
+    asyncio.run(main())
+```
+
+Running this script reveals exactly how <FlamaName /> transforms the output.
+
+For the **Page Number** request, we asked for Page 2 with a size of 5.
+The framework correctly identified that in a 0-indexed list, this corresponds to items 5 through 9 (IDs 6 through 10).
+The `meta` object confirms there are 100 items in total and calculates that there are indeed previous and next pages available.
+
+For the **Limit Offset** request, we skipped 90 items and took 5.
+The result starts at "Widget 91". This precision makes it ideal for fetching specific "windows" of data.
+
+```console
+Page Number Strategy (Page 2)
+ Request URL: http://localapp/catalogue/?page=2&page_size=5
+ Meta Info:   {'count': 100, 'has_next': True, 'has_previous': True, 'page': 2, 'page_size': 5}
+ Data Count:  5
+ First Item:  Widget 6
+
+Limit-Offset Strategy (Skip 90, Take 5)
+ Request URL: http://localapp/feed/?limit=5&offset=90
+ Meta Info:   {'limit': 5, 'offset': 90, 'count': 100}
+ Data Count:  5
+ First Item:  Widget 91
+
+```
+
+## Conclusion
+
+Pagination is not just a performance optimisation; it is a requirement for any scalable API.
+<FlamaName /> simplifies this complex pattern into a single declarative argument.
+By separating the logic of data retrieval (your handler returning the data)
+from the logic of data slicing (the framework handling the pagination), you keep your code clean, readable, and focused on business logic.

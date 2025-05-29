@@ -1,0 +1,577 @@
+---
+title: Application assembly
+wip: false
+---
+
+With the individual DDD layers defined (the [data model](/docs/domain-driven-design/data-model/), the [repository](/docs/domain-driven-design/repository/), the [worker](/docs/domain-driven-design/worker/), and the [resource](/docs/domain-driven-design/resources/)) the remaining question is how to *compose* them into a running application. This composition step is not merely mechanical; it is an architectural concern in its own right. The way you wire the layers together determines how the application bootstraps, how dependencies flow at runtime, and how cleanly the codebase scales as new domain entities are added.
+
+In <FlamaName />, application assembly revolves around three concepts: **modules** (which manage infrastructure such as database connections), **components** (which provide dependency injection for workers), and **resource registration** (which mounts domain logic onto the API's routing table). In this page, we walk through each of these, show the complete assembled application, discuss the recommended project structure, and exercise the full API with real HTTP requests.
+
+## What is application assembly?
+
+In DDD, the *application layer* is the thin orchestration layer that sits above the domain. It does not contain business logic; rather, it configures the infrastructure, wires the dependencies, and exposes the domain operations to the outside world. In <FlamaName />, this layer is expressed through the `Flama(...)` constructor and a handful of registration calls.
+
+The assembly follows a clear pattern:
+
+1. **Infrastructure modules**: `SQLAlchemyModule(DATABASE_URL)` manages the async database engine. It provides the `app.sqlalchemy` interface that workers use internally to open connections and manage transactions.
+2. **Dependency components**: Each worker is registered as a `WorkerComponent`. You can register as many workers as you need, one for each backend your application interacts with. For example, an `SQLAlchemyWorker` for database access and an `HTTPWorker` for a remote notification service. <FlamaName />'s [dependency injection system](/docs/fundamentals/components/) resolves each worker by its concrete class, so any resource method that declares `worker: RegisterWorker` or `notification_worker: NotificationWorker` as a parameter will receive the correct instance automatically.
+3. **Resource registration**: `app.resources.add_resource("/user/", UserResource)` mounts the resource's endpoints under the given prefix, connecting domain logic to HTTP routes.
+
+This pattern is consistent regardless of how many domain entities or external services your application manages. Adding a second entity (e.g., products) means adding a new table, a new repository, extending the worker, creating a new resource, and registering it. Adding a second external service means adding a new HTTP repository, a new HTTP worker, and registering it as another `WorkerComponent`, the assembly pattern itself does not change.
+
+## The complete application
+
+Below is the full application in a single, self-contained file so that all the layers and their wiring are visible at a glance. This example includes **two workers**: an `SQLAlchemyWorker` for database operations and an `HTTPWorker` for sending notifications via an external service. In a production setting, you would split this across dedicated modules (as discussed in the project structure section further down).
+
+```python
+import hashlib
+import http
+import typing as t
+import uuid
+
+import flama
+import pydantic
+import sqlalchemy
+from flama import Flama, types
+from flama.ddd import WorkerComponent
+from flama.ddd.exceptions import NotFoundError
+from flama.ddd.repositories.http import HTTPRepository
+from flama.ddd.repositories.sqlalchemy import SQLAlchemyTableRepository
+from flama.ddd.workers.http import HTTPWorker
+from flama.ddd.workers.sqlalchemy import SQLAlchemyWorker
+from flama.exceptions import HTTPException
+from flama.http import APIResponse
+from flama.resources import Resource
+from flama.resources.routing import ResourceRoute
+from flama.sqlalchemy import SQLAlchemyModule, metadata
+
+
+# Data Model
+user_table = sqlalchemy.Table(
+    "user",
+    metadata,
+    sqlalchemy.Column(
+        "id", sqlalchemy.String, primary_key=True, nullable=False,
+        default=lambda: str(uuid.uuid4()),
+    ),
+    sqlalchemy.Column("name", sqlalchemy.String, nullable=False),
+    sqlalchemy.Column("surname", sqlalchemy.String, nullable=False),
+    sqlalchemy.Column("email", sqlalchemy.String, nullable=False, unique=True),
+    sqlalchemy.Column("password", sqlalchemy.String, nullable=False),
+    sqlalchemy.Column("active", sqlalchemy.Boolean, nullable=False),
+)
+
+
+# Schemas
+class UserCredentials(pydantic.BaseModel):
+    email: str
+    password: str
+
+
+class UserDetails(UserCredentials):
+    name: str
+    surname: str
+
+
+class User(UserDetails):
+    id: t.Optional[str] = None
+    active: t.Optional[bool] = False
+
+
+# SQL Repository
+class UserRepository(SQLAlchemyTableRepository):
+    _table = user_table
+
+
+# SQL Worker
+class RegisterWorker(SQLAlchemyWorker):
+    user: UserRepository
+
+
+# HTTP Repository (notification service)
+class WelcomeNotificationRepository(HTTPRepository):
+    _resource = "notifications/welcome"
+
+    async def send(self, email: str, name: str) -> None:
+        response = await self._client.post(
+            f"{self._resource}/send/",
+            json={"email": email, "name": name},
+        )
+        response.raise_for_status()
+
+
+# HTTP Worker (notification service)
+class NotificationWorker(HTTPWorker):
+    welcome: WelcomeNotificationRepository
+
+
+# Password helper
+ENCRYPTION_SALT = uuid.uuid4().hex
+ENCRYPTION_PEPPER = uuid.uuid4().hex
+
+
+class Password:
+    def __init__(self, password: str):
+        self._password = password
+
+    def encrypt(self) -> str:
+        return hashlib.sha512(
+            (
+                hashlib.sha512(
+                    (self._password + ENCRYPTION_SALT).encode()
+                ).hexdigest()
+                + ENCRYPTION_PEPPER
+            ).encode()
+        ).hexdigest()
+
+
+# Resource
+class UserResource(Resource):
+    name = "user"
+    verbose_name = "User"
+
+    @ResourceRoute.method("/", methods=["POST"], name="create")
+    async def create(
+        self,
+        worker: RegisterWorker,
+        notification_worker: NotificationWorker,
+        data: t.Annotated[types.Schema, types.SchemaMetadata(UserDetails)],
+    ):
+        """
+        tags:
+            - User
+        summary:
+            User create
+        description:
+            Create a new user with the provided details.
+        responses:
+            200:
+                description:
+                    User created successfully.
+        """
+        async with worker:
+            try:
+                await worker.user.retrieve(email=data["email"])
+            except NotFoundError:
+                await worker.user.create(
+                    {**data, "password": Password(data["password"]).encrypt(), "active": False}
+                )
+
+        async with notification_worker:
+            await notification_worker.welcome.send(
+                email=data["email"], name=data["name"]
+            )
+
+        return APIResponse(status_code=http.HTTPStatus.OK)
+
+    @ResourceRoute.method("/signin/", methods=["POST"], name="signin")
+    async def signin(
+        self,
+        worker: RegisterWorker,
+        data: t.Annotated[types.Schema, types.SchemaMetadata(UserCredentials)],
+    ):
+        """
+        tags:
+            - User
+        summary:
+            User sign in
+        description:
+            Authenticate a user with email and password.
+        responses:
+            200:
+                description:
+                    User signed in successfully.
+            400:
+                description:
+                    User not active.
+            401:
+                description:
+                    Invalid credentials.
+            404:
+                description:
+                    User not found.
+        """
+        async with worker:
+            password = Password(data["password"])
+            try:
+                user = await worker.user.retrieve(email=data["email"])
+            except NotFoundError:
+                raise HTTPException(status_code=http.HTTPStatus.NOT_FOUND)
+
+            if user["password"] != password.encrypt():
+                raise HTTPException(status_code=http.HTTPStatus.UNAUTHORIZED)
+
+            if not user["active"]:
+                raise HTTPException(
+                    status_code=http.HTTPStatus.BAD_REQUEST,
+                    detail="User must be activated via /user/activate/",
+                )
+
+        return APIResponse(
+            status_code=http.HTTPStatus.OK,
+            schema=t.Annotated[types.Schema, types.SchemaMetadata(User)],
+            content=user,
+        )
+
+    @ResourceRoute.method("/activate/", methods=["POST"], name="activate")
+    async def activate(
+        self,
+        worker: RegisterWorker,
+        data: t.Annotated[types.Schema, types.SchemaMetadata(UserCredentials)],
+    ):
+        """
+        tags:
+            - User
+        summary:
+            User activate
+        description:
+            Activate an existing user account.
+        responses:
+            200:
+                description:
+                    User activated successfully.
+            401:
+                description:
+                    Invalid credentials.
+            404:
+                description:
+                    User not found.
+        """
+        async with worker:
+            try:
+                user = await worker.user.retrieve(email=data["email"])
+            except NotFoundError:
+                raise HTTPException(status_code=http.HTTPStatus.NOT_FOUND)
+
+            if user["password"] != Password(data["password"]).encrypt():
+                raise HTTPException(status_code=http.HTTPStatus.UNAUTHORIZED)
+
+            if not user["active"]:
+                await worker.user.update({"active": True}, id=user["id"])
+
+        return APIResponse(status_code=http.HTTPStatus.OK)
+
+    @ResourceRoute.method("/deactivate/", methods=["POST"], name="deactivate")
+    async def deactivate(
+        self,
+        worker: RegisterWorker,
+        data: t.Annotated[types.Schema, types.SchemaMetadata(UserCredentials)],
+    ):
+        """
+        tags:
+            - User
+        summary:
+            User deactivate
+        description:
+            Deactivate an existing user account.
+        responses:
+            200:
+                description:
+                    User deactivated successfully.
+            401:
+                description:
+                    Invalid credentials.
+            404:
+                description:
+                    User not found.
+        """
+        async with worker:
+            try:
+                user = await worker.user.retrieve(email=data["email"])
+            except NotFoundError:
+                raise HTTPException(status_code=http.HTTPStatus.NOT_FOUND)
+
+            if user["password"] != Password(data["password"]).encrypt():
+                raise HTTPException(status_code=http.HTTPStatus.UNAUTHORIZED)
+
+            if user["active"]:
+                await worker.user.update({"active": False}, id=user["id"])
+
+        return APIResponse(status_code=http.HTTPStatus.OK)
+
+
+# Application assembly
+DATABASE_URL = "sqlite+aiosqlite:///ddd_full_app.db"
+NOTIFICATION_SERVICE_URL = "http://notifications:8001"
+
+app = Flama(
+    openapi={
+        "info": {
+            "title": "Domain-driven API",
+            "version": "1.0.0",
+            "description": "Domain-driven design with Flama 🔥",
+        },
+    },
+    docs="/docs/",
+    modules=[SQLAlchemyModule(DATABASE_URL)],
+    components=[
+        WorkerComponent(worker=RegisterWorker()),
+        WorkerComponent(worker=NotificationWorker(url=NOTIFICATION_SERVICE_URL)),
+    ],
+)
+
+app.resources.add_resource("/user/", UserResource)
+
+
+@app.get("/", name="info")
+def info():
+    """
+    tags:
+        - Info
+    summary:
+        Ping
+    description:
+        Returns a brief description of the API.
+    responses:
+        200:
+            description:
+                Successful response with API info.
+    """
+    return {
+        "title": app.schema.openapi["info"]["title"],
+        "description": app.schema.openapi["info"]["description"],
+        "public": True,
+    }
+
+
+@app.on_event("startup")
+async def on_startup():
+    async with app.sqlalchemy.engine.begin() as conn:
+        await conn.run_sync(metadata.create_all)
+
+
+if __name__ == "__main__":
+    flama.run(flama_app=app, server_host="0.0.0.0", server_port=8000)
+```
+
+## Project structure
+
+In a production project, the code above would typically be organised into separate modules:
+
+```console
+.
+├── migration.py
+└── src
+    ├── __init__.py
+    ├── __main__.py
+    ├── app.py
+    ├── models.py
+    ├── repositories/
+    │   ├── __init__.py
+    │   ├── user.py
+    │   └── notifications.py
+    ├── resources.py
+    ├── schemas.py
+    └── workers.py
+```
+
+Each file has a clear, single responsibility:
+
+- **models.py**: The SQLAlchemy table definitions.
+- **schemas.py**: The Pydantic schemas.
+- **repositories/**: The repository classes, grouped by backend. SQL repositories interact with the database; HTTP repositories interact with external services.
+- **workers.py**: The worker classes (one per backend).
+- **resources.py**: The resource classes with business logic.
+- **app.py**: The application assembly and configuration.
+- **migration.py**: The database migration script.
+
+## Running the application
+
+With the assembly in place, starting the application is straightforward:
+
+```console
+> flama run --server-reload src.app:app
+
+INFO:     Started server process [3267]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
+```
+
+Alternatively, if you have the self-contained script, you can run it directly:
+
+```console
+> python 6-full-app.py
+
+INFO:     Started server process [3267]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://0.0.0.0:8000 (Press CTRL+C to quit)
+```
+
+Navigate to `http://localhost:8000/docs/` to see the auto-generated documentation UI, which lists all the available endpoints with their expected request and response schemas.
+
+## The request lifecycle
+
+Before exercising the endpoints, it is worth understanding what happens when a request arrives. Consider a <Label color="blue">POST</Label> to `/user/` (create user):
+
+1. <FlamaName />'s router matches the path to the `create` method on `UserResource`.
+2. The dependency injector sees that `create` requires `worker: RegisterWorker` and `notification_worker: NotificationWorker`, and resolves each via its corresponding `WorkerComponent`.
+3. Inside the method, `async with worker:` opens a database connection, begins a transaction, and creates the `UserRepository` instance. The repository executes the insert against the database.
+4. On exiting the `async with worker:` block, the worker commits (or rolls back) and closes the connection.
+5. `async with notification_worker:` opens an HTTP `Client` to the notification service and creates the `WelcomeNotificationRepository`. The repository sends a <Label color="blue">POST</Label> request to the notification endpoint.
+6. On exiting the block, the HTTP client is closed.
+7. The resource method returns the response.
+
+Every request follows this same path through the layers, router → injector → resource → worker(s) → repository/repositories → backend(s), and back. The separation is maintained at every stage, and each worker manages its own connection lifecycle independently.
+
+## Exercising the API
+
+With the application running, let us walk through the full user lifecycle using `curl`. Each request exercises a different aspect of the domain logic we implemented in the [Resources](/docs/domain-driven-design/resources/) page.
+
+### Create a user
+
+```console
+curl --request POST \
+  --url http://localhost:8000/user/ \
+  --header 'Content-Type: application/json' \
+  --data '{
+    "name": "John",
+    "surname": "Doe",
+    "email": "john@doe.com",
+    "password": "123456"
+  }'
+```
+
+The response is a **200 OK** with an empty body. The user has been created in the database with an inactive status and a hashed password.
+
+### Attempt to sign in (inactive user)
+
+```console
+curl --request POST \
+  --url http://localhost:8000/user/signin/ \
+  --header 'Content-Type: application/json' \
+  --data '{
+    "email": "john@doe.com",
+    "password": "123456"
+  }'
+```
+
+Since the user is not yet active, the response is a **400 Bad Request**:
+
+```json
+{
+    "status_code": 400,
+    "detail": "User must be activated via /user/activate/",
+    "error": "HTTPException"
+}
+```
+
+### Activate the user
+
+```console
+curl --request POST \
+  --url http://localhost:8000/user/activate/ \
+  --header 'Content-Type: application/json' \
+  --data '{
+    "email": "john@doe.com",
+    "password": "123456"
+  }'
+```
+
+The response is a **200 OK**. The user's status has been updated to active.
+
+### Sign in (active user)
+
+```console
+curl --request POST \
+  --url http://localhost:8000/user/signin/ \
+  --header 'Content-Type: application/json' \
+  --data '{
+    "email": "john@doe.com",
+    "password": "123456"
+  }'
+```
+
+This time, the sign-in succeeds and returns the user's data:
+
+```json
+{
+    "email": "john@doe.com",
+    "name": "John",
+    "surname": "Doe",
+    "id": "d73d4a62-dfe9-4907-91f4-f6b06f33c534",
+    "active": true,
+    "password": "..."
+}
+```
+
+### Deactivate the user
+
+```console
+curl --request POST \
+  --url http://localhost:8000/user/deactivate/ \
+  --header 'Content-Type: application/json' \
+  --data '{
+    "email": "john@doe.com",
+    "password": "123456"
+  }'
+```
+
+The response is a **200 OK**. The user is now deactivated and can no longer sign in until they activate again.
+
+### Invalid credentials
+
+```console
+curl --request POST \
+  --url http://localhost:8000/user/signin/ \
+  --header 'Content-Type: application/json' \
+  --data '{
+    "email": "john@doe.com",
+    "password": "wrong_password"
+  }'
+```
+
+The response is a **401 Unauthorized**:
+
+```json
+{
+    "status_code": 401,
+    "detail": "Unauthorized",
+    "error": "HTTPException"
+}
+```
+
+### Non-existent user
+
+```console
+curl --request POST \
+  --url http://localhost:8000/user/signin/ \
+  --header 'Content-Type: application/json' \
+  --data '{
+    "email": "nobody@nowhere.com",
+    "password": "123456"
+  }'
+```
+
+The response is a **404 Not Found**:
+
+```json
+{
+    "status_code": 404,
+    "detail": "Not Found",
+    "error": "HTTPException"
+}
+```
+
+## Conclusion
+
+Across this section, we have progressively built a domain-driven API from the ground up using <FlamaName />. The final architecture can be summarised as follows:
+
+| Layer | Responsibility | SQL Variant | HTTP Variant |
+|---|---|---|---|
+| **Data Model** | Defines database tables and API schemas | SQLAlchemy `Table` + Pydantic `BaseModel` | Pydantic `BaseModel` (schemas only) |
+| **Repository** | Encapsulates data access (CRUD) | `SQLAlchemyTableRepository` | `HTTPResourceRepository` |
+| **Worker** | Manages connections and transactions | `SQLAlchemyWorker` | `HTTPWorker` |
+| **Resource** | Implements business logic endpoints | `Resource` + `ResourceRoute.method` | `Resource` + `ResourceRoute.method` |
+
+The benefits of this architecture are substantial:
+
+- **Separation of concerns**: Each layer has a single, well-defined responsibility. Business logic never touches the database directly, and data access never makes business decisions.
+- **Maintainability**: Changes to the database schema, business rules, or API contract can be made independently in their respective layers.
+- **Testability**: Business logic can be tested by mocking the worker and repositories, without requiring a running database.
+- **Readability**: Resource methods read like specifications of business rules, making the codebase accessible to new developers and domain experts alike.
+
+Although the sign-in process described here is deliberately simplified, you could extend it with real authentication by combining this material with <FlamaName />'s [JWT Authentication](/docs/advanced-topics/authentication/) system, where the sign-in endpoint would return a JWT token instead of raw user data.
+
+The patterns introduced throughout this section (repositories, workers, and resources) scale naturally as your application grows in complexity. <FlamaName />'s built-in abstractions handle the infrastructure plumbing, freeing you to focus on what matters most: encoding your business domain into clean, readable, and testable code. And because the SQL and HTTP variants share the same abstract interfaces, you can apply these patterns whether your data lives in a local database or behind a remote API, or even combine both within the same application.

@@ -1,0 +1,279 @@
+---
+title: Resources
+wip: false
+---
+
+With the [data model](/docs/domain-driven-design/data-model/), [repository](/docs/domain-driven-design/repository/), and [worker](/docs/domain-driven-design/worker/) in place, we have a solid infrastructure layer that handles persistence and transactional integrity. What remains is the most important part of any DDD application: the **business logic** itself. In <FlamaName />, business logic is implemented in **Resources**, classes that expose domain operations as API endpoints while delegating all data access to the worker and its repositories.
+
+This page demonstrates how to build a `UserResource` that implements the complete user management workflow introduced in the [Data Model](/docs/domain-driven-design/data-model/) page: creating users, signing in, and activating or deactivating accounts.
+
+## The Resource as a domain service
+
+In DDD terminology, a **domain service** is an operation that does not naturally belong to any single entity but represents a meaningful action within the domain. In <FlamaName />, the `Resource` class serves this role. Each method on a resource corresponds to a domain operation, and each operation is automatically exposed as an API endpoint.
+
+The critical design principle here is **separation of concerns**:
+
+- The **Resource** owns the business logic, the *what* and the *why*.
+- The **Worker** owns the transactional boundaries, the *when* to commit or rollback.
+- The **Repository** owns the data access, the *how* to read and write.
+
+This layered architecture means that the resource methods read almost like a plain-language description of the business rules, free from database boilerplate and connection management.
+
+## Password hashing
+
+Before diving into the resource itself, we need a helper for password security. Storing passwords in plain text is never acceptable, so we define a `Password` class that hashes the password using SHA-512 with a salt and pepper:
+
+```python
+import hashlib
+import uuid
+
+ENCRYPTION_SALT = uuid.uuid4().hex
+ENCRYPTION_PEPPER = uuid.uuid4().hex
+
+
+class Password:
+    def __init__(self, password: str):
+        self._password = password
+
+    def encrypt(self) -> str:
+        return hashlib.sha512(
+            (
+                hashlib.sha512(
+                    (self._password + ENCRYPTION_SALT).encode()
+                ).hexdigest()
+                + ENCRYPTION_PEPPER
+            ).encode()
+        ).hexdigest()
+```
+
+The salt and pepper are generated once at application startup, ensuring consistent hashing throughout the application's lifecycle. In a production environment, you would store these values securely (e.g., as environment variables managed through <FlamaName />'s [Configuration](/docs/advanced-topics/configuration/) system).
+
+## Building the UserResource
+
+The `UserResource` implements four domain operations, each decorated with `@ResourceRoute.method` to expose it as an API endpoint. Let us walk through each one.
+
+### Creating a user
+
+The create operation accepts user details, checks whether a user with that email already exists, and if not, creates a new user with a hashed password and an inactive status:
+
+```python
+from flama.resources import Resource
+from flama.resources.routing import ResourceRoute
+
+class UserResource(Resource):
+    name = "user"
+    verbose_name = "User"
+
+    @ResourceRoute.method("/", methods=["POST"], name="create")
+    async def create(
+        self,
+        worker: RegisterWorker,
+        data: t.Annotated[types.Schema, types.SchemaMetadata(UserDetails)],
+    ):
+        """
+        tags:
+            - User
+        summary:
+            User create
+        description:
+            Create a new user with the provided details.
+        responses:
+            200:
+                description:
+                    User created successfully.
+        """
+        async with worker:
+            try:
+                await worker.user.retrieve(email=data["email"])
+            except NotFoundError:
+                await worker.user.create(
+                    {**data, "password": Password(data["password"]).encrypt(), "active": False}
+                )
+
+        return APIResponse(status_code=http.HTTPStatus.OK)
+```
+
+Several things are worth noting:
+
+- The **worker** is injected by <FlamaName />'s dependency injection system, we simply declare its type as a parameter.
+- The **data** parameter uses `t.Annotated[types.Schema, types.SchemaMetadata(UserDetails)]` to declare that the request body must conform to the `UserDetails` schema.
+- The `async with worker:` block ensures atomicity. Inside it, we first check if the email is already taken (using `retrieve`). If a `NotFoundError` is raised, it means no such user exists, and we proceed to create one.
+- The password is hashed before storage, the plain-text password never reaches the database.
+
+### Signing in
+
+The sign-in operation verifies the user's credentials and returns their data if the account is active:
+
+```python
+    @ResourceRoute.method("/signin/", methods=["POST"], name="signin")
+    async def signin(
+        self,
+        worker: RegisterWorker,
+        data: t.Annotated[types.Schema, types.SchemaMetadata(UserCredentials)],
+    ):
+        """
+        tags:
+            - User
+        summary:
+            User sign in
+        description:
+            Authenticate a user with email and password.
+        responses:
+            200:
+                description:
+                    User signed in successfully.
+            400:
+                description:
+                    User not active.
+            401:
+                description:
+                    Invalid credentials.
+            404:
+                description:
+                    User not found.
+        """
+        async with worker:
+            password = Password(data["password"])
+            try:
+                user = await worker.user.retrieve(email=data["email"])
+            except NotFoundError:
+                raise HTTPException(status_code=http.HTTPStatus.NOT_FOUND)
+
+            if user["password"] != password.encrypt():
+                raise HTTPException(status_code=http.HTTPStatus.UNAUTHORIZED)
+
+            if not user["active"]:
+                raise HTTPException(
+                    status_code=http.HTTPStatus.BAD_REQUEST,
+                    detail="User must be activated via /user/activate/",
+                )
+
+        return APIResponse(
+            status_code=http.HTTPStatus.OK,
+            schema=t.Annotated[types.Schema, types.SchemaMetadata(User)],
+            content=user,
+        )
+```
+
+This method illustrates the layered error handling that DDD naturally encourages:
+
+1. If the user does not exist → **404 Not Found**.
+2. If the password does not match → **401 Unauthorized**.
+3. If the user is not active → **400 Bad Request** with a helpful message.
+4. If all checks pass → **200 OK** with the full user data.
+
+Notice how each check maps directly to a domain rule. The code reads like a specification of the expected behaviour.
+
+### Activating and deactivating
+
+The activation and deactivation operations follow the same pattern (verify credentials, then update the user's status):
+
+```python
+    @ResourceRoute.method("/activate/", methods=["POST"], name="activate")
+    async def activate(
+        self,
+        worker: RegisterWorker,
+        data: t.Annotated[types.Schema, types.SchemaMetadata(UserCredentials)],
+    ):
+        """
+        tags:
+            - User
+        summary:
+            User activate
+        description:
+            Activate an existing user account.
+        responses:
+            200:
+                description:
+                    User activated successfully.
+            401:
+                description:
+                    Invalid credentials.
+            404:
+                description:
+                    User not found.
+        """
+        async with worker:
+            try:
+                user = await worker.user.retrieve(email=data["email"])
+            except NotFoundError:
+                raise HTTPException(status_code=http.HTTPStatus.NOT_FOUND)
+
+            if user["password"] != Password(data["password"]).encrypt():
+                raise HTTPException(status_code=http.HTTPStatus.UNAUTHORIZED)
+
+            if not user["active"]:
+                await worker.user.update({"active": True}, id=user["id"])
+
+        return APIResponse(status_code=http.HTTPStatus.OK)
+
+    @ResourceRoute.method("/deactivate/", methods=["POST"], name="deactivate")
+    async def deactivate(
+        self,
+        worker: RegisterWorker,
+        data: t.Annotated[types.Schema, types.SchemaMetadata(UserCredentials)],
+    ):
+        """
+        tags:
+            - User
+        summary:
+            User deactivate
+        description:
+            Deactivate an existing user account.
+        responses:
+            200:
+                description:
+                    User deactivated successfully.
+            401:
+                description:
+                    Invalid credentials.
+            404:
+                description:
+                    User not found.
+        """
+        async with worker:
+            try:
+                user = await worker.user.retrieve(email=data["email"])
+            except NotFoundError:
+                raise HTTPException(status_code=http.HTTPStatus.NOT_FOUND)
+
+            if user["password"] != Password(data["password"]).encrypt():
+                raise HTTPException(status_code=http.HTTPStatus.UNAUTHORIZED)
+
+            if user["active"]:
+                await worker.user.update({"active": False}, id=user["id"])
+
+        return APIResponse(status_code=http.HTTPStatus.OK)
+```
+
+Both methods follow the same structure: enter the worker context, retrieve the user, verify the password, perform the domain action, and return a response. This consistency is not accidental, it is a direct consequence of the DDD architecture. The pattern `async with worker: → retrieve → validate → act → respond` becomes the natural rhythm of every operation.
+
+## Registering the resource
+
+Once the resource is defined, we register it with the application using `app.resources.add_resource()`:
+
+```python
+app.resources.add_resource("/user/", UserResource)
+```
+
+This mounts all the resource's methods under the `/user/` prefix. The resulting endpoints are:
+
+| Method | Path | Description |
+|---|---|---|
+| <Label color="blue">POST</Label> | `/user/` | Create a new user |
+| <Label color="blue">POST</Label> | `/user/signin/` | Sign in |
+| <Label color="blue">POST</Label> | `/user/activate/` | Activate account |
+| <Label color="blue">POST</Label> | `/user/deactivate/` | Deactivate account |
+
+## The DDD payoff
+
+Looking at the resource methods, the benefits of the layered architecture become tangible. The business logic is:
+
+- **Readable**: Each method reads like a natural-language description of the domain rule it implements.
+- **Focused**: Methods contain only domain logic, no connection handling, no raw SQL, no transaction management.
+- **Consistent**: Every method follows the same structure, making the codebase predictable and straightforward to navigate.
+- **Testable**: Domain rules can be tested by mocking the worker and its repositories, without needing a database.
+
+This clean separation is the core promise of Domain-Driven Design, and <FlamaName />'s built-in abstractions make it achievable with remarkably little boilerplate.
+
+In the [final page](/docs/domain-driven-design/application-assembly/) of this section, we wire the layers together into a complete, runnable application and exercise every endpoint with real HTTP requests.

@@ -1,0 +1,436 @@
+---
+title: Resources
+wip: false
+---
+
+In previous sections, we've explored the fundamental building blocks of a <FlamaName /> application: 
+[Routes](/docs/fundamentals/routes/), [Endpoints](/docs/fundamentals/endpoints/), and 
+[Schemas](/docs/fundamentals/schemas/). While you can build a complete API using just these elements, 
+as your application grows, you'll likely find yourself facing a common challenge: **organisation**.
+
+Defining routes and functions individually works great for small scripts, but it quickly becomes unmanageable 
+as your API scales. You might end up with a long list of disconnected functions, scattered logic, and repetitive
+boilerplate code for standard database operations.
+
+**Resources** are <FlamaName />'s answer to this problem. 
+They allow you to bundle related functionality (like all the operations for managing users, products, or system status) 
+into single cohesive classes.
+
+Think of a **Resource** as a container that holds both the logic (your code) and the state (your data 
+connections) for a specific part of your application. By using resources, you move from writing *scripts* to
+building structured *software.*
+
+## What are Resources?
+
+In <FlamaName />, a **Resource** is a class representing a collection of endpoints (methods) mounted under a
+common URL prefix. Instead of defining loose functions and attaching them to the app one by one, you define a
+class that encapsulates a specific domain of your application.
+
+Why are they a game-changer?
+
+- **Structured Organisation**: They keep your code clean by grouping related functionality. For instance, all "Animal" logic
+  lives in the `AnimalResource`.
+- **Shared Logic**: State and helper methods can be shared across all endpoints within a resource.
+- **Automatic CRUD**: For database-backed resources, <FlamaName /> can automatically generate standard `Create`,
+  `Read`, `Update`, Delete, and List routes for you.
+- **Native Dependency Injection**: Resources integrate fully with <FlamaName />'s injection system.
+
+Depending on what you are building, you will choose between two base classes:
+
+-  **`Resource`**: The flexible blank canvas. Use this for "virtual" resources that don't map directly to a 
+  database table, such as a calculator, a system health check, or an interface to an external API.
+-  **`CRUDResource`**: The database specialist. This is a powerful, opinionated class designed specifically
+  for standard database interactions. You simply tell it *what* your data looks like, and it automatically builds
+  the API to manage it.
+
+## The base Resource
+
+Let's start with a simple scenario: we want a resource that acts as a **Calculator**, performing stateless operations
+like addition or multiplication. The results are calculated on the fly based on user input, rather than being fetched
+from a permanent database record.
+
+This is the perfect use case for a generic `Resource`.
+
+To build one, we inherit from `flama.resources.Resource` and define standard Python methods. The magic ingredient here
+is the `@ResourceRoute.method` decorator. It works just like the application-level decorators you've seen before
+(`@app.get`), but it knows how to attach the route to the resource class itself.
+
+```python
+from flama.resources import Resource
+from flama.resources.routing import ResourceRoute
+
+# Schemas
+class CalcInput(pydantic.BaseModel):
+    a: float
+    b: float
+
+class CalcResult(pydantic.BaseModel):
+    operation: str
+    result: float
+
+# The "Primitive" Resource
+class CalculatorResource(Resource):
+    name = "calculator"
+    verbose_name = "Calculator"
+
+    @ResourceRoute.method("/add/", methods=["POST"], name="add")
+    def add(
+        self, data: t.Annotated[types.Schema, types.SchemaMetadata(CalcInput)]
+    ) -> t.Annotated[types.Schema, types.SchemaMetadata(CalcResult)]:
+        """
+        tags:
+            - Calculator
+        summary:
+            Add two numbers
+        description:
+            Performs addition on the input data.
+        """
+        return {"operation": "add", "result": data["a"] + data["b"]}
+
+    @ResourceRoute.method("/subtract/", methods=["POST"], name="subtract")
+    def subtract(
+        self, data: t.Annotated[types.Schema, types.SchemaMetadata(CalcInput)]
+    ) -> t.Annotated[types.Schema, types.SchemaMetadata(CalcResult)]:
+        """
+        tags:
+            - Calculator
+        summary:
+            Subtract two numbers
+        description:
+            Performs subtraction (a - b).
+        """
+        return {"operation": "subtract", "result": data["a"] - data["b"]}
+
+    @ResourceRoute.method("/multiply/", methods=["POST"], name="multiply")
+    def multiply(
+        self, data: t.Annotated[types.Schema, types.SchemaMetadata(CalcInput)]
+    ) -> t.Annotated[types.Schema, types.SchemaMetadata(CalcResult)]:
+        """
+        tags:
+            - Calculator
+        summary:
+            Multiply two numbers
+        description:
+            Performs multiplication on the input data.
+        """
+        return {"operation": "multiply", "result": data["a"] * data["b"]}
+
+    @ResourceRoute.method("/divide/", methods=["POST"], name="divide")
+    def divide(
+        self, data: t.Annotated[types.Schema, types.SchemaMetadata(CalcInput)]
+    ) -> t.Annotated[types.Schema, types.SchemaMetadata(CalcResult)]:
+        """
+        tags:
+            - Calculator
+        summary:
+            Divide two numbers
+        description:
+            Performs division (a / b). returns error if b is 0.
+        """
+        if data["b"] == 0:
+            raise exceptions.HTTPException(
+                status_code=400, detail="Division by zero is not allowed."
+            )
+        return {"operation": "divide", "result": data["a"] / data["b"]}
+```
+
+In this snippet:
+
+* **`name`**: An internal identifier for the resource.
+* **`verbose_name`**: A human-readable name used in the documentation.
+* **`add`, `substract`, `multiply`, `divide`**: Standard Python methods.
+
+Notice how clean this is. We haven't touched an `app` instance yet. We've simply defined a self-contained
+unit of logic that can be plugged into *any* application later.
+
+## The CRUD Resource
+
+Now for the heavy lifting. Most APIs need to store and retrieve data. Writing endpoints for creating, finding,
+updating, and deleting records manually is tedious and error-prone. This is where `CRUDResource` shines.
+
+### Standard CRUD
+
+Before the resource can do its job, it needs to know the "shape" of your data. In <FlamaName />, we separate 
+this into two layers:
+
+1. **The Model**: Defines how data is stored in the database (using **SQLAlchemy**).
+2. **The Schema**: Defines how data is validated and serialised for the API (using **Pydantic**, **Typesystem**, 
+  or **Marshmallow**).
+
+Once we have our **Model** and **Schema** defined, creating the API is incredibly simple. We define a class 
+inheriting from `CRUDResource` and link it to them:
+
+```python
+from flama.resources import CRUDResource
+
+class AnimalResource(CRUDResource):
+    name = "animal"
+    verbose_name = "Animal"
+
+    model = animal_table
+    schema = Animal
+
+```
+
+Just by writing these few lines, <FlamaName /> will automatically generate a complete set of endpoints for both collection and resource management:
+
+**Collection Operations**
+
+* <Label color="blue">POST</Label> `/`: Create a new animal.
+* <Label color="green">GET</Label> `/`: List all animals (with pagination support).
+* <Label color="orange">PUT</Label> `/`: Replace the entire animal collection.
+* <Label color="orange">PATCH</Label> `/`: Partially update the animal collection.
+* <Label color="red">DELETE</Label> `/`: Drop the entire animal collection.
+
+**Resource Operations**
+
+* <Label color="green">GET</Label> `/{id}/`: Retrieve a specific animal.
+* <Label color="orange">PUT</Label> `/{id}/`: Update (replace) a specific animal.
+* <Label color="orange">PATCH</Label> `/{id}/`: Partially update a specific animal.
+* <Label color="red">DELETE</Label> `/{id}/`: Delete a specific animal.
+
+### Adding custom methods
+
+The `CRUDResource` is great for standard operations, but real-world applications often need custom logic 
+that *also* interacts with the database.
+
+For example, let's say we want specific endpoints to check if an animal is a "puppy" (younger than 1 year)
+or a "senior" (older than 10 years). This isn't a standard CRUD operation, but it requires fetching the animal's age from the database.
+
+We can mix standard CRUD behavior with custom logic by simply adding decorated methods to our `CRUDResource` 
+class, just like we did with the Base Resource.
+
+```python
+@ResourceRoute.method("/{id}/is_puppy/", methods=["GET"], name="is-puppy")
+async def is_puppy(self, id: int, ...):
+    ...
+
+```
+
+### Managing DB connection
+
+When you add a custom method that needs to talk to the database, you need to obtain a connection. 
+Unlike the automatic CRUD methods, here you have full control and responsibility over how that connection 
+is managed. However, we have a recommended pattern to handle the connection to the database.
+Your application already has an `SQLAlchemyModule` configured with a database connection. 
+You can reuse this connection pool instead of creating a new one. 
+
+Since `Resources` run in their own isolated "scope", you cannot simply inject `app` to get the
+main application. Instead, you inject **`scope`** (the ASGI scope) and access the `root_app`:
+
+```python
+@ResourceRoute.method("/{id}/is_puppy/", methods=["GET"], name="is-puppy")
+async def is_puppy(
+    self, id: int, scope: types.Scope
+) -> t.Annotated[types.Schema, types.SchemaMetadata(PuppyCheck)]:
+    # ... logic ...
+    
+    # Access the 'root_app' to get the shared SQLAlchemy engine
+    async with scope["root_app"].sqlalchemy.engine.connect() as conn:
+        result = await conn.execute(query)
+        animal_record = result.first()
+        
+    # ... logic ...
+```
+
+> [!WARNING]
+> You might've been tempted to manually create an engine within the method itself.
+We greatly discourage that solution, since the connection should be managed by the `SQLAlchemyModule`.
+Also, you might be thinking that getting the connection from the `SQLAlchemyModule` via the `root_app`
+application that is inside the `Scope` (injected by <FlamaName />) is a bit of an overshoot, and you are
+right. This is precisely the reason why <FlamaName /> brings its own implementation of the **domain
+driven design** (DDD) philosophy, which makes resources completely agnositc of the connection, and 
+isolates that layer of responsibility into what we will refer to as `Worker`s.
+
+
+## Example
+
+Let's put it all together into a runnable `resources_example.py` application. This example demonstrates 
+the evolution from a basic **Generic Resource** to a fully automated **CRUD Resource**, and finally extending 
+that CRUD resource with **custom methods** using both connection patterns described above.
+
+```python
+import flama
+
+from flama.resources import Resource
+from flama.resources.crud import CRUDResource
+from flama.resources.routing import ResourceRoute
+from flama.sqlalchemy import SQLAlchemyModule
+from flama import Flama, types, exceptions
+
+import typing as t
+import pydantic
+import sqlalchemy
+
+from sqlalchemy.ext.asyncio import create_async_engine
+
+# Configuration
+DATABASE_URL = "sqlite+aiosqlite:///animals.db"
+
+# Data Model (SQLAlchemy)
+metadata = sqlalchemy.MetaData()
+animal_table = sqlalchemy.Table(
+    "animal",
+    metadata,
+    sqlalchemy.Column("id", sqlalchemy.Integer, primary_key=True, autoincrement=True),
+    sqlalchemy.Column("name", sqlalchemy.String, nullable=False),
+    sqlalchemy.Column("species", sqlalchemy.String, nullable=False),
+    sqlalchemy.Column("age", sqlalchemy.Integer, nullable=False),
+)
+
+# Schemas
+class Animal(pydantic.BaseModel):
+    id: t.Optional[int] = None
+    name: str
+    species: str
+    age: int
+
+class CalcInput(pydantic.BaseModel):
+    a: float
+    b: float
+
+
+class CalcResult(pydantic.BaseModel):
+    operation: str
+    result: float
+
+class PuppyCheck(pydantic.BaseModel):
+    is_puppy: bool
+    name: str
+
+class SeniorCheck(pydantic.BaseModel):
+    is_senior: bool
+    name: str
+
+# The "Primitive" Resource
+class CalculatorResource(Resource):
+    name = "calculator"
+    verbose_name = "Calculator"
+
+    @ResourceRoute.method("/add/", methods=["POST"], name="add")
+    def add(
+        self, data: t.Annotated[types.Schema, types.SchemaMetadata(CalcInput)]
+    ) -> t.Annotated[types.Schema, types.SchemaMetadata(CalcResult)]:
+        """
+        tags:
+            - Calculator
+        summary:
+            Add two numbers
+        description:
+            Performs addition on the input data.
+        """
+        return {"operation": "add", "result": data["a"] + data["b"]}
+
+    @ResourceRoute.method("/subtract/", methods=["POST"], name="subtract")
+    def subtract(
+        self, data: t.Annotated[types.Schema, types.SchemaMetadata(CalcInput)]
+    ) -> t.Annotated[types.Schema, types.SchemaMetadata(CalcResult)]:
+        """
+        tags:
+            - Calculator
+        summary:
+            Subtract two numbers
+        description:
+            Performs subtraction (a - b).
+        """
+        return {"operation": "subtract", "result": data["a"] - data["b"]}
+
+    @ResourceRoute.method("/multiply/", methods=["POST"], name="multiply")
+    def multiply(
+        self, data: t.Annotated[types.Schema, types.SchemaMetadata(CalcInput)]
+    ) -> t.Annotated[types.Schema, types.SchemaMetadata(CalcResult)]:
+        """
+        tags:
+            - Calculator
+        summary:
+            Multiply two numbers
+        description:
+            Performs multiplication on the input data.
+        """
+        return {"operation": "multiply", "result": data["a"] * data["b"]}
+
+    @ResourceRoute.method("/divide/", methods=["POST"], name="divide")
+    def divide(
+        self, data: t.Annotated[types.Schema, types.SchemaMetadata(CalcInput)]
+    ) -> t.Annotated[types.Schema, types.SchemaMetadata(CalcResult)]:
+        """
+        tags:
+            - Calculator
+        summary:
+            Divide two numbers
+        description:
+            Performs division (a / b). returns error if b is 0.
+        """
+        if data["b"] == 0:
+            raise exceptions.HTTPException(
+                status_code=400, detail="Division by zero is not allowed."
+            )
+        return {"operation": "divide", "result": data["a"] / data["b"]}
+
+# The "CRUD" Resource
+class AnimalResource(CRUDResource):
+    name = "animal"
+    verbose_name = "Animal"
+
+    model = animal_table
+    schema = Animal
+
+    # This is the recommended way to reuse the application's configured database.
+    @ResourceRoute.method("/{id}/is_puppy/", methods=["GET"], name="is-puppy")
+    async def is_puppy(
+        self, id: int, scope: types.Scope
+    ) -> t.Annotated[types.Schema, types.SchemaMetadata(PuppyCheck)]:
+        """
+        tags:
+            - Animal
+        summary:
+            Check is puppy
+        description:
+            Checks if animal is a puppy using the app's shared database connection.
+        """
+        query = sqlalchemy.select(animal_table).where(animal_table.c.id == id)
+
+        # Access the 'root_app' to get the shared SQLAlchemy engine
+        async with scope["root_app"].sqlalchemy.engine.connect() as conn:
+            result = await conn.execute(query)
+            animal_record = result.first()
+
+        if not animal_record:
+            raise exceptions.HTTPException(status_code=404, detail="Animal not found")
+
+        return {"is_puppy": (animal_record.age < 1), "name": animal_record.name}
+
+# Application Setup
+app = Flama(
+    openapi={
+        "info": {
+            "title": "Animal API",
+            "version": "1.0",
+            "description": "Demonstrating the evolution from Resource to CRUDResource.",
+        },
+    },
+    modules=[SQLAlchemyModule(DATABASE_URL)],
+)
+
+app.resources.add_resource("/puppy/", PuppyResource)
+app.resources.add_resource("/animal/", AnimalResource)
+
+@app.on_event("startup")
+async def create_db():
+    try:
+        async with app.sqlalchemy.engine.begin() as conn:
+            await conn.run_sync(metadata.create_all)
+        print("\n🐶 Database Initialised!\n")
+    except Exception as e:
+        print(f"\n❌ Error initialising database: {e}\n")
+
+if __name__ == "__main__":
+    flama.run(flama_app=app, server_host="0.0.0.0", server_port=8000)
+```
+
+In this section, we have journeyed from the **stateless utility** of a basic **Resource**, used here to structure
+our Calculator logic, to the **data-driven power** of a **CRUDResource** that automates database interactions.
+We've also seen how to break out of the "standard box" by adding custom methods that manage their own database connections,
+giving you the best of both worlds: automation when you want it, and granular control when you need it.
+By adopting Resources, you transform your application from a flat list of routes into a structured, maintainable,
+and scalable software architecture ready for production.
