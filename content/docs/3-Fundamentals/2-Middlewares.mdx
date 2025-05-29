@@ -196,7 +196,6 @@ async def slow_endpoint():
 # This part is for making the example runnable if saved as a .py file,
 # though specific run instructions are omitted as per request.
 if __name__ == "__main__":
-    # Ensure flama.run is available; it's part of the main flama package.
     flama.run(flama_app=app, server_host="0.0.0.0", server_port=8000)
 ```
 
@@ -214,8 +213,9 @@ x-process-time-ms: 0.21
 
 And:
 
-```
+```console
 curl -I http://localhost:8000/slow
+
 HTTP/1.1 200 OK
 server: uvicorn
 content-length: 54
