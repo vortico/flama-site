@@ -1,0 +1,59 @@
+.markdown-alert {
+  @apply mb-4 border bg-primary-50 p-4 shadow-md;
+
+  & > * {
+    @apply m-0;
+  }
+
+  .markdown-alert-title {
+    @apply flex items-center justify-start font-alternative font-medium;
+
+    & + p {
+      @apply mt-2;
+    }
+
+    svg.octicon {
+      @apply mr-2 fill-current;
+    }
+  }
+
+  &.markdown-alert-note {
+    @apply border-vortico-500/25 shadow-vortico-500/25 dark:bg-vortico-500/10;
+
+    .markdown-alert-title {
+      @apply text-vortico-500;
+    }
+  }
+
+  &.markdown-alert-tip {
+    @apply border-ciclon-500/25 shadow-ciclon-500/25 dark:bg-ciclon-500/10;
+
+    .markdown-alert-title {
+      @apply text-ciclon-500;
+    }
+  }
+
+  &.markdown-alert-important {
+    @apply border-bruma-500/25 shadow-bruma-500/25 dark:bg-bruma-500/10;
+
+    .markdown-alert-title {
+      @apply text-bruma-500;
+    }
+  }
+
+  &.markdown-alert-warning {
+    @apply border-bosque-500/25 shadow-bosque-500/25 dark:bg-bosque-500/10;
+
+    .markdown-alert-title {
+      @apply text-bosque-500;
+    }
+  }
+
+  &.markdown-alert-caution {
+    @apply border-flama-500/25 shadow-flama-500/25 dark:bg-flama-500/10;
+
+    .markdown-alert-title {
+      @apply text-flama-500;
+    }
+  }
+}

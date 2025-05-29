@@ -1,0 +1,122 @@
+---
+title: Data model
+wip: false
+---
+
+Every domain-driven application starts with a clear understanding of the data it manages. Before writing any business logic, we need to define two things: how the data is **persisted** (the database schema) and how the data is **exchanged** at the API boundary (the request and response contracts). In DDD terminology, this is the foundation upon which the entire domain model is built.
+
+<FlamaName /> leverages **SQLAlchemy** for database persistence and **Pydantic** (or other supported schema libraries) for data validation and serialisation. In this page, we define both layers for a concrete example that will serve as the running thread through the rest of this section.
+
+## The domain
+
+Throughout this section, we use a **user management** domain as our running example. User management is a pattern that appears in virtually every web application: users register, verify their identity, authenticate, and manage the state of their accounts. Despite its familiarity, it is rich enough to exercise all the DDD patterns we cover (repositories, workers, and resources), yet simple enough that the focus stays on the architecture rather than on domain-specific complexity.
+
+Our user entity has the following attributes:
+
+- **id**: A unique identifier (UUID), generated automatically on creation.
+- **name** and **surname**: The user's personal details.
+- **email**: A unique email address that also serves as the login identifier.
+- **password**: The user's password, which will be hashed before storage.
+- **active**: A boolean flag indicating whether the account has been activated. Newly created users start as inactive.
+
+The lifecycle of a user follows a natural progression: the user is *created* (inactive by default), then *activates* their account, after which they can *sign in*. They may also *deactivate* their account at any time, and the activation/deactivation cycle can repeat indefinitely. We will implement each of these operations as we progress through the section.
+
+## The persistence layer
+
+The persistence layer defines how domain entities are stored in the database. Using **SQLAlchemy's** declarative table syntax, we create a `user` table with columns that map directly to the attributes described above.
+
+```python
+import uuid
+
+import sqlalchemy
+from flama.sqlalchemy import metadata
+
+user_table = sqlalchemy.Table(
+    "user",
+    metadata,
+    sqlalchemy.Column(
+        "id", sqlalchemy.String, primary_key=True, nullable=False,
+        default=lambda: str(uuid.uuid4()),
+    ),
+    sqlalchemy.Column("name", sqlalchemy.String, nullable=False),
+    sqlalchemy.Column("surname", sqlalchemy.String, nullable=False),
+    sqlalchemy.Column("email", sqlalchemy.String, nullable=False, unique=True),
+    sqlalchemy.Column("password", sqlalchemy.String, nullable=False),
+    sqlalchemy.Column("active", sqlalchemy.Boolean, nullable=False),
+)
+```
+
+A few things to note:
+
+- We import `metadata` from `flama.sqlalchemy`. This is the shared `MetaData` instance provided by <FlamaName />, which ensures that all tables defined across the application are registered in a single, consistent metadata object. This is important when <FlamaName />'s `SQLAlchemyModule` manages the database connection.
+- The **id** column uses a `String` type with a `uuid.uuid4` default, making this example compatible with SQLite. In a production environment with PostgreSQL, you might use `sqlalchemy.dialects.postgresql.UUID(as_uuid=True)` instead.
+- The **email** column has a `unique=True` constraint, enforcing at the database level that no two users can share the same email address.
+
+## The API contract
+
+While the SQLAlchemy table defines the *internal* representation of the data, Pydantic schemas define the *external* contract, the shape of data that the API accepts and returns. Schemas ensure that incoming data is validated before it reaches the business logic, and that outgoing data is serialised in a consistent, predictable format.
+
+For our user domain, we define three schemas arranged in an inheritance hierarchy that mirrors the different levels of information needed at different stages of the user lifecycle:
+
+```python
+import pydantic
+
+class UserCredentials(pydantic.BaseModel):
+    email: str
+    password: str
+
+class UserDetails(UserCredentials):
+    name: str
+    surname: str
+
+class User(UserDetails):
+    id: str | None = None
+    active: bool | None = False
+```
+
+Each schema serves a distinct purpose:
+
+- **UserCredentials**: The minimal set of fields needed for authentication operations (sign in, activate, deactivate). Contains only `email` and `password`.
+- **UserDetails**: Extends `UserCredentials` with the fields required to create a new user. This is the schema we will use for the "create user" endpoint's request body.
+- **User**: The complete representation of a user, including the server-generated `id` and the `active` status flag. This is the schema we will use for response bodies when returning user data.
+
+This layered design is intentional: each endpoint receives **exactly** the data it needs, nothing more and nothing less. An authentication endpoint does not need a user's name, and a creation endpoint should not require the client to provide an `id` or `active` status.
+
+## Database migration
+
+Before the application can interact with the database, the table must exist. We create it using a simple migration script:
+
+```python
+from sqlalchemy import create_engine
+
+DATABASE_URL = "sqlite:///ddd_users.db"
+
+
+def run_migration():
+    engine = create_engine(DATABASE_URL, echo=False)
+    metadata.create_all(engine)
+    print("Database and User table created successfully.")
+
+
+if __name__ == "__main__":
+    run_migration()
+```
+
+Running this script produces the following output:
+
+```console
+Database and User table created successfully.
+```
+
+In a production setting, you would typically use a migration tool like [Alembic](https://alembic.sqlalchemy.org/) to manage schema changes incrementally. For the purposes of this documentation, the simple `create_all` approach is sufficient.
+
+## The separation principle
+
+It is worth pausing to appreciate what we have established. Two distinct layers now exist side by side:
+
+- The **persistence layer** (SQLAlchemy table) describes *how* data is stored.
+- The **API contract** (Pydantic schemas) describes *what* data flows in and out of the system.
+
+These two layers are kept separate by design. The database schema might evolve independently of the API contract, e.g., you might add an internal audit column to the table without exposing it through the API. Conversely, you might restructure the API schemas to accommodate a new client without altering the database. This separation is a cornerstone of DDD and a theme that runs throughout this section.
+
+With the data model defined, we are ready to build the abstraction layer that connects these two worlds. In the [next page](/docs/domain-driven-design/repository/), we introduce the **Repository** pattern, which allows the business logic to interact with domain entities without coupling itself to the details of the persistence layer.

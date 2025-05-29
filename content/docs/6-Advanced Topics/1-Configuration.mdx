@@ -1,0 +1,297 @@
+---
+title: Configuration
+wip: false
+---
+
+Managing configuration effectively is one of the most critical aspects of building production-ready applications.
+Whether you are dealing with database credentials, API keys, or simple debug flags, the way you handle these settings
+can determine the security and flexibility of your entire system.
+
+Hardcoding configuration values directly into your source code is a practice that often leads to security vulnerabilities and operational headaches.
+The industry standard for solving this, popularised by the [**12-Factor App**](https://12factor.net/) methodology, 
+is to strictly separate configuration from code.
+This ensures that your application can run in different environments (local development, staging, or production) without requiring any changes
+to the codebase itself.
+
+
+## Config class 
+
+<FlamaName /> provides a built-in and unified tool to handle this complexity: the **`Config`** class.
+It offers a robust mechanism to seamlessly blend settings from local files, which are excellent for development convenience,
+with environment variables, which are essential for production security.
+Furthermore, it provides a powerful type-casting system to ensure your application always receives data in the correct format,
+reducing the risk of runtime errors.
+
+### Philosophy
+
+The core philosophy of the `Config` module revolves around **precedence**. 
+When you request a configuration value, <FlamaName /> does not just look in one place but it follows a specific logical hierarchy 
+to determine which value to return to you.
+
+First and foremost, it checks for an **Environment Variable**.
+This is the highest priority source.
+In a production environment, such as one orchestrated by Kubernetes or Docker, you will typically inject sensitive secrets or
+environment-specific settings this way.
+Because environment variables override everything else, you can always change the behaviour of your application at runtime without touching a single file.
+
+If the variable is not found in the environment, <FlamaName /> looks into the **Config File**.
+This is your baseline configuration. 
+It is perfect for defining defaults, local development settings, or complex nested structures (like database connection details) that
+are tedious to define using simple environment variables strings.
+
+Finally, if the key is not defined in either the environment or the file, the system uses the **Default Value** provided in your code.
+This acts as a safety net, ensuring your application has a fallback value to operate with, preventing it from crashing due to missing configuration.
+
+This hierarchy implies a powerful workflow: you can commit a `config.yaml` file with safe defaults to your repository,
+yet instantly override any specific value in a production environment simply by setting the corresponding environment variable.
+
+
+### Initialisation
+
+To start using the configuration system, you must instantiate the `Config` object.
+You have the flexibility to point it to a specific file or use it in **pure environment** mode if you prefer not to use files at all.
+
+```python
+from flama.config import Config
+
+# Load from a file (YAML, JSON, TOML, or INI)
+config = Config("config.yaml", format="yaml")
+
+# Or, use environment variables only
+env_config = Config()
+```
+
+<FlamaName /> supports `yaml`, `json`, `toml`, and `ini` formats out of the box. It automatically handles the complex logic of opening and parsing these files into a dictionary structure, so you can focus entirely on retrieving your settings.
+
+## Retrieving and casting
+
+Retrieving a value is as simple as calling the `config` object with the key name you need.
+However, configuration values often originate as strings, especially when they come from environment variables.
+To address this, <FlamaName /> allows you to **cast** these values into native Python types on the fly, ensuring your application
+logic remains clean and type-safe.
+
+### Basic Types
+
+You can cast values to simple types like booleans or integers.
+The boolean caster is particularly intelligent, since it can handle various string representations of truth, such as
+`"true"`, `"True"`, `"1"`, or `"on"`, as well as their false counterparts.
+
+```python
+# Simple retrieval (returns the raw string)
+host = config("HOST", default="127.0.0.1")
+
+# Casting to boolean
+# Handles "true", "1", "on" as True
+debug = config("DEBUG", cast=bool, default=False)
+
+# Casting to integer
+port = config("PORT", cast=int, default=8000)
+```
+
+### Advanced types
+
+Beyond basic types, <FlamaName /> includes specialised types designed to handle common configuration scenarios securely and robustly.
+
+#### Secrets
+
+For sensitive data like API keys, tokens, or passwords, you should use the `flama.config.Secret` type.
+This wrapper serves a crucial security function: it ensures the value is masked (printed as `*****`) when logged or printed to the console.
+This simple feature prevents accidental leaks of sensitive credentials in your application logs, which is a common security vulnerability.
+
+```python
+from flama.config import Secret
+
+# The actual value is accessible, but the string representation is masked
+api_key = config("API_KEY", cast=Secret)
+print(api_key)
+# Output: Secret('*****')
+```
+
+#### URLs
+
+Database connections and external services are often defined as URL strings. 
+The `flama.config.URL` type parses these strings into structured objects.
+This gives you easy attribute-based access to components like the scheme, netloc, or port,
+saving you from writing error-prone string manipulation code.
+
+```python
+from flama.config import URL
+
+service = config("SERVICE_URL", cast=URL)
+print(service.netloc)
+```
+
+### Structured configuration
+
+One of the most powerful and unique features of <FlamaName />'s configuration system is its ability to map
+configuration sections directly to Python **Dataclasses**.
+This allows you to define strict schemas for your configuration and access them as structured objects rather than loose dictionaries.
+
+This functionality works seamlessly in two primary scenarios:
+
+- **From Config files**: If your configuration file has a nested dictionary, such as a `DATABASE` section in a YAML file, <FlamaName /> maps the keys to the fields of your dataclass.
+- **From ENV variables**: If an environment variable contains a JSON string, <FlamaName /> parses the JSON and maps it to the dataclass. This is incredibly useful for passing complex configurations in containerised environments where you might want to group related settings into a single variable.
+
+```python
+import dataclasses
+
+@dataclasses.dataclass
+class DatabaseConfig:
+    host: str
+    port: int
+    name: str
+    user: str
+
+    # You can use __post_init__ for extra validation or type conversion
+    def __post_init__(self):
+        self.port = int(self.port)
+
+# Flama automatically instantiates DatabaseConfig with values from the 'DATABASE' key
+db_settings = config("DATABASE", cast=DatabaseConfig)
+
+```
+
+## Example
+
+To fully understand how these features interact, let's walk through a complete example. We will simulate a real-world scenario where we mix a local `config.yaml` file with environment variable overrides.
+
+### Setup
+
+First, we need to define our data structures and create a dummy configuration file.
+In a real project, this file would exist in your root directory.
+We also simulate setting environment variables to mimic a production environment.
+
+```python
+import dataclasses
+import os
+from flama.config import Config, Secret
+
+# We simulate a production environment where secrets are injected.
+# 'API_KEY' is a secret that does not exist in our file.
+os.environ["API_KEY"] = "sk_prod_987654321"
+
+# 'DEBUG' exists in the file as 'true', but we override it here.
+os.environ["DEBUG"] = "false"
+
+# 'FEATURE_FLAGS' is a complex JSON object passed as a string.
+os.environ["FEATURE_FLAGS"] = '{"enable_new_ui": true, "max_daily_limit": 500}'
+
+# We create a local config file with defaults and nested structures.
+CONFIG_CONTENT = """
+# Default debug setting (will be overridden)
+DEBUG: true
+
+# Server defaults
+HOST: "127.0.0.1"
+PORT: 8000
+
+# Nested config for database
+DATABASE:
+  host: "db.internal"
+  port: 5432
+  name: "flama_production"
+  user: "admin"
+"""
+
+CONFIG_FILE_PATH = "config.yaml"
+with open(CONFIG_FILE_PATH, "w") as f:
+    f.write(CONFIG_CONTENT)
+
+# Dataclass definitions
+@dataclasses.dataclass
+class DatabaseConfig:
+    host: str
+    port: int
+    name: str
+    user: str
+
+    def __post_init__(self):
+        self.port = int(self.port)
+
+    @property
+    def connection_string(self) -> str:
+        return f"postgresql://{self.user}@{self.host}:{self.port}/{self.name}"
+
+@dataclasses.dataclass
+class FeatureFlags:
+    enable_new_ui: bool
+    max_daily_limit: int
+
+```
+
+### Hybrid loading and precedence
+
+Now we initialize the configuration. We will see how `DEBUG` is loaded from the environment variable (false), ignoring the value in the file (true), while `HOST` is loaded correctly from the file because it is missing from the environment.
+
+```python
+# Initialize Config with the file
+config = Config(CONFIG_FILE_PATH, format="yaml")
+
+print("--- Hybrid Mode ---")
+
+# Precedence: Env Var > Config File
+# File says True, Env says False -> Result is False
+DEBUG = config("DEBUG", cast=bool)
+print(f"DEBUG:        {DEBUG}")
+
+# Exclusive to Env Var
+# 'API_KEY' is NOT in the file, but found in the environment.
+API_KEY = config("API_KEY", cast=Secret)
+print(f"API_KEY:      {API_KEY!r}")
+
+# Fallback to File
+# 'HOST' is NOT in the environment, so Flama falls back to the file.
+HOST = config("HOST")
+print(f"HOST:         {HOST}")
+```
+
+**Console Output:**
+
+```console
+--- Hybrid Mode ---
+DEBUG:        False
+API_KEY:      Secret('*****')
+HOST:         127.0.0.1
+
+```
+
+Notice how `API_KEY` is printed as `Secret('*****')`.
+This confirms that our secret handling is working, protecting sensitive data from being exposed in logs.
+
+### Complex structures
+
+Finally, we demonstrate the power of dataclasses.
+We load the `DATABASE` configuration from the nested structure in the YAML file, and the `FEATURE_FLAGS` configuration
+from the JSON string in the environment variable.
+
+```python
+print("\n--- Structured Configuration ---")
+
+# Dataclass Casting (From File)
+# Flama maps the YAML dictionary to the DatabaseConfig dataclass.
+DB = config("DATABASE", cast=DatabaseConfig)
+print(f"DB Conn:      {DB.connection_string}")
+
+# Dataclass Casting (From JSON Env Var)
+# Flama parses the JSON string and maps it to FeatureFlags.
+FEATURES = config("FEATURE_FLAGS", cast=FeatureFlags)
+print(f"Features:     UI={FEATURES.enable_new_ui}, Limit={FEATURES.max_daily_limit}")
+
+# Cleanup
+os.remove(CONFIG_FILE_PATH)
+```
+
+**Console Output:**
+
+```console
+--- Structured Configuration ---
+DB Conn:      postgresql://admin@db.internal:5432/flama_production
+Features:     UI=True, Limit=500
+```
+
+## Conclusion
+
+By leveraging `Config`, you can build applications that are secure by default using Secrets,
+easy to configure locally using Files, and flexible in production using environment variables.
+The ability to cast configuration directly into Python Dataclasses ensures your application
+logic remains clean and type-safe, regardless of where the configuration data originates.

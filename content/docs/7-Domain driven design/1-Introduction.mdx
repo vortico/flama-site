@@ -1,0 +1,122 @@
+---
+title: Introduction
+wip: false
+---
+
+In modern software development, aligning business logic with the technical design of an application is essential for building systems that remain maintainable as they grow. As APIs become more complex, the gap between what the business needs and how the code is structured tends to widen, leading to tangled logic, hidden dependencies, and code that becomes increasingly difficult to reason about. **Domain-Driven Design** (DDD) addresses this problem head-on by placing the business domain at the centre of the architecture.
+
+<FlamaName /> provides native first-class support for DDD, offering built-in abstractions for the most important patterns so that you can structure your application around the domain without reinventing the wheel. This section introduces the core concepts, explains why they matter, and walks you through their implementation step by step.
+
+## What is Domain-Driven Design?
+
+Domain-Driven Design is a software development approach that places the **business domain** at the very centre of the application's architecture. Rather than letting technical concerns dictate how the codebase is structured, DDD encourages developers to model the software around the real-world processes, rules, and entities that the business operates with. The result is code that reads like a description of the business itself, which makes it easier to understand, extend, and maintain.
+
+DDD was introduced by Eric Evans in his seminal book [Domain-Driven Design: Tackling Complexity in the Heart of Software](https://www.oreilly.com/library/view/domain-driven-design-tackling/0321125215/), and has since become one of the most influential paradigms in software engineering. For a practical, Python-focused treatment of the subject, we highly recommend [Cosmic Python](https://www.cosmicpython.com/) by Harry Percival and Bob Gregory.
+
+**Why does it matter?**
+
+- **Clarity**: Code that mirrors the business domain is inherently more readable and understandable, both for the original developers and for anyone who joins the project later.
+- **Maintainability**: By separating business logic from infrastructure concerns (such as database access or HTTP handling), each layer of the application can evolve independently.
+- **Testability**: Business rules become easy to test in isolation, without requiring a running database or a live server.
+- **Scalability**: A well-structured domain model adapts gracefully as the business requirements change and the application grows.
+
+## Key concepts
+
+Before diving into <FlamaName />'s implementation, let us establish the three foundational concepts that this section covers. Together, they form a layered architecture where each layer has a single, well-defined responsibility. If you are a visual learner, [Cosmic Python](https://www.cosmicpython.com/) provides a useful [diagram](https://www.cosmicpython.com/book/images/apwp_0602.png) showing how these concepts relate to each other.
+
+### Domain Model
+
+The concept of **domain model** can be explained by a simple definition of its two terms:
+
+- *Domain* refers to the specific subject area of activity (or knowledge) that the software is being built to support.
+- *Model* refers to a simplified representation (or abstraction) of the system or process that we are trying to encode in our software.
+
+Thus, the **domain model** is the set of concepts, rules, and relationships that describe how the business works. In practical terms, it is what we commonly call the *business logic*, including the rules, constraints, and workflows that govern the system's behaviour. Getting this model right is the first and most important step in DDD.
+
+### Repository pattern
+
+The **repository pattern** is a design pattern that decouples the domain model from the data access layer. The core idea is to create an abstraction layer between the business logic and the mechanisms used to read and write data. This allows the business logic to operate on domain entities without knowing (or caring) whether those entities are stored in a SQL database, a file, an in-memory cache, or an external API.
+
+When implementing the repository pattern, we typically define an interface specifying the standard methods any repository must support (e.g., `create`, `retrieve`, `update`, `delete`, `list`). A concrete repository then provides the implementation for a specific data source. <FlamaName /> ships with two families of concrete repositories: `SQLAlchemyTableRepository`, which provides a full set of CRUD operations backed by a SQLAlchemy table, and `HTTPResourceRepository`, which provides the same operations over HTTP against a remote <FlamaName /> API.
+
+### Unit of Work pattern
+
+The **unit of work pattern** is the missing piece that completes the decoupling between the domain model and the data layer. While repositories handle individual operations on specific entities, the unit of work encapsulates all the operations that must be performed on the data source within a single, atomic transaction. This ensures that either all operations succeed together, or none of them take effect at all.
+
+In <FlamaName />, the unit of work pattern is implemented under the name **Worker**. A worker manages the connection lifecycle and instantiates all the repositories that participate in the unit of work. For database-backed applications, <FlamaName /> provides `SQLAlchemyWorker`, which manages an async SQLAlchemy connection and transaction. For microservice architectures where your application consumes another <FlamaName /> API over HTTP, `HTTPWorker` manages an HTTP `Client` instance and passes it to its repositories.
+
+## Naming conventions
+
+Before moving on, it is helpful to clarify the naming conventions that <FlamaName /> uses for these DDD concepts:
+
+| DDD Concept | <FlamaName /> Name | SQL | HTTP |
+|---|---|---|---|
+| Repository | **Repository** | `SQLAlchemyTableRepository` | `HTTPResourceRepository` |
+| Unit of Work | **Worker** | `SQLAlchemyWorker` | `HTTPWorker` |
+| Domain Service | **Resource** | `Resource` | `Resource` |
+
+These names are used consistently throughout the framework and this documentation section. The **Repository** handles data access, the **Worker** manages connection and transactional boundaries, and the **Resource** implements the business logic exposed through API endpoints. The SQL and HTTP variants share the same abstract interfaces, so the patterns you learn with one backend translate directly to the other.
+The following diagram illustrates how these concepts relate to each other within the context of a <FlamaName /> application:
+
+<img src="/images/blog/2024-10-28_Native_Domain-Driven_Design_with_Flama/ddd.png" alt="DDD concepts" width="800" height="660" />
+
+
+## Base application
+
+To ground the discussion in something concrete, let us set up the minimal skeleton of a <FlamaName /> application. This will serve as the starting point upon which we progressively layer the DDD patterns in the pages that follow.
+
+```python
+import flama
+from flama import Flama
+
+app = Flama(
+    openapi={
+        "info": {
+            "title": "Domain-driven API",
+            "version": "1.0.0",
+            "description": "Domain-driven design with Flama 🔥",
+        },
+    },
+    docs="/docs/",
+)
+
+
+@app.get("/", name="info")
+def info():
+    """
+    tags:
+        - Info
+    summary:
+        Ping
+    description:
+        Returns a brief description of the API.
+    responses:
+        200:
+            description:
+                Successful response with API info.
+    """
+    return {
+        "title": app.schema.openapi["info"]["title"],
+        "description": app.schema.openapi["info"]["description"],
+        "public": True,
+    }
+
+
+if __name__ == "__main__":
+    flama.run(flama_app=app, server_host="0.0.0.0", server_port=8000)
+```
+
+This is a perfectly functional API with a single <Label color="green">GET</Label> endpoint that returns some metadata about itself. You can run it and navigate to `http://localhost:8000/docs/` to see the auto-generated documentation. Over the following pages, we will transform this simple skeleton into a fully-featured, domain-driven application.
+
+## What comes next
+
+This section is structured as a progressive, hands-on guide. Each page introduces one DDD building block, explains the concepts behind it, and demonstrates its implementation with working code:
+
+- **Introduction** (this page): The foundational concepts of DDD and the base application.
+- **[Data model](/docs/domain-driven-design/data-model/)**: Defining the persistence layer with SQLAlchemy tables and the API contract with Pydantic schemas.
+- **[Repository](/docs/domain-driven-design/repository/)**: Encapsulating data access with the repository pattern.
+- **[Worker](/docs/domain-driven-design/worker/)**: Managing atomic transactions with the unit of work (worker) pattern.
+- **[Resources](/docs/domain-driven-design/resources/)**: Implementing business logic endpoints that leverage repositories and workers.
+- **[Application assembly](/docs/domain-driven-design/application-assembly/)**: Wiring the layers together, the recommended project structure, and a full API walkthrough.
+
+By the end, you will have a clear understanding of how DDD works in <FlamaName />, and a fully working reference implementation that you can adapt to your own projects.

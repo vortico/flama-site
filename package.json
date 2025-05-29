@@ -44,6 +44,7 @@
     "rehype-slug": "^5.1.0",
     "rehype-toc": "^3.0.2",
     "remark-gfm": "^4.0.0",
+    "remark-github-blockquote-alert": "^2.0.1",
     "remark-math": "^6.0.0",
     "remark-sectionize": "^2.0.0",
     "shiki": "^1.22.2",

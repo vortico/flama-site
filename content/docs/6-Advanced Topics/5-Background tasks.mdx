@@ -1,0 +1,210 @@
+---
+title: Background Tasks
+wip: false
+---
+
+In high-performance API design, latency is the enemy.
+When a user performs an action (e.g. registering an account) they expect an immediate confirmation.
+If your API waits to send a welcome email, resize an uploaded avatar, or update analytics *before* responding,
+the user is left staring at a loading screen unnecessarily.
+
+<FlamaName /> solves this with **Background Tasks**.
+This mechanism allows you to define operations that run *after* the response has been sent to the client.
+This keeps your API snappy and responsive, while heavy lifting happens asynchronously.
+
+## Why background tasks?
+
+To understand why background tasks are critical, let's look at the lifecycle of a standard **User Registration** request.
+
+**Without Background Tasks**
+1.  Receive request (0ms)
+2.  **Save user to database** (+50ms)
+3.  Connect to SMTP server & send email (+2000ms)
+4.  Return response (Total: 2050ms)
+
+The user waits over 2 seconds just to be told "Success". This feels slow and unresponsive.
+
+**With Background Tasks**
+1.  Receive request (0ms)
+2.  **Save user to database** (+50ms)
+3.  Schedule email task (+1ms)
+4.  Return response (Total: 51ms)
+5.  *... Server sends email in the background ...*
+
+The user gets a response instantly.
+The server handles the email delivery independently, without blocking the user's experience.
+
+## Concurrency models
+
+<FlamaName /> provides a robust module `flama.background` to handle these operations. 
+Unlike some frameworks that guess how to run your code, <FlamaName /> gives you explicit control over the concurrency model:
+**Threads** or **Processes**. Choosing the right one is essential for performance.
+
+### I/O bound tasks 
+I/O (Input/Output) bound tasks are operations where the CPU spends most of its time **waiting** for external resources.
+* **Examples:** Sending an email, querying a database, writing a file to disk, making an HTTP request to another API.
+* **Mechanism:** Python threads are lightweight and share the same memory space. While one thread waits for the network, Python releases the Global Interpreter Lock (GIL), allowing other threads to run.
+* **Flama Tool:** `BackgroundThreadTask` or `Concurrency.thread`.
+
+### CPU bound tasks
+CPU bound tasks are operations that require heavy computation and keep the processor busy.
+* **Examples:** Resizing an image, training a machine learning model, calculating complex statistics, parsing large XML files.
+* **Mechanism:** Because of the GIL, Python threads cannot run strictly in parallel on multiple CPU cores. To utilise the full power of your machine, you must spawn a separate **Process**. This has higher overhead to start but allows true parallelism.
+* **Flama Tool:** `BackgroundProcessTask` or `Concurrency.process`.
+
+## Toolkit
+
+<FlamaName /> offers four classes to manage these tasks.
+
+### BackgroundThreadTask
+This is a specialised helper for I/O bound work. It automatically sets the concurrency to `thread`.
+
+```python
+from flama import background
+# Best for email, DB, etc.
+task = background.BackgroundThreadTask(send_email, "user@example.com")
+return JSONResponse(content, background=task)
+```
+
+### BackgroundProcessTask
+
+This is a specialised helper for CPU bound work. It automatically sets the concurrency to `process`.
+
+```python
+# Best for ML, image resizing, etc.
+task = background.BackgroundProcessTask(resize_image, image_id=123)
+return JSONResponse(content, background=task)
+```
+
+### BackgroundTask
+
+This is the generic wrapper. If you use this, you must explicitly provide the concurrency type from the `Concurrency` enum. It offers the most flexibility but requires you to be explicit.
+
+```python
+# Explicit definition
+task = background.BackgroundTask(background.Concurrency.thread, my_function, arg1)
+```
+
+### BackgroundTasks
+
+This is a collection wrapper. It allows you to chain multiple tasks, potentially of different concurrency types, to a single response.
+
+```python
+tasks = background.BackgroundTasks()
+# Task 1: Send email (Thread)
+tasks.add_task(background.Concurrency.thread, send_email, email)
+# Task 2: Resize avatar (Process)
+tasks.add_task(background.Concurrency.process, resize_image, image_id)
+
+return JSONResponse(content, background=tasks)
+```
+
+## Example
+
+The following example demonstrates the true power of asynchronous background tasks. We define two endpoints: one that simulates a slow network operation (sending an email) and one that simulates heavy data crunching.
+In both cases, we want the user to receive a `"queued"` message instantly, rather than waiting for the work to finish.
+
+```python
+import time
+import multiprocessing
+from flama import Flama, background, run
+from flama.http import JSONResponse
+
+app = Flama()
+
+def blocking_io_task(email: str):
+    """A blocking I/O task suitable for Threads."""
+    print(f"[Thread] ⏳ Starting email to {email}...")
+    time.sleep(2)  # Simulate 2 seconds of work
+    print(f"[Thread] ✅ Email sent to {email}!")
+
+
+def cpu_heavy_task(data_id: int):
+    """A CPU intensive task suitable for Processes."""
+    pid = multiprocessing.current_process().pid
+    print(f"[Process] ⚙️  Processing data {data_id} on PID {pid}...")
+    _ = sum(i * i for i in range(10_000_000))
+    print(f"[Process] ✅ Data {data_id} processed!")
+
+
+@app.route("/thread/")
+async def thread():
+    # This response will return IMMEDIATELY. 
+    # The 2-second sleep happens after the response is sent.
+    task = background.BackgroundThreadTask(blocking_io_task, "user@example.com")
+    return JSONResponse(
+        {"status": "queued", "message": "Email is sending in background"}, 
+        background=task
+    )
+
+
+@app.route("/process/")
+async def process():
+    task = background.BackgroundProcessTask(cpu_heavy_task, 101)
+    return JSONResponse(
+        {"status": "queued", "message": "Heavy calculation started"}, 
+        background=task
+    )
+
+
+if __name__ == "__main__":
+    # Start the server on port 8000
+    run(app, host="0.0.0.0", port=8000)
+
+```
+
+To see this in action, you need two terminal windows:
+
+1. **Start the server**: In your first terminal, run the app (`> python app.py`).
+2. **Make requests**: In your second terminal, we will use `curl` to hit the endpoints.
+We use the `-w` flag to measure the total time taken for the request to complete.
+
+### Thread Task
+
+We hit `/thread/`. This endpoint triggers a task that sleeps for 2 seconds. If this were synchronous, `curl` would hang for 2 seconds.
+
+```bash
+curl -w "\nTotal Time: %{time_total}s\n" http://localhost:8000/thread/
+```
+
+**Client output**: The client received a response in **4 milliseconds**.
+```console
+{"status": "queued", "message": "Email is sending in background"}
+Total Time: 0.004512s
+```
+
+**Server output**: The server sent the response first, *then* finished the 2-second task.
+```console
+[Thread] ⏳ Starting email to user@example.com...
+INFO:     127.0.0.1:54321 - "GET /thread/ HTTP/1.1" 200 OK
+[Thread] ✅ Email sent to user@example.com!
+```
+
+### Process Task
+
+We hit `/process/`. This triggers a heavy calculation loop.
+
+```bash
+curl -w "\nTotal Time: %{time_total}s\n" http://localhost:8000/process/
+```
+
+**Client Output**: The client received a response in **5 milliseconds**.
+
+```console
+{"status": "queued", "message": "Heavy calculation started"}
+Total Time: 0.005102s
+```
+
+
+**Server output**: The heavy calculation ran in a completely separate process (notice the PID), keeping the main server process free to handle other requests.
+
+```console
+INFO:     127.0.0.1:54323 - "GET /process/ HTTP/1.1" 200 OK
+[Process] ⚙️  Processing data 101 on PID 12345...
+[Process] ✅ Data 101 processed!
+```
+
+## Conclusion
+
+Background tasks are a fundamental tool for optimising user experience. 
+By correctly identifying whether your task is I/O bound or CPU bound, and utilising `BackgroundThreadTask` or `BackgroundProcessTask` accordingly, you can ensure your API remains responsive even under heavy load.

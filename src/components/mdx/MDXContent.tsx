@@ -6,6 +6,7 @@ import rehypeKatex from 'rehype-katex'
 import rehypeSlug from 'rehype-slug'
 import rehypeTOC from 'rehype-toc'
 import remarkGfm from 'remark-gfm'
+import { remarkAlert } from 'remark-github-blockquote-alert'
 import remarkMath from 'remark-math'
 // eslint-disable-next-line @typescript-eslint/ban-ts-comment
 // @ts-ignore
@@ -63,7 +64,7 @@ export default function MDXContent<D extends Document>({ document, components }:
       options={{
         parseFrontmatter: true,
         mdxOptions: {
-          remarkPlugins: [remarkGfm, remarkMath, remarkSectionize],
+          remarkPlugins: [remarkAlert, remarkGfm, remarkMath, remarkSectionize],
           rehypePlugins: [
             // eslint-disable-next-line @typescript-eslint/ban-ts-comment
             // @ts-ignore

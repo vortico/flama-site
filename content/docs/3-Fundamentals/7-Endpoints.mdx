@@ -1,0 +1,265 @@
+---
+title: Endpoints
+wip: false
+---
+
+Endpoints are the final destination for an incoming request within a <FlamaName /> application. They are the core logic
+units that process requests, interact with services or data, and generate responses. While basic endpoint logic can be
+defined directly within route handler functions,
+
+<FlamaName /> provides dedicated endpoint classes for more structured, complex, or stateful scenarios, especially when
+you need to handle multiple HTTP methods for the same path or manage the lifecycle of a WebSocket connection in a more
+organised way.
+
+## What are endpoints?
+
+In <FlamaName />, an **Endpoint** is the callable (a function or a class instance) that is executed when a route matches
+an incoming request. For simple cases, this is often an `async` function decorated with `@app.get()` or a similar
+decorator. However, for more advanced use cases,
+
+<FlamaName /> offers class-based endpoints:
+
+- **`flama.endpoints.HTTPEndpoint`**: A class designed to handle multiple HTTP methods for a single URL path. Instead of
+  creating separate functions for
+  <Label color="green">GET</Label>, <Label color="orange">PUT</Label>, <Label color="red">DELETE</Label>, etc., you can
+  define them as methods within a single, cohesive class.
+- **`flama.endpoints.WebSocketEndpoint`**: A class for managing the lifecycle of a WebSocket connection. It provides
+  dedicated methods like `on_connect`, `on_receive`, and `on_disconnect` to structure real-time communication logic
+  cleanly.
+
+**Why are they important?**
+
+- **Code Organisation**: Class-based endpoints group related logic together. For a resource at `/items/{item_id}`, all
+  operations (<Label color="green">GET</Label>, <Label color="orange">PUT</Label>, <Label color="red">DELETE</Label>)
+  can be organised in one `ItemEndpoint` class, improving readability and maintainability.
+- **State Management**: Endpoints can maintain state for the duration of a request or, in the case of WebSockets, for
+  the lifetime of the connection. This is useful for caching data or managing user sessions within the connection scope.
+- **Logic Reuse**: Common logic can be shared across different endpoint methods within the same class (e.g., fetching a
+  resource from a database before processing a <Label color="green">GET</Label> or <Label color="orange">PUT</Label>
+  request).
+- **Clear Lifecycle Handling (WebSockets)**: `WebSocketEndpoint` provides a clear and structured way to handle the
+  distinct phases of a WebSocket connection, making the logic for connection setup, message handling, and teardown much
+  cleaner than a single, long function.
+
+The main virtue endpoints bring is **providing a structured and object-oriented approach to defining request and
+connection handling logic**, which is particularly beneficial for complex resources and real-time applications.
+
+## HTTP Endpoints
+
+For HTTP routes, you can either use simple asynchronous functions as endpoints or use the `HTTPEndpoint` class for more
+structured logic.
+
+```python
+from flama import Flama
+from flama.http import JSONResponse
+
+app = Flama()
+
+@app.get("/hello/{name}/")
+async def hello(name: str):
+    return JSONResponse({"message": f"Hello, {name}!"})
+```
+
+### Standard function endpoints
+
+The most direct way to create an endpoint is by using a route decorator on an `async` function. This is ideal for simple
+cases where a path corresponds to a single action.
+
+```python
+import flama
+from flama import Flama, http, types
+
+import typing
+import pydantic
+
+# A mock database
+ITEMS_DB = {
+    "item_001": {"name": "Awesome Gadget", "price": 99.99},
+    "item_002": {"name": "Super Tool", "price": 49.50},
+}
+
+# Schema representing an item
+class Item(pydantic.BaseModel):
+    name: str
+    price: float
+
+app = Flama()
+
+@app.get("/{id:str}/")
+async def get(id: str):
+    if id not in ITEMS_DB:
+        return http.JSONResponse({"error": "Item not found"}, status_code=404)
+    return http.JSONResponse(ITEMS_DB[id])
+
+@app.put("/{id:str}/")
+async def put(
+    item_id: str,
+    item: typing.Annotated[types.Schema, types.SchemaMetadata(Item)],
+):
+    if item_id not in ITEMS_DB:
+        return http.JSONResponse({"error": "Item not found"}, status_code=404)
+
+    ITEMS_DB[item_id].update(item)
+    return http.JSONResponse(ITEMS_DB[item_id])
+```
+
+### Class-based `HTTPEndpoint`
+
+For RESTful resources, where a single URL represents a resource that can be interacted with using multiple HTTP methods,
+`HTTPEndpoint` is the ideal solution.
+
+#### Building an `HTTPEndpoint`
+
+You create a class that inherits from `flama.endpoints.HTTPEndpoint` and define `async` methods for the HTTP verbs you
+want to support (e.g., `get`, `post`, `put`, `delete`).
+
+```python
+import flama
+from flama import Flama, http, types
+from flama.endpoints import HTTPEndpoint
+
+import typing
+import pydantic
+
+ITEMS_DB = {
+    "item_001": {"name": "Awesome Gadget", "price": 99.99},
+    "item_002": {"name": "Super Tool", "price": 49.50},
+}
+
+class Item(pydantic.BaseModel):
+    name: str
+    price: float
+
+class ItemEndpoint(HTTPEndpoint):
+    async def get(self, id: str):
+        if id not in ITEMS_DB:
+            return http.JSONResponse({"error": "Item not found"}, status_code=404)
+        return http.JSONResponse(ITEMS_DB[id])
+
+    async def put(
+        self,
+        id: str,
+        item: typing.Annotated[types.Schema, types.SchemaMetadata(Item)],
+    ):
+        if id not in ITEMS_DB:
+            return http.JSONResponse({"error": "Item not found"}, status_code=404)
+
+        ITEMS_DB[id].update(item)
+        return http.JSONResponse(ITEMS_DB[id])
+```
+
+#### Utilising an `HTTPEndpoint`
+
+Instead of decorating a function, you add the endpoint class to a route using `app.add_route()`. <FlamaName /> will
+automatically dispatch requests to the appropriate method within the class based on the HTTP method.
+
+```python
+# Continuing the example above
+from flama import Flama
+
+app = Flama()
+
+app.add_route("/items/{item_id}", ItemEndpoint)
+```
+
+However, we can also decorat the `HTTPEndpoint` with `@app.route("/items/")` if we don't want to especially add the
+route by ourselves:
+
+```python
+# ... Same code as before
+
+app = Flama()
+
+@app.route("/items/")
+class ItemEndpoint(HTTPEndpoint):
+    # ... Same code as before
+```
+
+Now, a <Label color="green">GET</Label> request to `/items/item_001` will be handled by the `get` method of
+`ItemEndpoint`, and a <Label color="orange">PUT</Label> request will be handled by the `put` method.
+
+## WebSocket Endpoints
+
+Similar to HTTP, WebSocket connections can be handled by a single function or, for better structure, by the
+`WebSocketEndpoint` class.
+
+### Standard WebSocket function
+
+A simple WebSocket handler is an `async` function that accepts a `websocket` object. This is suitable for simple,
+self-contained real-time logic like a basic echo server.
+
+```python
+from flama import Flama, websockets
+
+app = Flama()
+
+@app.websocket_route("/ws/echo")
+async def websocket_echo(websocket: websockets.WebSocket):
+    await websocket.accept()
+    try:
+        while True:
+            data = await websocket.receive_text()
+            await websocket.send_text(f"Echo: {data}")
+    except websockets.WebSocketDisconnect:
+        pass
+```
+
+### Class-based `WebSocketEndpoint`
+
+For more complex WebSocket interactions, `WebSocketEndpoint` provides a class-based structure that cleanly separates the
+logic for different phases of the connection lifecycle.
+
+#### Building a `WebSocketEndpoint`
+
+You create a class that inherits from `flama.endpoints.WebSocketEndpoint` and implement the following `async` methods:
+
+- `on_connect(self, websocket)`: Called when a client initiates a connection. Use this to `accept()` the connection and
+  perform any setup.
+- `on_receive(self, websocket, data)`: Called whenever a message is received from the client.
+- `on_disconnect(self, websocket, close_code)`: Called when the client disconnects. Use this for cleanup tasks.
+
+```python
+from flama import websockets
+from flama.endpoints import WebSocketEndpoint
+import typing as t
+
+class ChatroomEndpoint(WebSocketEndpoint):
+    encoding: str = "text"  # Can be "json", "bytes", or "text"
+
+    # A simple way to manage connected clients for this example
+    _connected_clients: list[websockets.WebSocket] = []
+
+    async def on_connect(self, websocket: websockets.WebSocket):
+        await websocket.accept()
+        self._connected_clients.append(websocket)
+        await self.broadcast(f"A new user joined. Users online: {len(self._connected_clients)}")
+
+    async def on_disconnect(self, websocket: websockets.WebSocket, close_code: int):
+        self._connected_clients.remove(websocket)
+        await self.broadcast(f"A user left. Users online: {len(self._connected_clients)}")
+
+    async def on_receive(self, websocket: websockets.WebSocket, data: t.Any):
+        # We broadcast the received message to all connected clients
+        await self.broadcast(f"User says: {data}")
+
+    async def broadcast(self, message: str):
+        for client in self._connected_clients:
+            await client.send_text(message)
+```
+
+#### Utilising a `WebSocketEndpoint`
+
+You register the endpoint class using `app.add_websocket_route()`. <FlamaName /> will manage the connection and call the
+appropriate methods as events occur.
+
+```python
+# Continuing the example above
+from flama import Flama
+
+app = Flama()
+
+app.add_websocket_route("/ws/chatroom", ChatroomEndpoint)
+```
+
+This `ChatroomEndpoint` example demonstrates how a class-based endpoint can manage state (the list of connected clients)
+and provide a clearly structured implementation for a multi-user chat application.

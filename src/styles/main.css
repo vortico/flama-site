@@ -1,6 +1,7 @@
 @import 'base.css';
 
 /*! purgecss start ignore */
+@import 'alert.css';
 @import 'docsearch.css';
 @import 'scrollbar.css';
 /*! purgecss end ignore */
