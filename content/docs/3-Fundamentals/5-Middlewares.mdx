@@ -1,0 +1,215 @@
+---
+title: Middlewares
+wip: false
+---
+
+Middlewares are a powerful feature in <FlamaName /> that allow you to process requests and responses globally.
+They act as a chain of processing units that an incoming request travels through before it hits your
+application logic, and similarly, an outgoing response travels back through them before being sent to
+the client. This provides a clean and efficient way to implement cross-cutting concerns.
+
+## What are middlewares?
+
+In the context of <FlamaName /> and ASGI applications, a **Middleware** is a piece of code that sits
+between the web server and your main application logic. It can inspect, modify, or route requests and responses.
+Each middleware component wraps the next layer of the application (which could be another middleware or
+the main application itself) and can execute code before and after the wrapped layer is called.
+
+**Why are they important?**
+
+1.  **Cross-Cutting Concerns**: Middleware is ideal for handling functionalities that apply to many or all endpoints, such as logging, authentication, authorisation, error handling, metrics collection, or adding common security headers.
+2.  **Request/Response Modification**: They can modify incoming requests before they reach your route handlers (e.g., parsing special headers, decompressing bodies) or outgoing responses (e.g., adding custom headers, compressing content, transforming data formats).
+3.  **Encapsulation**: They help keep your route handlers focused on their specific business logic by offloading common tasks to reusable middleware components.
+4.  **Pipeline Processing**: Middleware components form a pipeline, allowing for ordered execution of these cross-cutting concerns, which can be crucial for tasks like authentication needing to run before request processing.
+
+The main virtue middleware brings is the ability to **hook into the request/response lifecycle** in a modular and reusable way, allowing for cleaner application architecture and reducing code duplication.
+
+## Building a middleware
+
+Building an middleware for <FlamaName /> involves creating a class that follows the ASGI middleware interface.
+This typically means:
+
+1.  An **\_\_init\_\_** method:
+
+    - The constructor usually accepts at least one argument: **app**. This **app** argument is the next ASGI application in the stack (it could be another middleware or the <FlamaName /> application itself).
+    - You can also accept additional arguments for configuring the middleware's behaviour. These are passed when the middleware is added to the application.
+
+      ```python
+      from flama import types
+
+      class MyCustomMiddleware:
+          def __init__(self, app: types.App, custom_argument: str = "default_value"):
+              self.app = app
+              self.custom_argument = custom_argument
+      ```
+
+2.  A **\_\_call\_\_** method:
+
+    - This is the core of the middleware. It’s an asynchronous method that takes three arguments: **scope** (a dictionary containing information about the connection), **receive** (an awaitable callable to receive event messages), and **send** (an awaitable callable to send event messages).
+    - Inside this method, you can:
+      - Execute code _before_ passing control to the next application in the stack (`await self.app(scope, receive, send)`). This is where you might inspect or modify the incoming request based on the **scope**.
+      - Execute code _after_ the next application has processed the request. This often involves wrapping the **send** callable to intercept and possibly modify outgoing messages (like response headers or body).
+
+    Here's the basic structure of the **\_\_call\_\_** method:
+
+    ```python
+    # Continuing MyCustomMiddleware from above
+    async def __call__(self, scope: types.Scope, receive: types.Receive, send: types.Send):
+        # Code to run before the request is handled by the next app/middleware
+        if scope["type"] == "http": # Example: only operate on HTTP requests
+            # To modify the response, you might need to wrap the 'send' callable
+            async def modified_send(message: types.Message):
+                if message["type"] == "http.response.start":
+                    # Modify headers here, for example
+                    # new_headers = list(message.get("headers", []))
+                    # new_headers.append((b"x-my-middleware", b"processed"))
+                    # message["headers"] = new_headers
+                    pass # Placeholder for actual modification logic
+                await send(message) # Pass message to original send
+
+            await self.app(scope, receive, modified_send) # Call next app with modified_send
+        else:
+            await self.app(scope, receive, send) # For non-HTTP, pass through
+
+        # Code to run after the request has been handled (less common here, usually in wrapped send)
+    ```
+
+## Utilising middlewares
+
+Once you've defined your middleware class, you need to add it to your <FlamaName /> application.
+
+### Registering Middleware
+
+Middleware is registered with a **Flama** application instance by providing a list to its **middleware** parameter. Each item in this list should be an instance of **flama.middleware.Middleware**. The **Middleware** class is a helper that takes your custom middleware class and any arguments it needs for its `__init__` method.
+
+```python
+from flama import Flama
+from flama.middleware import Middleware
+
+# Assuming MyCustomMiddleware is defined as above
+class MyCustomMiddleware:
+    def __init__(self, app: types.App, custom_argument: str = "default_value"):
+        self.app = app
+        self.custom_argument = custom_argument
+    async def __call__(self, scope: types.Scope, receive: types.Receive, send: types.Send):
+        # ... implementation ...
+        await self.app(scope, receive, send)
+
+
+app = Flama(
+    middleware=[
+        Middleware(MyCustomMiddleware, custom_argument="my_special_value")
+        # You can add more Middleware instances here
+    ]
+)
+```
+
+<FlamaName /> will wrap these middleware components around your application in the order they are provided. The first
+middleware in the list will be the outermost, processing the request first and the response last.
+
+## Example
+
+Let's create a simple middleware that measures the time taken to process a request and adds this information as a custom header, **X-Process-Time-MS**, to the response.
+
+```python
+import asyncio
+import time
+import typing as t
+
+import flama
+from flama import Flama, http, types
+from flama.middleware import Middleware
+
+
+# Step 1: Define your custom middleware class
+class TimingMiddleware:
+    def __init__(self, app: types.App):
+        self.app: Flama = t.cast("Flama", app)
+
+    async def __call__(
+        self, scope: types.Scope, receive: types.Receive, send: types.Send
+    ):
+        # This middleware only operates on HTTP scopes.
+        # For other scope types (e.g., 'websocket'), it passes them through.
+        if scope["type"] != "http":
+            await self.app(scope, receive, send)
+            return
+
+        start_time = time.perf_counter()  # Record time before processing the request
+
+        # Define a new 'send' callable that will be passed to the wrapped application.
+        # This allows us to intercept messages sent by the application.
+        async def send_with_timing_header(message: types.Message):
+            # We are interested in the 'http.response.start' message,
+            # as it contains the response status and headers. This message is sent
+            # just before the response body.
+            if message["type"] == "http.response.start":
+                end_time = time.perf_counter()  # Record time after processing
+                duration_ms = (end_time - start_time) * 1000
+
+                # Headers are a list of (name, value) byte string pairs.
+                # Ensure headers is a mutable list.
+                headers = list(message.get("headers", []))
+
+                # Add our custom process time header
+                headers.append(
+                    (b"x-process-time-ms", f"{duration_ms:.2f}".encode("latin-1"))
+                )
+                message["headers"] = headers  # Update the headers in the message
+
+            # Pass the (potentially modified) message to the original 'send' callable.
+            await send(message)
+
+        # Call the wrapped application (self.app) with our modified 'send_with_timing_header'.
+        await self.app(scope, receive, send_with_timing_header)
+
+
+# Step 2: Create a Flama application and register your middleware
+app = Flama(
+    middleware=[
+        Middleware(TimingMiddleware)  # No arguments needed for TimingMiddleware's __init__ beyond 'app'
+    ]
+)
+
+
+# Step 3: Define some simple routes
+@app.route("/fast")
+async def fast_endpoint():
+    return http.PlainTextResponse("This was fast! Check X-Process-Time-MS header.")
+
+
+@app.route("/slow")
+async def slow_endpoint():
+    # Simulate some work using asyncio.sleep
+    # For broader compatibility, a time.sleep in a threadpool could be used for CPU-bound tasks,
+    # but for an IO-bound simulation like waiting, asyncio.sleep is fine.
+    await asyncio.sleep(0.5)  # Simulate 50ms of work
+    time.sleep(0.5)
+
+    return http.PlainTextResponse(
+        "This was a bit slower. Check X-Process-Time-MS header."
+    )
+
+
+# This part is for making the example runnable if saved as a .py file,
+# though specific run instructions are omitted as per request.
+if __name__ == "__main__":
+    flama.run(flama_app=app, server_host="0.0.0.0", server_port=8000)
+```
+
+This **TimingMiddleware** example demonstrates how to:
+
+- Execute logic before the request hits the application (capturing **start_time**)
+- Modify the response by wrapping the **send** callable to add a custom header just before the response is sent to the client.
+
+When you run this application and access the `/fast` or `/slow` endpoints, the response will include the **X-Process-Time-MS** header, e.g.:
+
+```console
+curl -I http://localhost:8000/slow
+
+HTTP/1.1 200 OK
+server: uvicorn
+content-length: 54
+content-type: text/plain; charset=utf-8
+x-process-time-ms: 1002.49
+```

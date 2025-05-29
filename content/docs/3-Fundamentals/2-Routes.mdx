@@ -1,0 +1,243 @@
+---
+title: Routes 
+wip: false 
+---
+
+Routes are the definitions that map incoming client requests to specific handler functions within your <FlamaName /> application. They act as the primary entry points for your API or web application, interpreting the request's path (URL) and HTTP method to determine which piece of your backend logic should be executed to process that request. Understanding and defining routes effectively is fundamental to building any web service with <FlamaName />.
+
+## What are routes?
+
+In <FlamaName />, a **Route** essentially binds a URL path pattern and one or more HTTP methods (like GET, POST, PUT, DELETE) to a specific Python asynchronous function, often called an "endpoint" or "handler". When <FlamaName /> receives an HTTP request, its routing mechanism inspects the request's path and method to find a matching route. If a match is found, the associated handler function is called to process the request and generate a response.
+
+Routes can be simple, like mapping `/` to a homepage handler, or more complex, involving variable path parameters (e.g., `/items/{item_id}`) that capture parts of the URL for use in the handler.
+
+**Why are they important?**
+
+1.  **API structure definition**: Routes define the accessible URLs of your application, forming the public interface or contract of your API.
+2.  **Request dispatching**: They are crucial for directing incoming requests to the correct logic. Without routes, the application wouldn't know what to do with a request for `/users/` versus `/products/`.
+3.  **Resource addressing**: In RESTful APIs, routes map to resources, allowing clients to interact with these resources using standard HTTP methods (e.g., GET to retrieve, POST to create).
+4.  **Code organisation**: By associating specific functions with URL paths, routes help in organising the application's codebase into logical handlers for different functionalities.
+
+The main virtue routes bring is providing a **clear, declarative, and structured way to define the entry points into your application**, making it understandable both for developers working on the application and for clients interacting with it.
+
+## Building and utilising routes
+
+<FlamaName /> offers flexible ways to define and organise routes, primarily through decorators on your handler functions and by using a **Router** class for grouping related routes.
+
+### Routes with decorators
+
+The most common and convenient way to create routes in <FlamaName /> is by using decorators directly on your asynchronous handler functions. 
+The main application instance (typically named **app**) provides these decorators.
+
+* **@app.route(path, methods=["METHOD"], ...)**: This is the fundamental route decorator.
+    * **path**: A string defining the URL path for the route (e.g., `"/items/"`, `"/users/{user_id}"`).
+    * **methods**: A list of HTTP methods this route responds to (e.g., `["GET"]`, `["POST"]`, `["GET", "POST"]`). If omitted, it typically defaults to `["GET"]`.
+    * Other optional parameters include **name** (to refer to the route by name, useful for URL generation) and **include\_in\_schema** (to control its visibility in the auto-generated OpenAPI schema).
+
+* **Shorthand decorators**: For convenience, <FlamaName /> provides shorthand decorators for common HTTP methods:
+    * **@app.get(path, ...)**
+    * **@app.post(path, ...)**
+    * **@app.put(path, ...)**
+    * **@app.delete(path, ...)**
+    * **@app.patch(path, ...)**
+    * **@app.options(path, ...)**
+    * **@app.head(path, ...)**
+    
+    These are equivalent to using **@app.route()** with the corresponding method specified.
+
+    ```python
+    @app.get("/my-data/")
+    async def fetch_my_data():
+        return {"data": "sample"}
+    ```
+
+* **Path parameters and type conversion**:
+    Routes can include path parameters, which capture segments of the URL. These are defined using curly braces `{}`. <FlamaName /> supports type conversion for these parameters directly in the path string.
+    * `"/items/{item_name:str}"`: Captures `item_name` as a string (default if no type is specified).
+    * `"/items/{item_id:int}"`: Captures `item_id` and converts it to an integer.
+    * Other supported types include **float**, and **uuid**.
+    The converted path parameters are then passed as arguments with the same name to your handler function.
+
+    ```python
+    @app.get("/product/{product_id:int}/")
+    async def get_product(product_id: int): # product_id will be an integer
+        return {"id": product_id, "name": f"Product {product_id}"}
+    ```
+
+### Routes added explicitly
+
+Besides decorators, you can also add routes to your application programmatically using the **app.add\_route()** method.
+
+* **app.add_route(path, endpoint, methods=["METHOD"], name=None, include_in_schema=True)**:
+    * **path**: The URL path string.
+    * **endpoint**: The asynchronous handler function to be called for this route.
+    * **methods**, **name**, **include\_in\_schema**: Same as for the **@app.route()** decorator.
+
+    This method is useful when generating routes dynamically or when the decorator syntax is less convenient.
+
+    ```python
+    async def custom_handler():
+        return {"message": "Handled manually"} 
+    
+    app.add_route("/manual-endpoint/", custom_handler, methods=["GET"])
+    ```
+
+### Working with Routers
+
+For better organisation, especially in larger applications, <FlamaName /> provides the **flama.routing.Router** class. A **Router** allows you to group a set of related routes together.
+
+* You can create an instance of **Router**.
+* Routes are added to a **Router** by passing a list of **flama.routing.Route** instances to its **routes** parameter during initialisation, or by using its own **add\_route()** method or route decorators (**@router.get()**, etc.) if you're using the router instance directly like an app instance for route definitions.
+* A **Route** instance is defined as **Route(path, endpoint, methods=["METHOD"], name=None, include_in_schema=True)**.
+
+    ```python
+    from flama.routing import Router, Route
+
+    async def list_items(): return []
+    async def get_item(item_id: int): return {}
+
+    item_router = Router(routes=[
+        Route("/", list_items, methods=["GET"]),
+        Route("/{item_id:int}/", get_item, methods=["GET"]),
+    ])
+    ```
+    A **Router** can also have its own specific list of components or middleware, allowing for modular configuration of different sections of your application.
+
+### Mounting Routers
+
+Once you have a **Router** (or even another <FlamaName /> application instance), you can include all its routes into your main application under a specific path prefix using the **app.mount()** method.
+
+* **app.mount(path_prefix, app_to_mount, name=None)**:
+    * **path\_prefix**: The URL prefix under which all routes from **app\_to\_mount** will be available (e.g., `"/api/v1"`).
+    * **app\_to\_mount**: The **Router** instance (or another ASGI application) whose routes you want to include.
+    * **name**: An optional name for the mounted application/router.
+
+    Mounting is a powerful way to structure large applications by breaking them into smaller, manageable **Router** instances, each responsible for a specific domain or feature set.
+
+    ```python
+    app.mount("/items", item_router)    
+    ```
+
+## Example
+
+This example demonstrates various ways to define and organise routes in a <FlamaName /> application, including using decorators for basic routes, adding a route manually, and creating and mounting a separate **Router** for a group of related endpoints.
+
+```python
+import datetime
+
+import flama
+from flama import Flama
+from flama.http import HTMLResponse, JSONResponse
+from flama.routing import Route, Router
+
+app = Flama(
+    openapi={
+        "info": {
+            "title": "Hello-🔥",
+            "version": "1.0",
+            "description": "My first API",
+        },
+    },
+)
+
+
+# Basic Routes with decorators
+@app.get("/")
+async def root_path():
+    """Handles GET requests to the root path."""
+    return HTMLResponse(
+        "<h1>Welcome to the <FlamaName /> Routes Example!</h1><p>Explore different endpoints.</p>"
+    )
+
+
+@app.get("/items/{item_id:int}/")
+async def get_item_by_id(item_id: int):
+    """
+    Handles GET requests for a specific item, expecting an integer item_id.
+    Demonstrates path parameter with type conversion.
+    """
+    return JSONResponse(
+        {
+            "item_id": item_id,
+            "description": f"Details for item ID: {item_id}",
+            "parameter_type": str(type(item_id).__name__),
+        }
+    )
+
+
+@app.post("/items/")
+async def create_new_item():
+    """
+    Handles POST requests to create a new item (conceptual).
+    In a real application, this would likely involve processing a request body.
+    """
+    return JSONResponse(
+        {"message": "Item created successfully (simulated)."}, status_code=201
+    )
+
+
+@app.get("/users/{username:str}/profile/")
+async def get_user_profile(username: str):
+    """Handles GET requests for a user's profile by their username."""
+    # <FlamaName /> automatically converts dictionary to JSONResponse
+    return {
+        "username": username,
+        "email": f"{username}@example.com",
+        "status": "active",
+    }
+
+
+# Explicitly adding Route
+async def system_status_handler():
+    """A handler for a manually added route providing system status."""
+    return {
+        "status": "All systems operational",
+        "server_time": datetime.datetime.now(),
+    }
+
+
+app.add_route(
+    "/system/status/", system_status_handler, methods=["GET"], name="system_status"
+)
+
+
+# Grouping routes with a Router
+async def list_products():
+    """Lists all available products (within the product_router context)."""
+    return [
+        {"id": "prod_001", "name": "Awesome Gadget"},
+        {"id": "prod_002", "name": "Super Tool"},
+    ]
+
+
+async def get_product_details(product: str):
+    """Gets details for a specific product."""
+    return {
+        "sku": product,
+        "name": f"Product {product.upper()}",
+        "price": "99.99",
+    }
+
+
+product_router = Router(
+    routes=[
+        Route("/product/", get_product_details, methods=["GET"]),
+        Route("/products/", list_products, methods=["GET"]),
+    ]
+)
+
+app.mount("/api/v1/shop", product_router)
+
+if __name__ == "__main__":
+    flama.run(flama_app=app, server_host="0.0.0.0", server_port=8000)
+```
+
+This example covers:
+
+  * Defining various GET and POST routes using **@app.get()** and **@app.post()**
+  * Using path parameters with type conversion
+  * Returning different response types like **HTMLResponse** and **JSONResponse** (including automatic dictionary to JSON conversion)
+  * Explicitly adding a **Route** using **app.add\_route()** with a named handler
+  * Creating a separate **Router** instance (**product\_router**) with its own set of **Route** definitions.
+  * Mounting this **product\_router** to the main **app** at a specific path prefix (`/api/v1/shop`), so its routes become accessible at paths like `/api/v1/shop/products/` and `/api/v1/shop/product/{product_sku}/`.
+
