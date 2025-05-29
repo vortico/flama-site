@@ -1,0 +1,64 @@
+---
+title: Request payload
+wip: true
+---
+
+When you need to send data from a client to your API (e.g., for creating or updating resources),
+you typically send it as a request payload (or request body). Flama uses type hints with schema definitions
+(commonly `Pydantic` models or other supported schema libraries) to define the expected structure and validate the incoming request data.
+
+## Defining an endpoint that expects a request payload
+
+First, you need a schema to define the structure of your payload.
+Flama integrates with schema libraries like `Pydantic`, `Marshmallow`, and `Typesystem` through its schema adapter system.
+Let's see how to use a Pydantic model.
+
+```python
+import typing as t
+
+import flama
+import pydantic
+from flama import Flama, schemas
+
+app = Flama()
+
+
+# Define your data model using Pydantic
+class Item(pydantic.BaseModel):
+    name: str
+    description: str | None = None
+    price: float
+    is_offer: bool | None = None
+
+
+# Register the schema with Flama (optional but good practice for OpenAPI)
+app.schema.register_schema("Item", Item)
+
+
+@app.route("/items/", methods=["POST"])
+async def create_item(
+    item: t.Annotated[schemas.SchemaType, schemas.SchemaMetadata(Item)],
+) -> t.Annotated[schemas.SchemaType, schemas.SchemaMetadata(Item)]:
+    # 'item' will be a dictionary compatible with the `Item` Pydantic model,
+    # validated from the request body.
+    # In a real app, you'd save the item to a database.
+    return item
+
+
+if __name__ == "__main__":
+    flama.run(flama_app=app)
+
+```
+
+In this example:
+
+- `class Item(pydantic.BaseModel): ...`: Defines the structure of the expected JSON payload.
+- `async def create_item(item: t.Annotated[schemas.SchemaType, schemas.SchemaMetadata(Item)])`: The item parameter is type-hinted with the `Item` model. Flama will automatically:
+  - Read the request body (e.g., JSON).
+  - Validate the data against the Item schema.
+  - If validation fails (e.g., missing name or price, or price is not a float), Flama returns a `422 Unprocessable Entity`` error with details about the validation errors.
+- Convert the validated data into an Item instance and pass it to your function.
+- `-> t.Annotated[schemas.SchemaType, schemas.SchemaMetadata(Item)]`: The return type hint indicates that the response should also conform to the Item schema. Flama will serialize the returned Item instance into a JSON response.
+
+Flama's `RequestDataComponent` handles the initial parsing of the request body based on `Content-Type` (e.g., `application/json`).
+Then, `ValidateRequestDataComponent` and `CompositeParamComponent` use the schema to validate and convert the data.

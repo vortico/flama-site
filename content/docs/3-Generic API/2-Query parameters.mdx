@@ -1,0 +1,43 @@
+---
+title: Query Parameters
+wip: true
+---
+
+Query parameters are optional key-value pairs that appear at the end of a URL after a question mark `?`
+and are separated by ampersands `&`.
+In Flama, query parameters are defined as parameters in your view function that are not part of the path.
+
+## Defining a route with query parameters
+
+Let's proceed with a simple example to show what we are discussing:
+
+```python
+import typing as t
+import flama
+from flama import Flama
+
+app = Flama()
+
+@app.route("/users/")
+async def list_users(skip: int = 0, limit: int = 10, name: t.Optional[str] = None):
+    # In a real application, you would fetch users from a database
+    # using skip, limit, and name for filtering and pagination.
+    return {"skip": skip, "limit": limit, "name": name, "users": []}
+
+if __name__ == "__main__":
+    flama.run(flama_app=app)
+```
+
+In this example:
+
+- `skip: int = 0`: `skip` is a query parameter of type int with a default value of `0`.
+- `limit: int = 10`: `limit` is a query parameter of type int with a default value of `10`.
+- `name: t.Optional[str] = None`: `name` is an optional query parameter of type str.
+
+If you call `/users/`, it will use the default values: `skip=0, limit=10`.
+If you call `/users/?skip=5&limit=20&name=Alice`, these values will be passed to the function.
+
+Flama automatically validates query parameters based on their type hints and default values.
+The `ValidateQueryParamsComponent` handles this.
+If a query parameter cannot be converted to its annotated type, Flama returns a `400 Bad Request error`.
+Basic types are supported similarly to path parameters.

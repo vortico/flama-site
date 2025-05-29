@@ -1,0 +1,82 @@
+---
+title: Validation with Schema Types
+wip: true
+---
+
+For more complex data structures, especially in request bodies or responses, Flama leverages its schema system.
+You can use `typing.Annotated` along with `flama.schemas.SchemaMetadata` to explicitly define how data should be validated and serialized.
+This is particularly useful when you want to use Flama's generic `SchemaType` for type hinting but still provide specific schema
+information for OpenAPI documentation and validation.
+
+The `flama.schemas` module provides the core structures like `Schema`, `Field`, and `SchemaMetadata`.
+Besides, `flama.schemas.adapter` allows plugging in different schema libraries.
+
+## Example using typing.Annotated and SchemaMetadata
+
+Let's assume you have a Pydantic model `Puppy`:
+
+```python
+import typing as t
+import flama
+from flama import Flama, schemas
+import pydantic
+
+app = Flama()
+
+class Puppy(pydantic.BaseModel):
+    id: int
+    name: str
+    age: int
+
+    @pydantic.field_validator("age")
+    def minimum_age_validation(cls, v):
+        if v < 0:
+            raise ValueError("Age must be positive")
+        return v
+
+app.schema.register_schema("Puppy", Puppy) # Important for OpenAPI
+
+@app.route("/puppies/", methods=["POST"])
+async def create_puppy(
+    puppy_data: t.Annotated[schemas.SchemaType, schemas.SchemaMetadata(Puppy)]
+) -> t.Annotated[schemas.SchemaType, schemas.SchemaMetadata(Puppy)]:
+    """
+    Create a new puppy.
+    """
+    # puppy_data is a dict here, validated against the Puppy schema.
+    # You might convert it to a Puppy instance if needed, or work with the dict.
+    # For this example, let's assume we return the validated dict.
+    # In a real app, you might do: validated_puppy = Puppy(**puppy_data)
+    return puppy_data
+
+@app.route("/puppies_list/", methods=["GET"])
+async def list_puppies() -> t.Annotated[list[schemas.SchemaType], schemas.SchemaMetadata(Puppy)]:
+    """
+    List puppies.
+    """
+    # This would come from a database
+    example_puppies_data = [
+        {"id": 1, "name": "Buddy", "age": 2},
+        {"id": 2, "name": "Lucy", "age": 3}
+    ]
+    return example_puppies_data
+
+if __name__ == "__main__":
+    flama.run(flama_app=app)
+```
+
+In this example:
+
+- `t.Annotated[schemas.SchemaType, schemas.SchemaMetadata(Puppy)]`:
+  - `schemas.SchemaType` is a generic type hint (often dict[str, t.Any]) indicating that the function will receive or return data that conforms to a schema.
+  - `schemas.SchemaMetadata(Puppy)` provides the actual `Puppy` schema (which could be a Pydantic model, Marshmallow schema, etc.) to Flama for validation, serialization, and OpenAPI schema generation.
+- For create_puppy:
+  - The input puppy_data is expected to be a JSON payload. Flama validates it against the Puppy schema. If valid, puppy_data will be a dictionary.
+  - The return value is also annotated, so Flama will ensure the returned dictionary conforms to Puppy and serialize it as JSON.
+- For list_puppies:
+  - The return type t.Annotated[list[schemas.SchemaType], schemas.SchemaMetadata(Puppy)] indicates that the endpoint will return a list of objects, each conforming to the Puppy schema.
+
+This approach allows for precise schema definition while keeping the function signatures relatively clean, especially when dealing
+with data that might not always be directly instantiated as a Pydantic model within the handler.
+Flama's validation layer, particularly CompositeParamComponent for request bodies and schema processing for responses,
+handles these annotations.
