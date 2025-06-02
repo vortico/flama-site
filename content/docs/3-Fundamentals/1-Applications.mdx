@@ -1,6 +1,193 @@
 ---
 title: Applications
-wip: false 
+wip: false
 ---
 
+The **Flama** application instance is the heart of any web service or API built with the <FlamaName /> framework. It acts as the central orchestrator, bringing together all the different parts of your project—such as routes, components, modules, and middleware—into a single, coherent ASGI (Asynchronous Server Gateway Interface) application. Understanding its role and how to configure it is essential for developing with <FlamaName />.
 
+## What is a <FlamaName /> application?
+
+A <FlamaName /> application, typically instantiated from the **`flama.Flama`** class, is the main entry point and primary building block of your service. When an ASGI server like Uvicorn runs your project, it's this **Flama** app instance that it interacts with. It's responsible for receiving incoming HTTP requests (and WebSocket connections), processing them through any configured middleware, dispatching them to the appropriate route handlers based on URL patterns, and managing the overall application lifecycle.
+
+Thus, the **Flama** app contains all the ingredients needed, and it's where you:
+
+- Define [Routes](/docs/fundamentals/routes/) and [Routers](/docs/fundamentals/routes/#working-with-routers) to handle requests
+- Register [Components](/docs/fundamentals/components/) for dependency injection
+- Integrate [Modules](/docs/fundamentals/modules/) for extended functionalities and lifecycle management
+- Add [Middlewares](/docs/fundamentals/middlewares/) to handle tasks (e.g., authentication, or logging) before the request reaches the API endpoint
+- Configure global settings like **OpenAPI** schema generation
+
+**Why is it important?**
+
+1.  **Central orchestration**: It serves as the central point where all other parts of the <FlamaName /> framework (routes, components, modules, middleware) are connected and managed.
+2.  **ASGI compliance**: It is the actual ASGI application that web servers interact with, handling the low-level details of the ASGI protocol.
+3.  **Configuration hub**: It holds the application's global configuration, including settings for debugging, OpenAPI schema details, and paths for documentation.
+4.  **Extensibility core**: It provides the mechanisms (like registration of modules and components) that make <FlamaName /> extensible and customisable.
+5.  **Request lifecycle management**: It oversees the entire lifecycle of a request, from reception through middleware, routing, handler execution (with dependency injection), and response generation.
+
+The main virtue of the **Flama** application instance is that it **provides a structured and unified entry point for building and running your web services**, consolidating configuration and core functionalities into a manageable and understandable object.
+
+## Building and utilising a <FlamaName /> application
+
+Creating and configuring a **Flama** application instance is the first step in any <FlamaName /> project.
+
+### Initialisation
+
+You create a <FlamaName /> application by instantiating the **`flama.Flama`** class. The constructor accepts several keyword-only arguments to configure its behaviour and integrate various parts of your application.
+
+```python
+from flama import Flama
+
+app = Flama(
+    ## Application Structure
+    routes=None,
+    components=None,
+    modules=None,
+    middleware=None,
+
+    ## Behaviour and lifecycle
+    debug=False,
+    events=None,
+    lifespan=None,
+
+    ## OpenAPI schema definition and serving
+    openapi={ # Default values are shown if not overridden here
+        "info": {
+            "title": "Flama", # Default title
+            "version": "0.1.0", # Default version
+            "summary": "Flama application", # Default summary
+            "description": "Firing up with the flame", # Default description
+        },
+        # "tags": [...],
+        # "servers": [...],
+    },
+    schema="/schema/", # Default path for serving the OpenAPI JSON schema
+    docs="/docs/",     # Default path for serving the documentation UI
+    schema_library=None, # Optional: specify a schema library
+)
+```
+
+Key parameters for the **`flama.Flama`** constructor, based on the provided codebase definition:
+
+- **Application structure**:
+
+  - `routes`: An optional sequence of **`flama.routing.BaseRoute`** objects (which can include **`Route`**, **`Router`**, or **`Mount`** instances) for programmatic route definition at instantiation.
+  - `components`: An optional sequence or set of **`flama.injection.Component`** instances to be registered for dependency injection.
+  - `modules`: An optional sequence or set of **`flama.modules.Module`** instances to be registered with the application.
+  - `middleware`: An optional sequence of **`flama.middleware.Middleware`** instances.
+
+- **Behaviour and lifecycle**:
+
+  - `debug`: A boolean indicating if the application should run in debug mode (default: `False`). When enabled, <FlamaName /> provides a helpful exception handler with graphical tools for tracing code errors (e.g., **Internal Server Error 500**) or issues like requests to non-existent resources (**Not Found 404**), making debugging more direct and straightforward.
+  - `events`: An optional dictionary defining event handlers (e.g., for "startup", "shutdown") or an instance of **`flama.events.Events`**. These are in addition to module lifecycle methods.
+  - `lifespan`: An optional callable that returns an asynchronous context manager for application startup and shutdown events, following the ASGI lifespan protocol. This is an alternative way to manage global startup/shutdown logic if not using **Modules** or **events** for everything.
+
+- **OpenAPI schema definition and serving**:
+
+  - `openapi`: A dictionary (of type **`flama.types.OpenAPISpec`**) that directly mirrors the structure of an OpenAPI document's top-level object. This is the primary way to provide detailed schema information. It defaults to a basic structure with "Flama" as the title. You can customise `info` (title, version, description, summary, etc.), `tags`, `servers`, `components` (OpenAPI components like schemas, securitySchemes), `security`, and other valid OpenAPI fields here.
+  - `schema`: A string defining the URL path where the generated OpenAPI JSON schema will be served (default: `"/schema/"`). Set to `None` to disable serving the schema.
+  - `docs`: A string defining the URL path for serving the interactive API documentation UI (e.g., Swagger UI/ReDoc) (default: `"/docs/"`). Set to `None` to disable serving the documentation UI.
+  - `schema_library`: An optional string to specify which schema library adapter (<FlamaName />'s internal mechanism) should be used if multiple are available or if a specific one needs to be enforced (e.g., "pydantic", "marshmallow").
+
+### Core responsibilities
+
+Once initialised, the **Flama** app instance takes on several core responsibilities:
+
+- It acts as the **ASGI application** callable that an ASGI server (like **uvicorn**) will use.
+- It manages the main **Router**, resolving incoming request paths to the appropriate _*endpoint*_.
+- It holds the **Injector** instance, making dependency injection available to route handlers and components.
+- It orchestrates the **startup** and **shutdown** events, including those defined by registered **Modules**, the global **lifespan** handler, and any registered **events**.
+- It processes requests and responses through the configured **Middleware** stack.
+- It handles the generation and serving of the OpenAPI schema and documentation UI based on its configuration and route definitions.
+
+### Adding Functionality
+
+While many structural elements like **Modules** and **Components** are typically provided during initialisation, other functionalities, particularly routes, are often added after the **app** instance has been created:
+
+- **Routes**: Defined using decorators such as `@app.get()`, `@app.post()` (which are convenient wrappers around `@app.route()`), or added programmatically with `app.add_route()`. Routers can be mounted using `app.mount()`.
+- **Components**: Can also be added after initialisation using `app.add_component()`.
+- **Event Handlers**: Can be added using `app.add_event_handler()` or the `@app.on_event()` decorator.
+- **Exception Handlers**: Custom error handlers can be registered using `app.add_exception_handler()`.
+- **Middleware**: Additional middlewares can be added using `app.add_middleware()`.
+
+The **Flama** app instance is thus not just a static configuration object but an active manager of your application's structure and behaviour.
+
+## Example
+
+This example demonstrates the basic instantiation of a <FlamaName /> application, including customisation of the OpenAPI schema information and defining a simple route with its own OpenAPI documentation provided via its docstring.
+
+```python
+import flama
+from flama import Flama
+from flama import types as t
+
+# Instantiate the Flama application
+# The 'openapi' dictionary is used to provide detailed information for the API documentation.
+
+openapi: t.OpenAPISpec = {
+    # General information about the application
+    "info": {
+        "title": "Hello-🔥",
+        "version": "1.0",
+        "description": "My first API using Flama.",
+    },
+    # Global tags that can be referenced by individual route documentation
+    "tags": [
+        {"name": "Salute", "description": "Endpoints that offer simple greetings."},
+        # Additional global tags can be defined here
+    ],
+    # Other OpenAPI fields like 'servers', 'components', 'security' can be added here too.
+}
+
+app = Flama(
+    openapi=openapi,
+    schema="/custom-schema/",  # Example of customising the schema URL path, default is "/schema/"
+    docs="/custom-api-docs/",  # Example of customising the docs UI URL path, default is "/docs/"
+)
+
+
+# Define a route on the application instance
+# The @app.route("/") decorator maps GET requests (by default) for the root path to this function.
+@app.route("/")
+def home():
+    """
+    tags:
+        - Salute
+    summary: # A concise summary for the API documentation
+        Home
+    description: |
+        This endpoint provides a simple greeting from the <FlamaName /> application.
+        It serves as a basic example to:
+        1. Verify that the application is running correctly.
+        2. Illustrate how OpenAPI documentation is automatically generated from
+           correctly formatted docstrings in route handler functions.
+    responses:
+        "200":
+            description: Warming hello message returned successfully!
+            content:
+                application/json:
+                    schema:
+                        type: object
+                        properties:
+                            message:
+                                type: string
+                                example: "Hello 🔥"
+    """
+    # Flama automatically converts this Python dictionary to a JSONResponse.
+    return {"message": "Hello 🔥"}
+
+
+if __name__ == "__main__":
+    flama.run(flama_app=app, server_host="0.0.0.0", server_port=8000)
+```
+
+In this example:
+
+- A **`flama.Flama`** instance named **app** is created.
+- The **openapi** parameter is used to provide custom metadata for the API documentation. It accepts a dictionary mirroring the OpenAPI specification structure, allowing for detailed setup of `info` (like title, version, description), `tags`, and other global schema elements.
+- Parameters like `schema` (for schema URL path, e.g. `"/schema/"`) and `docs` (for docs UI URL path, e.g. `"/docs/"`) in the **Flama** constructor allow customisation of where these are served.
+- A single route is defined at `/` using `@app.route()`. This implicitly handles <Label color="green">GET</Label> requests by default.
+- The docstring of the `home()` function is formatted in YAML. <FlamaName /> parses this to enrich the OpenAPI schema for this specific endpoint, linking it to the **Salute** tag, providing a summary, a detailed description, and defining the expected structure and example for a `200 OK` response.
+- The handler returns a Python dictionary, which <FlamaName /> automatically serialises into a JSON response.
+
+This demonstrates how the **Flama** application object serves as the central point for configuration (like OpenAPI details) and route definition, integrating seamlessly with features like automatic API documentation generation.
