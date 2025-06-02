@@ -78,14 +78,14 @@ Besides decorators, you can also add routes to your application programmatically
   - `endpoint`: The asynchronous handler function to be called for this route.
   - `methods`, `name`, `include_in_schema`: Same as for the `@app.route()` decorator.
 
-  This method is useful when generating routes dynamically or when the decorator syntax is less convenient.
+This method is useful when generating routes dynamically or when the decorator syntax is less convenient.
 
-  ```python
-  async def custom_handler():
-      return {"message": "Handled manually"}
+```python
+async def custom_handler():
+    return {"message": "Handled manually"}
 
-  app.add_route("/manual-endpoint/", custom_handler, methods=["GET"])
-  ```
+app.add_route("/manual-endpoint/", custom_handler, methods=["GET"])
+```
 
 ### Working with Routers
 
@@ -107,7 +107,7 @@ For better organisation, especially in larger applications, <FlamaName /> provid
   ])
   ```
 
-  A **Router** can also have its own specific list of components or middleware, allowing for modular configuration of different sections of your application.
+A **Router** can also have its own specific list of components or middleware, allowing for modular configuration of different sections of your application.
 
 ### Mounting Routers
 
@@ -119,11 +119,11 @@ Once you have a **Router** (or even another <FlamaName /> application instance),
   - `app_to_mount`: The **Router** instance (or another ASGI application) whose routes you want to include.
   - `name`: An optional name for the mounted application/router.
 
-  Mounting is a powerful way to structure large applications by breaking them into smaller, manageable **Router** instances, each responsible for a specific domain or feature set.
+Mounting is a powerful way to structure large applications by breaking them into smaller, manageable **Router** instances, each responsible for a specific domain or feature set.
 
-  ```python
-  app.mount("/items", item_router)
-  ```
+```python
+app.mount("/items", item_router)
+```
 
 ## Example
 
