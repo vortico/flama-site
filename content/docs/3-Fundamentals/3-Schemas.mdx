@@ -64,12 +64,10 @@ To validate an incoming request body against a schema, you type hint the relevan
 Crucially, the handler receives the validated data as a dictionary, not (by default) a direct instance of your schema class (e.g., not a Pydantic model instance). If you need an instance of your schema model within the handler (for example, to use its methods, for more complex data manipulation, or simply for more structured attribute access), you would typically instantiate it yourself from this validated dictionary:
 
 ```python
-CreateItemInput = t.Annotated[
+async def create_item(data: t.Annotated[
   schemas.SchemaType,
   schemas.SchemaMetadata(MyPydanticItemSchema)
-]
-
-async def create_item(item_data: CreateItemInput):
+]):
      # item_data is a dictionary here, already validated by MyPydanticItemSchema
      # If you need a MyPydanticItemSchema instance:
      item_instance = MyPydanticItemSchema(**item_data)
@@ -90,12 +88,11 @@ To define the structure of a response and ensure your handler's return value is 
 The response schema is solely determined by the return type annotation.
 
 ```python
-ItemDetailsOutput = t.Annotated[
+ async def item_detals(id: 'str') -> t.Annotated[
   schemas.SchemaType,
   schemas.SchemaMetadata(MyPydanticItemSchema)
 ]
-
-async def item_detals(id: 'str') -> ItemDetailsOutput:
+:
      ...
 ```
 
@@ -145,7 +142,7 @@ import uuid
 import flama
 from flama import Flama, schemas
 
-PUPPIES_DB_PYDANTIC: t.List[t.Dict[str, t.Any]] = []
+PUPPIES_DB_PYDANTIC: list[dict[str, t.Any]] = []
 
 class Puppy(pydantic.BaseModel):
     id: uuid.UUID
@@ -237,7 +234,7 @@ from flama import Flama, schemas
 
 import typesystem
 
-PUPPIES_DB_TYPESYSTEM: t.List[t.Dict[str, t.Any]] = []
+PUPPIES_DB_TYPESYSTEM: list[dict[str, t.Any]] = []
 
 puppy_output_schema = typesystem.Schema(
     fields={
