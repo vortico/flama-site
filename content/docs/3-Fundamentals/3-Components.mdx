@@ -14,31 +14,29 @@ In <FlamaName />, a **Component** is an object responsible for providing an inst
 1.  **Decoupling**: Components help decouple the logic of _how_ an object is created from _where_ it is used. Your route handlers or other services don't need to know the instantiation details of their dependencies; they simply declare what they need.
 2.  **Modularity**: They encourage breaking down complex functionalities into smaller, manageable, and often reusable units.
 3.  **Testability**: Dependencies provided by components can be easily replaced with mock objects or alternative implementations during testing, isolating the unit under test.
-4.  **Centralised Dependency Management**: Components provide a clear and centralised way to manage the lifecycle and configuration of services or objects used across your application.
+4.  **Centralised dependency management**: Components provide a clear and centralised way to manage the lifecycle and configuration of services or objects used across your application.
 
 The main virtue Components bring is the **automation of dependency resolution**. <FlamaName />'s injector can automatically identify and provide the necessary dependencies to your functions (like route handlers) based on type hints, significantly reducing boilerplate code and making your application easier to reason about.
 
 ## Building a component
 
-### How to
-
 Creating a custom component in <FlamaName /> involves two main steps:
 
-1.  Inherit from **flama.Component**:
-    Your custom component class must inherit from the base **flama.Component** class, which is found in **flama.injection.components**.
+1.  Inherit from **`flama.Component`**:
+    Your custom component class must inherit from the base **Component** class, which is found in **`flama.injection.components`**.
 
-2.  Implement the **resolve** method:
+2.  Implement the **`resolve`** method:
     This is the core method of any component. It's responsible for creating, configuring, and returning the instance of the dependency that the component manages.
-    - The **resolve()** method's return type hint is crucial for the default mechanism <FlamaName /> uses to match components to requested dependencies. <FlamaName />'s dependency injector primarily uses this return type hint (via the default **can_handle_parameter()** method of the **Component** class) to identify which component can satisfy a particular dependency request.
-    - The **resolve()** method can also have its own parameters. These parameters can, in turn, be resolved by <FlamaName />'s injector from various sources:
+    - The **`resolve()`** method's return type hint is crucial for the default mechanism <FlamaName /> uses to match components to requested dependencies. <FlamaName />'s dependency injector primarily uses this return type hint (via the default `can_handle_parameter()` method of the **Component** class) to identify which component can satisfy a particular dependency request.
+    - The **`resolve()`** method can also have its own parameters. These parameters can, in turn, be resolved by <FlamaName />'s injector from various sources:
       - **Request data**: Path parameters, query parameters, request headers, cookies, or the request body (if it's a Pydantic model, for instance).
-      - **Other Components**: If a parameter of a **resolve()** method is type-hinted with a type that another registered component can provide, <FlamaName /> will recursively resolve it.
+      - **Other Components**: If a parameter of a `resolve()` method is type-hinted with a type that another registered component can provide, <FlamaName /> will recursively resolve it.
       - **Predefined values or services**: Such as the **Request** object itself, **WebSocket**, etc.
-      - Default values specified in the **resolve()** method's signature.
+      - Default values specified in the `resolve()` method's signature.
 
 ### Advanced: Customising parameter handling
 
-While relying on the **resolve()** method's return type hint is the most common way for a component to declare what it provides, <FlamaName /> offers a more advanced mechanism through the **can_handle_parameter()** method. If you override **can_handle_parameter()** in your component, you can implement custom logic to determine if your component can satisfy a given parameter, potentially without relying on the **resolve()** method's return type hint.
+While relying on the `resolve()` method's return type hint is the most common way for a component to declare what it provides, <FlamaName /> offers a more advanced mechanism through the `can_handle_parameter()` method. If you override `can_handle_parameter()` in your component, you can implement custom logic to determine if your component can satisfy a given parameter, potentially without relying on the `resolve()` method's return type hint.
 
 For example, consider a generic **WorkerComponent** that is initialised with a specific worker instance. You might want this component to handle any parameter whose type annotation matches the type of the worker it holds.
 
@@ -65,12 +63,12 @@ class WorkerComponent(Component):
         return self.worker
 ```
 
-In this scenario, **WorkerComponent.can_handle_parameter()** directly compares the parameter's annotation with **self.worker.\_\_class\_\_**. If it returns **True**, <FlamaName /> will use this component to provide the worker instance by calling its **resolve()** method. This approach allows for more dynamic or instance-based component resolution. However, for most common use cases, relying on the return type hint of the **resolve()** method is simpler and clearer.
+In this scenario, `WorkerComponent.can_handle_parameter()` directly compares the parameter's annotation with `self.worker.__class__`. If it returns **True**, <FlamaName /> will use this component to provide the worker instance by calling its `resolve()` method. This approach allows for more dynamic or instance-based component resolution. However, for most common use cases, relying on the return type hint of the `resolve()` method is simpler and clearer.
 
-Here's a basic structure for a typical component relying on the return type hint of **resolve()**:
+Here's a basic structure for a typical component relying on the return type hint of `resolve()`:
 
 ```python
-from flama import Component # For <FlamaName /> version < 0.10, it's from flama.components
+from flama import Component
 from typing import Any
 
 class MyService:
@@ -82,14 +80,14 @@ class MyService:
 
 class MyServiceComponent(Component):
     # The resolve method's parameters (e.g., 'some_config')
-    # will also be injected by <FlamaName /> if possible from request data or other components.
+    # will also be injected if possible from request data or other components.
     def resolve(self, some_config: str = "default_config") -> MyService:
         # This is where you create and return the instance
         # of the object this component provides.
         return MyService(config_value=some_config)
 ```
 
-In this example, **MyServiceComponent** provides instances of **MyService**. Its **resolve()** method takes a **some_config** parameter.
+`MyServiceComponent` provides instances of `MyService`. Its `resolve()` method takes a `some_config` parameter.
 
 ## Utilising components
 
@@ -106,7 +104,7 @@ from flama import Flama
 app = Flama(components=[MyServiceComponent()])
 ```
 
-The **Flama** application initialises an **Injector** (from **flama.injection**) with these components.
+The **Flama** application initialises an **Injector** (from `flama.injection`) with these components.
 
 ### Injecting Dependencies
 
@@ -115,20 +113,19 @@ After a component is registered, <FlamaName /> can automatically inject the obje
 ```python
 @app.get("/my-service-info/")
 async def get_service_info(service_instance: MyService):
-    # 'service_instance' will be an instance of MyService,
-    # resolved and provided by MyServiceComponent.
-    # The 'some_config' parameter of MyServiceComponent.resolve
-    # would be injected from a request query parameter named 'some_config'
-    # if provided in the URL, e.g., /my-service-info/?some_config=custom_value
-    return {"info": service_instance.do_work(), "config_used_for_service": service_instance.config_value}
+    # 'service_instance' will be an instance of MyService, resolved and provided by MyServiceComponent.
+    return {
+      "info": service_instance.do_work(),
+      "config_used_for_service": service_instance.config_value,
+    }
 ```
 
 When a request to `/my-service-info/` is made, <FlamaName />'s injector inspects the **get_service_info** handler:
 
-- It sees the **service_instance: MyService** parameter.
-- It looks for a registered component whose **resolve()** method has a return type hint of **MyService** (or whose **can_handle_parameter()** returns true for it). It finds **MyServiceComponent**.
-- It then calls **MyServiceComponent.resolve()**.
-  - The **resolve(self, some_config: str = "default_config")** method of **MyServiceComponent** needs **some_config**. If the request URL was `/my-service-info/?some_config=custom`, then "custom" would be passed to **some_config**. Otherwise, the default "default_config" is used.
+- It sees the **`service_instance: MyService`** parameter
+- It looks for a registered component whose `resolve()` method has a return type hint of `MyService` (or whose `can_handle_parameter()` returns true for it). It finds `MyServiceComponent`
+- It then calls `MyServiceComponent.resolve()`
+  - The `resolve(self, some_config: str = "default_config")` method of `MyServiceComponent` needs `some_config`. If the request URL was `/my-service-info/?some_config=custom`, then `"custom"` would be passed to `some_config`. Otherwise, the default "default_config" is used.
 - The returned **MyService** instance is passed as **service_instance** to the route handler.
 
 This mechanism allows for powerful and flexible dependency management, including nested dependencies where one component's **resolve()** method depends on an object provided by another component.
@@ -141,7 +138,7 @@ Let's illustrate this with a self-contained example that demonstrates nested dep
 import flama
 from flama import Component, Flama
 
-# Step 1: Define your data structures (or services)
+# Define your data structures (or services)
 class Address:
     def __init__(self, street: str, city: str, zip_code: str):
         self.street = street
@@ -160,7 +157,7 @@ class Person:
     def to_dict(self):
         return {"name": self.name, "age": self.age, "address": self.address.to_dict()}
 
-# Step 2: Define Components for your data structures/services
+# Define Components for your data structures/services
 class AddressComponent(Component):
     # Flama will try to inject 'street', 'city', and 'zip_code'
     # for this resolve method, typically from request query parameters.
@@ -174,7 +171,7 @@ class PersonComponent(Component):
     def resolve(self, name: str, age: int, address: Address) -> Person:
         return Person(name=name, age=age, address=address)
 
-# Step 3: Create a Flama application and register your components
+# Create a Flama application and register your components
 app = Flama(
     openapi={
         "info": {
@@ -189,7 +186,7 @@ app = Flama(
     ]
 )
 
-# Step 4: Define routes that use injected dependencies
+# Define routes that use injected dependencies
 @app.get("/person-info/")
 def get_person_details(person_instance: Person):
     # 'person_instance' is automatically created and injected by Flama
@@ -202,7 +199,6 @@ def get_address_details(address_instance: Address):
     # using AddressComponent.
     return {"data": address_instance.to_dict()}
 
-# Step 5: Run the application (optional, for direct execution)
 if __name__ == "__main__":
     flama.run(flama_app=app, server_host="0.0.0.0", server_port=8080)
 ```
