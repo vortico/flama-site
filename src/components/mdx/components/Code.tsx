@@ -23,7 +23,7 @@ export default function Code({ children, className }: React.ComponentProps<'code
       code={code}
       language={language}
       lines={lines}
-      className={`not-prose ${isInline ? 'bg-primary-300 dark:bg-primary-600/50' : ''}`}
+      className={`not-prose ${isInline ? 'bg-primary-200 text-sm dark:bg-primary-600' : ''}`}
     />
   )
 }

@@ -12,7 +12,7 @@ export default function PlainCode({ code, selectedLine }: { code: string; select
       {lines.map((line, i) => (
         <span
           key={i}
-          className={`line ${isInline ? 'inline' : 'block w-fit px-2'} ${
+          className={`line ${isInline ? 'inline-block h-full w-fit px-1' : 'block w-fit px-2'} ${
             selectedLine === i + 1 ? `${LINE_SELECTED_CLASS} bg-brand-700` : ''
           }`}
         >
@@ -21,7 +21,7 @@ export default function PlainCode({ code, selectedLine }: { code: string; select
           ) : (
             line.split(' ').map((token, j) => (
               <span key={j} className="token">
-                {token}
+                {`${j === 0 ? '' : ' '}${token}`}
               </span>
             ))
           )}

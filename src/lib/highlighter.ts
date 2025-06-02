@@ -7,13 +7,13 @@ export const theme = {
     {
       scope: ['markup.changed', 'markup.deleted', 'markup.inserted', 'punctuation', 'variable', 'constant', 'source'],
       settings: {
-        foreground: '#aaabb6', // Primary light
+        foreground: '#cdced4', // Primary light
       },
     },
     {
       scope: ['comment', 'punctuation.definition.comment'],
       settings: {
-        foreground: '#3f3f46', // Primary dark
+        foreground: '#575863', // Primary dark
       },
     },
     {

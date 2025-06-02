@@ -2,7 +2,7 @@
 
 import React, { MutableRefObject, useCallback, useEffect, useRef, useState } from 'react'
 
-import { IconCircleMinus, IconCirclePlus, IconCircleX } from '@tabler/icons-react'
+import { IconCircleDotFilled, IconCirclePlusFilled, IconCircleXFilled } from '@tabler/icons-react'
 
 export interface WindowProps extends React.ComponentProps<'div'> {
   title?: string
@@ -32,38 +32,44 @@ export default function Window({ title, autoScroll, className, children }: Windo
       {...(state === 'full' && { 'aria-modal': true, role: 'dialog' })}
     >
       {state === 'full' && (
-        <div
-          className="fixed inset-0 bg-black/20 backdrop-blur-sm dark:bg-primary-900/80"
-          aria-hidden={true}
-          onClick={onMinimize}
-        />
+        <div className="fixed inset-0 bg-primary-950/30 backdrop-blur-sm" aria-hidden={true} onClick={onMinimize} />
       )}
       <div
-        className={`h-fit overflow-hidden rounded-xl bg-primary-800 shadow-xl ${
-          state === 'closed' ? 'relative max-h-[30px] dark:bg-primary-950/70' : ''
-        } ${state === 'full' ? 'fixed inset-x-4 inset-y-[5vh] dark:bg-primary-950 sm:inset-x-6 md:inset-x-8' : ''} ${
-          state === 'open' ? 'relative dark:bg-primary-950/70' : ''
+        className={`h-full overflow-hidden border border-primary-300 bg-primary-900 shadow-md shadow-primary-300 dark:border-primary-600 dark:shadow-primary-600 ${
+          state === 'closed'
+            ? 'relative max-h-[32px]'
+            : state === 'full'
+              ? 'fixed inset-x-4 inset-y-[5vh] max-h-[calc(85vh+2rem+3px)] sm:inset-x-6 md:inset-x-8'
+              : state === 'open'
+                ? 'relative max-h-full'
+                : ''
         } ${className || ''}`}
       >
-        <div className="mb-px flex h-8 w-full items-center justify-between border-b border-primary-500 px-4 text-primary-300 dark:border-primary-500/30 dark:text-primary-400">
-          <span className="truncate font-semibold">{title}</span>
+        <div className="flex h-[calc(2rem-1px)] w-full flex-none items-center justify-between border-b border-primary-300 bg-primary-900 px-4 dark:border-primary-600 dark:bg-primary-950">
+          <span className="truncate font-alternative text-sm font-semibold leading-8 text-primary-200">{title}</span>
           <div className="flex items-center justify-end gap-x-2">
-            <button className="h-4 w-4" onClick={onMinimize} aria-label="Minimize Window">
-              <IconCircleMinus className="h-full w-full" />
+            <button className="h-4 w-4 cursor-pointer" onClick={onMinimize} aria-label="Minimize Window">
+              <IconCircleDotFilled className="h-full w-full text-primary-300 transition-colors duration-200 hover:text-ciclon dark:text-primary-600 dark:hover:text-ciclon" />
             </button>
-            <button className="h-4 w-4" onClick={onMaximize} aria-label="Maximize Window">
-              <IconCirclePlus className="h-full w-full" />
+            <button className="h-4 w-4 cursor-pointer" onClick={onMaximize} aria-label="Maximize Window">
+              <IconCirclePlusFilled className="h-full w-full text-primary-300 transition-colors duration-200 hover:text-bosque dark:text-primary-600 dark:hover:text-bosque" />
             </button>
-            <button className="h-4 w-4" onClick={onClose} aria-label="Close Window">
-              <IconCircleX className="h-full w-full" />
+            <button className="h-4 w-4 cursor-pointer" onClick={onClose} aria-label="Close Window">
+              <IconCircleXFilled className="h-full w-full text-primary-300 transition-colors duration-200 hover:text-flama dark:text-primary-600 dark:hover:text-flama" />
             </button>
           </div>
         </div>
         <div
           ref={containerRef}
-          className={`-mt-px w-full overflow-auto ${state === 'closed' ? 'max-h-0' : ''} ${
-            state === 'full' ? 'max-h-[85vh]' : ''
-          } ${state === 'open' ? 'max-h-full' : ''}`}
+          className={`h-full w-full bg-primary-900 dark:bg-primary-950 ${
+            state === 'closed'
+              ? 'max-h-0'
+              : state === 'full'
+                ? 'max-h-[calc(100%-2rem-1px)]'
+                : state === 'open'
+                  ? 'max-h-[calc(100%-2rem-1px)]'
+                  : ''
+          }`}
         >
           {children}
         </div>
