@@ -1,0 +1,389 @@
+---
+title: Schemas
+wip: false
+---
+
+Schemas are fundamental to building robust and well-documented APIs with <FlamaName />. They provide a formal definition for the structure of data that your application expects to receive and send. By defining schemas, you ensure data integrity, enable automatic validation, and facilitate clear communication of your API's data requirements, both for developers and for automated tooling like API documentation generators.
+
+## What are schemas?
+
+In the context of <FlamaName />, a **Schema** is a declaration that describes the expected format of data. This typically applies to request bodies sent to your API (e.g., the JSON payload in a <Label color="blue">POST</Label> or <Label color="orange">PUT</Label> request), and response bodies sent from your API.
+
+Schemas define the fields data should contain, their types (e.g., string, integer, boolean, nested objects, lists), whether they are required or optional, and any validation rules they must adhere to (e.g., minimum/maximum values, string patterns).
+
+**Why are they important?**
+
+- **Data validation**: Schemas allow <FlamaName /> to automatically validate incoming request data. If data doesn't conform to the defined schema, an appropriate error response (typically **HTTP 422**) is returned to the client, preventing invalid data from reaching your business logic.
+- **Serialisation and deserialisation**: They define how application data objects are converted to and from wire formats like JSON for request and response bodies.
+- **API documentation**: Schemas are a cornerstone of API documentation. <FlamaName /> uses them to generate detailed OpenAPI specifications, which describe the expected request and response bodies for each endpoint, making your API self-documenting.
+- **Clear contracts**: They establish a clear contract between the client and the server regarding data exchange, reducing misunderstandings and integration issues.
+- **Developer experience**: Working with well-defined data structures improves code clarity and maintainability.
+
+The main virtue schemas bring is **enabling reliable and predictable data exchange** by providing a single source of truth for data structures, which <FlamaName /> leverages for validation, (de)serialisation, and documentation.
+
+## Schema libraries in <FlamaName />
+
+<FlamaName /> is designed to be flexible and supports multiple popular Python schema and data validation libraries. Out
+of the box, it provides adapters for:
+
+1.  **Pydantic**
+2.  **Typesystem**
+3.  **Marshmallow**
+
+While <FlamaName /> can work with any of these, **only one schema library adapter** can be active at a time within a single <FlamaName /> application instance.
+The schema library is determined as follows:
+
+- **Default automatic detection**: When the **`flama.schemas`** module is first imported (which happens when you import **`flama.Flama`** or **`flama.schemas`** itself), it attempts to find an installed and supported schema library. It checks for **Pydantic**, then **Typesystem**, then **Marshmallow**. The first one it finds that has a corresponding <FlamaName /> adapter implemented is set up as the global default. If none of these are installed or have a valid <FlamaName /> adapter, a **`flama.exceptions.DependencyNotInstalled`** error is raised.
+
+- **Explicit configuration via `Flama(schema_library=...)`**: You can explicitly set the schema library for your application (and thus globally reconfigure it for the process if it's different from the auto-detected one) by passing the `schema_library` parameter when instantiating the **`Flama`** class:
+  ```python
+  # You can also specify either "pydantic" or "marshmallow"
+  app = flama.Flama(schema_library="typesystem")
+  ```
+  When the **`Flama`** application is initialised, if the `schema_library` parameter is provided, it instructs the internal **SchemaModule** to re-initialise <FlamaName />'s global schema handling system (`flama.schemas.adapter`, `flama.schemas.schemas`, etc.) to use the specified library. This makes it the active schema library for all schema operations thereafter within that Python process.
+
+It is generally recommended to explicitly set the `schema_library` in your **`Flama`** application constructor if you intend to use a specific library other than what might be auto-detected, or to ensure consistent behaviour across different environments.
+
+## Defining and utilising schemas
+
+Regardless of the chosen library, the general workflow for using schemas in <FlamaName /> follows a similar pattern.
+
+### Defining schema structures
+
+You define your data structures as classes that inherit from a base class provided by the chosen schema library (e.g., **`pydantic.BaseModel`**, **`typesystem.Schema`**, **`marshmallow.Schema`**). Within these classes, you declare fields with their respective types and any validation constraints.
+
+### Request body validation and data access
+
+To validate an incoming request body against a schema, you type hint the relevant parameter in your route handler function using **`typing.Annotated`** with **`flama.schemas.SchemaType`** and **`flama.schemas.SchemaMetadata`**, specifying your schema class. <FlamaName /> will use the active schema adapter to:
+
+1.  Parse the request body (e.g., from JSON).
+2.  Validate the parsed data against your schema class.
+3.  If valid, provide the **validated data as a Python dictionary** to your handler function parameter.
+4.  If invalid, automatically return an **HTTP 422 Unprocessable Entity** error response with details about the validation failures.
+
+Crucially, the handler receives the validated data as a dictionary, not (by default) a direct instance of your schema class (e.g., not a Pydantic model instance). If you need an instance of your schema model within the handler (for example, to use its methods, for more complex data manipulation, or simply for more structured attribute access), you would typically instantiate it yourself from this validated dictionary:
+
+```python
+CreateItemInput = t.Annotated[
+  schemas.SchemaType,
+  schemas.SchemaMetadata(MyPydanticItemSchema)
+]
+
+async def create_item(item_data: CreateItemInput):
+     # item_data is a dictionary here, already validated by MyPydanticItemSchema
+     # If you need a MyPydanticItemSchema instance:
+     item_instance = MyPydanticItemSchema(**item_data)
+     # Now you can use item_instance.some_method() or item_instance.some_field
+     ...
+```
+
+### Response model definition
+
+To define the structure of a response and ensure your handler's return value is serialised correctly (and accurately documented in the OpenAPI schema), you use a schema as the **return type annotation** of your route handler function. This also uses **`typing.Annotated`** with **`flama.schemas.SchemaType`** and **`flama.schemas.SchemaMetadata`**.
+
+<FlamaName /> will:
+
+1.  Take the object returned by your handler (which should be a dictionary conforming to the schema, or an instance of your schema model if the adapter can serialise it directly).
+2.  Serialise it to the appropriate format (usually JSON) according to the specified schema.
+3.  Include the schema definition in the OpenAPI documentation for that endpoint's response.
+
+The response schema is solely determined by the return type annotation.
+
+```python
+ItemDetailsOutput = t.Annotated[
+  schemas.SchemaType,
+  schemas.SchemaMetadata(MyPydanticItemSchema)
+]
+
+async def item_detals(id: 'str') -> ItemDetailsOutput:
+     ...
+```
+
+### The role of `SchemaType` and `SchemaMetadata`
+
+As we've seen so far, we need the use of the following tools from <FlamaName /> to be able to use schemas for validation and (de)serialisation:
+
+- **`schemas.SchemaType`**: This is an alias for `dict[str, t.Any]`. When used in a type hint like `t.Annotated[schemas.SchemaType, schemas.SchemaMetadata(YourSchemaClass)]` for a request body, it means that the handler will receive a dictionary, which <FlamaName /> has validated against `YourSchemaClass`.
+
+- **`schemas.SchemaMetadata(schema: t.Any, partial: bool = False, multiple: bool = False)`**: This dataclass, used as the second argument within `typing.Annotated`, provides metadata to <FlamaName />.
+
+  - `schema`: The actual schema class you defined (e.g., your `Puppy` Pydantic model class). This tells <FlamaName /> which schema definition to use for validation or serialisation, and for documentation.
+  - `partial`: A boolean (default `False`). If `True`, it indicates that a partial update is allowed (some fields might be missing). Support and behaviour depend on the schema library adapter.
+  - `multiple`: A boolean (default `False`). Set it to `True` if the type hint represents a list of schema instances (e.g., for an endpoint that returns a list of puppies, the return type would be `schemas.SchemaMetadata(Puppy, multiple=True)]`).
+
+### Schema registration
+
+To ensure your schemas are correctly represented in the global OpenAPI documentation (specifically in the `components.schemas` section,
+allowing them to be referenced by a consistent name), you should register them with your <FlamaName /> application instance. To this purpose,
+we use **`app.schema.register_schema(name: str, schema: type)`** with `name` being the string name under which this schema will be registered
+in the OpenAPI document (e.g., "Puppy"), and `schema` the schema class itself.
+
+```python
+class X(pydantic.BaseModel):
+    input: list[t.Any] = pydantic.Field(title="input", description="Model input")
+
+class Y(pydantic.BaseModel):
+    output: list[t.Any] = pydantic.Field(title="output", description="Model output")
+
+app.schema.register_schema("X", X)
+app.schema.register_schema("Y", Y)
+```
+
+## Examples
+
+The following examples demonstrate defining and using a `Puppy` schema for a "Puppy Register" API with Pydantic, Typesystem, and Marshmallow. Each handler receives and returns dictionaries.
+
+### Pydantic
+
+Pydantic is the default schema library if installed.
+
+```python
+import typing as t
+import pydantic
+import uuid
+
+import flama
+from flama import Flama, schemas
+
+PUPPIES_DB_PYDANTIC: t.List[t.Dict[str, t.Any]] = []
+
+class Puppy(pydantic.BaseModel):
+    id: uuid.UUID
+    name: str
+    age: int
+
+    @pydantic.field_validator("age")
+    @classmethod
+    def age_validation(cls, v: int) -> int:
+        if v < 0:
+            raise ValueError("Age must be a non-negative number.")
+        if v > 30:
+            raise ValueError("Age seems too high for a puppy.")
+        return v
+
+class PuppyCreatePayload(pydantic.BaseModel):
+    name: str
+    age: int
+
+    @pydantic.field_validator("age")
+    @classmethod
+    def age_validation(
+        cls, v: int
+    ) -> int:  # Re-apply validation if needed for input schema
+        if v < 0:
+            raise ValueError("Age must be a non-negative number.")
+        if v > 30:
+            raise ValueError("Age seems too high for a puppy.")
+        return v
+
+app = Flama(
+    openapi={"info": {"title": "Puppy Register (Pydantic)", "version": "0.1.0"}},
+    schema_library="pydantic",
+)
+
+app.schema.register_schema(name="Puppy", schema=Puppy)
+app.schema.register_schema(name="PuppyCreationPayload", schema=PuppyCreatePayload)
+
+PuppyListResponse = t.Annotated[
+    list[schemas.SchemaType],
+    schemas.SchemaMetadata(Puppy, multiple=True),
+]
+PuppyDetailResponse = t.Annotated[
+    schemas.SchemaType,
+    schemas.SchemaMetadata(Puppy),
+]
+PuppyCreateRequest = t.Annotated[
+    schemas.SchemaType,
+    schemas.SchemaMetadata(PuppyCreatePayload),
+]
+
+@app.get("/puppies/")
+async def list_puppies_pydantic(name: t.Optional[str] = None) -> PuppyListResponse:
+    result = [p for p in PUPPIES_DB_PYDANTIC if name is None or p.get("name") == name]
+    return result
+
+@app.post("/puppies/")
+async def create_puppy_pydantic(
+    puppy_input_dict: PuppyCreateRequest,
+) -> PuppyDetailResponse:
+    # puppy_input_dict is a validated dict matching PuppyCreatePayload
+    puppy = {
+        "name": puppy_input_dict["name"],
+        "age": puppy_input_dict["age"],
+        "id": uuid.uuid4(),
+    }
+
+    # Explicit validation of the composed object before returning (optional):
+    Puppy.model_validate(puppy)
+
+    PUPPIES_DB_PYDANTIC.append(puppy)
+
+    return puppy
+
+if __name__ == "__main__":
+    flama.run(flama_app=app, server_host="0.0.0.0", server_port=8000)
+```
+
+### Typesystem
+
+Ensure Typesystem is installed and selected via `schema_library="typesystem"`.
+
+```python
+import typing as t
+import uuid
+
+import flama
+from flama import Flama, schemas
+
+import typesystem
+
+PUPPIES_DB_TYPESYSTEM: t.List[t.Dict[str, t.Any]] = []
+
+puppy_output_schema = typesystem.Schema(
+    fields={
+        "id": typesystem.String(title="ID"),
+        "name": typesystem.String(title="Name", max_length=100),
+        "age": typesystem.Integer(title="Age", minimum=0, maximum=30),
+    }
+)
+
+puppy_create_schema = typesystem.Schema(
+    fields={
+        "name": typesystem.String(title="Name", max_length=100, allow_null=False),
+        "age": typesystem.Integer(title="Age", minimum=0, maximum=30, allow_null=False),
+    }
+)
+
+app = Flama(
+    openapi={"info": {"title": "Puppy Register (Typesystem)", "version": "0.1.0"}},
+    schema_library="typesystem",
+)
+
+app.schema.register_schema(name="Puppy", schema=puppy_output_schema)
+app.schema.register_schema(name="PuppyCreationPayload", schema=puppy_create_schema)
+
+PuppyListResponse = t.Annotated[
+    list[schemas.SchemaType],
+    schemas.SchemaMetadata(puppy_output_schema, multiple=True),
+]
+PuppyDetailResponse = t.Annotated[
+    schemas.SchemaType,
+    schemas.SchemaMetadata(puppy_output_schema),
+]
+PuppyCreateRequest = t.Annotated[
+    schemas.SchemaType,
+    schemas.SchemaMetadata(puppy_create_schema),
+]
+
+@app.get("/puppies/")
+async def list_puppies_typesystem(name: t.Optional[str] = None) -> PuppyListResponse:
+    result = [p for p in PUPPIES_DB_TYPESYSTEM if name is None or p.get("name") == name]
+    return result
+
+@app.post("/puppies/")
+async def create_puppy_typesystem(
+    puppy_input_dict: PuppyCreateRequest,
+) -> PuppyDetailResponse:
+    puppy = {
+        "name": puppy_input_dict["name"],
+        "age": puppy_input_dict["age"],
+        "id": str(uuid.uuid4()),
+    }
+
+    # Explicit validation of the composed object before returning (optional):
+    puppy_output_schema.validate(puppy)
+
+    PUPPIES_DB_TYPESYSTEM.append(puppy)
+
+    return puppy
+
+
+if __name__ == "__main__":
+    flama.run(flama_app=app, server_host="0.0.0.0", server_port=8000)
+```
+
+### Marshmallow
+
+Ensure Marshmallow is installed and selected via `schema_library="marshmallow"`.
+
+```python
+import typing as t
+import uuid
+
+import marshmallow
+from marshmallow import fields, validate
+
+import flama
+from flama import Flama, schemas
+
+PUPPIES_DB_MARSHMALLOW: list[dict[str, t.Any]] = []
+
+class PuppyOutput(marshmallow.Schema):
+    id = fields.UUID(dump_only=True)  # UUID field, for output only
+    name = fields.Str(required=True, validate=validate.Length(min=1, max=100))
+    age = fields.Int(
+        required=True,
+        validate=validate.Range(min=0, max=30, error="Age must be between 0 and 30."),
+    )
+
+    class Meta:
+        ordered = True
+
+class PuppyCreatePayload(marshmallow.Schema):
+    name = fields.Str(required=True, validate=validate.Length(min=1, max=100))
+    age = fields.Int(
+        required=True,
+        validate=validate.Range(min=0, max=30, error="Age must be between 0 and 30."),
+    )
+
+    class Meta:
+        ordered = True
+
+app = Flama(
+    openapi={"info": {"title": "Puppy Register (Marshmallow)", "version": "0.1.0"}},
+    schema_library="marshmallow",
+)
+
+app.schema.register_schema(name="PuppyMM", schema=PuppyOutput)
+app.schema.register_schema(name="PuppyCreationPayloadMM", schema=PuppyCreatePayload)
+
+PuppyListResponse = t.Annotated[
+    list[schemas.SchemaType],
+    schemas.SchemaMetadata(PuppyOutput, multiple=True),
+]
+PuppyDetailResponse = t.Annotated[
+    schemas.SchemaType,
+    schemas.SchemaMetadata(PuppyOutput),
+]
+PuppyCreateRequest = t.Annotated[
+    schemas.SchemaType,
+    schemas.SchemaMetadata(PuppyCreatePayload),
+]
+
+@app.get("/puppies/")
+async def list_puppies_marshmallow(name: t.Optional[str] = None) -> PuppyListResponse:
+    result = [
+        p for p in PUPPIES_DB_MARSHMALLOW if name is None or p.get("name") == name
+    ]
+    return result
+
+@app.post("/puppies/")
+async def create_puppy_marshmallow(
+    puppy_input: PuppyCreateRequest,
+) -> PuppyDetailResponse:
+    puppy = {
+        "name": puppy_input["name"],
+        "age": puppy_input["age"],
+        "id": uuid.uuid4(),
+    }
+
+    # Explicit validation of the composed object before returning (optional):
+    PuppyOutput().validate(puppy)
+
+    PUPPIES_DB_MARSHMALLOW.append(puppy)
+
+    return puppy
+
+if __name__ == "__main__":
+    flama.run(flama_app=app, server_host="0.0.0.0", server_port=8000)
+```
