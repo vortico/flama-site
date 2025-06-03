@@ -1,0 +1,375 @@
+---
+title: Routes
+wip: false
+---
+
+Routes are the definitions that map incoming client requests to specific handler functions within your <FlamaName /> application. They act as the primary entry points for your API or web application, interpreting the request's path (URL) and, for HTTP routes, the HTTP method, to determine which piece of your backend logic should be executed. Understanding and defining routes effectively is fundamental to building any web service with <FlamaName />, whether it handles HTTP requests or WebSocket connections.
+
+## What are routes?
+
+In <FlamaName />, a **Route** essentially binds a URL path pattern to a specific Python asynchronous function, often called an _*endpoint*_ or _*handler*_.
+
+- For **HTTP requests**, the route also considers one or more HTTP methods, like <Label color="green">GET</Label>, <Label color="blue">POST</Label>, <Label color="orange">PUT</Label>, or <Label color="red">DELETE</Label>.
+- For **WebSocket connections**, the route defines a path where a WebSocket handshake can be initiated, leading to a persistent bidirectional communication channel.
+
+When <FlamaName /> receives an incoming connection attempt (either an HTTP request or a WebSocket handshake request), its internal routing mechanism inspects the path (and method for HTTP) to find a matching route. If a match is found, the associated handler function is called.
+
+- HTTP routes can be simple, like mapping `/` to a homepage handler, or more complex, involving variable path parameters (e.g., `/items/{item_id}`).
+- WebSocket routes define specific paths for real-time communication.
+
+**Why are they important?**
+
+- **API and application structure definition**: Routes define the accessible URLs and WebSocket paths of your application, forming its public interface.
+- **Request dispatching**: They are crucial for directing incoming connections to the correct logic.
+- **Resource addressing (HTTP)**: In RESTful APIs, HTTP routes map to resources, allowing clients to interact with these resources using standard HTTP methods.
+- **Real-time communication (WebSockets)**: WebSocket routes enable persistent, two-way communication channels between clients and the server.
+- **Code organisation**: By associating specific functions with URL paths, routes help in organising the application's codebase into logical handlers.
+
+The main virtue routes bring is providing a **clear, declarative, and structured way to define the entry points into your application**, making it understandable for both developers and clients.
+
+## Building and utilising routes
+
+<FlamaName /> offers flexible ways to define routes for both HTTP and WebSocket protocols, primarily through decorators
+on your handler functions or by adding them programmatically. For organising larger applications, <FlamaName /> encourages
+mounting sub-applications.
+
+### HTTP Routes
+
+HTTP routes handle traditional request-response interactions.
+
+###### Routes with decorators
+
+The most common and convenient way to create routes in <FlamaName /> is by using decorators directly on your asynchronous handler functions.
+The main application instance (typically named **app**) provides these decorators.
+
+- **`@app.route(path, methods=["METHOD"], ...)`**: This is the fundamental route decorator.
+
+  - `path`: A string defining the URL path for the route (e.g., `"/items/"`, `"/users/{user_id}"`).
+  - `methods`: A list of HTTP methods this route responds to (e.g., `["GET"]`, `["POST"]`, `["GET", "POST"]`). If omitted, it typically defaults to `["GET"]`.
+  - Other optional parameters include `name` (to refer to the route by name, useful for URL generation) and `include_in_schema` (to control its visibility in the auto-generated OpenAPI schema).
+
+- **Shorthand decorators**: For convenience, <FlamaName /> provides shorthand decorators for common HTTP methods:
+
+  - `@app.get(path, ...)`
+  - `@app.post(path, ...)`
+  - `@app.put(path, ...)`
+  - `@app.delete(path, ...)`
+  - `@app.patch(path, ...)`
+  - `@app.options(path, ...)`
+  - `@app.head(path, ...)`
+
+  These are equivalent to using `@app.route()` with the corresponding method specified.
+
+  ```python
+  @app.get("/my-data/")
+  async def fetch_my_data():
+      return {"data": "sample"}
+  ```
+
+- **Path parameters and type conversion**:
+  Routes can include path parameters, which capture segments of the URL. These are defined using curly braces `{}`. <FlamaName /> supports type conversion for these parameters directly in the path string.
+
+  - `"/items/{item_name:str}"`: Captures `item_name` as a string (default if no type is specified).
+  - `"/items/{item_id:int}"`: Captures `item_id` and converts it to an integer.
+  - Other supported types include **float**, and **uuid**.
+    The converted path parameters are then passed as arguments with the same name to your handler function.
+
+  ```python
+  @app.get("/product/{product_id:int}/")
+  async def get_product(product_id: int): # product_id will be an integer
+      return {"id": product_id, "name": f"Product {product_id}"}
+  ```
+
+###### Routes added programmatically
+
+Besides decorators, you can also add routes to your application programmatically using the **app.add_route()** method.
+
+- **`app.add_route(path, endpoint, methods=["METHOD"], name=None, include_in_schema=True)`**:
+
+  - `path`: The URL path string.
+  - `endpoint`: The asynchronous handler function to be called for this route.
+  - `methods`, `name`, `include_in_schema`: Same as for the `@app.route()` decorator.
+
+This method is useful when generating routes dynamically or when the decorator syntax is less convenient.
+
+```python
+async def custom_handler():
+    return {"message": "Handled manually"}
+
+app.add_route("/manual-endpoint/", custom_handler, methods=["GET"])
+```
+
+### WebSocket Routes
+
+WebSocket routes establish persistent, bidirectional communication channels. HTTP methods like <Label color="green">GET</Label> or <Label color="blue">POST</Label> are not applicable here; the connection is established via an HTTP GET request that is then upgraded to the WebSocket protocol.
+
+###### Defining WebSocket Routes with Decorators
+
+The primary way to define WebSocket routes is using the **@app.websocket_route()** decorator:
+
+- **`@app.websocket_route(path, name=None)`**:
+
+  - `path`: A string defining the URL path for the WebSocket connection (e.g., `"/ws"`, `"/chat/{room_id}"`).
+  - `name`: An optional name for the WebSocket route.
+
+  The handler function for a WebSocket route must accept a single argument, which will be an instance of **`flama.websockets.WebSocket`**.
+
+  ```python
+  from flama import websockets
+
+  @app.websocket_route("/ws-echo")
+  async def websocket_echo(websocket: websockets.WebSocket):
+      await websocket.accept()
+      try:
+          while True:
+              data = await websocket.receive_text()
+              await websocket.send_text(f"Echo: {data}")
+      except websockets.WebSocketDisconnect:
+          # Client disconnected
+          pass
+      else:
+          await websocket.close()
+  ```
+
+###### WebSocket Routes added programmatically
+
+You can also add WebSocket routes using **app.add_websocket_route()**:
+
+- **`app.add_websocket_route(path, endpoint, name=None)`**:
+
+  - `path`: The URL path string.
+  - `endpoint`: The asynchronous WebSocket handler function (must accept a **`flama.websockets.WebSocket`** argument).
+  - `name`: An optional name.
+
+  ```python
+  async def my_websocket_handler(websocket: flama.websockets.WebSocket):
+      await websocket.accept()
+      await websocket.send_text("Connected to manual websocket route!")
+      await websocket.close()
+
+  app.add_websocket_route("/manual-ws/", my_websocket_handler)
+  ```
+
+###### WebSocket Communication Flow
+
+Within a WebSocket handler, you typically:
+
+1.  **Accept the connection**: `await websocket.accept()` (handled by `async with websocket:` if used).
+2.  **Communicate**: Enter a loop to send and receive messages:
+    - Receive messages: **`await websocket.receive_text()`**, **`await websocket.receive_bytes()`**, **`await websocket.receive_json()`**.
+    - Send messages: **`await websocket.send_text(...)`**, **`await websocket.send_bytes(...)`**, **`await websocket.send_json(...)`**.
+3.  **Handle Disconnects**: Catch **`flama.websockets.WebSocketDisconnect`** (from Starlette) to manage client disconnections gracefully.
+4.  **Close the connection**: `await websocket.close(code=1000)` (also handled by `async with websocket:`).
+
+### Working with Routers
+
+For better organisation, <FlamaName /> provides the **`flama.routing.Router`** class. A **Router** allows you to group a set of related routes together.
+
+- You can create an instance of **Router**.
+- Routes are added to a **Router** by passing a list of `flama.routing.Route` instances to its `routes` parameter during initialisation, or by using its own `add_route()` method or route decorators (`@router.get()`, etc.) if you're using the router instance directly like an app instance for route definitions.
+- A **Route** instance is defined as in the following example:
+
+  ```python
+  from flama.routing import Router, Route
+
+  async def list_items(): return []
+  async def get_item(item_id: int): return {}
+
+  item_router = Router(routes=[
+      Route("/", list_items, methods=["GET"]),
+      Route("/{item_id:int}/", get_item, methods=["GET"]),
+  ])
+  ```
+
+A **Router** can also have its own specific list of components or middleware, allowing for modular configuration of different sections of your application.
+
+### Mounting Routers
+
+Once you have a **Router** (or even another <FlamaName /> application instance), you can include all its routes into your main application under a specific path prefix using:
+
+- **`app.mount(path_prefix, app_to_mount, name=None)`**:
+
+  - `path_prefix`: The URL prefix under which all routes from `app_to_mount` will be available.
+  - `app_to_mount`: The **Router** instance (or another ASGI application) whose routes you want to include.
+  - `name`: An optional name for the mounted application/router.
+
+Mounting is a powerful way to structure large applications by breaking them into smaller, manageable **Router** instances, each responsible for a specific domain or feature set.
+
+```python
+app.mount("/items", item_router)
+```
+
+### Mounting applications
+
+While <FlamaName /> uses a `flama.routing.Router` class internally to manage routes within each application
+instance, for organising distinct sections of a larger project, the **recommended approach** is to create separate,
+focused **Flama** application instances (sub-applications) and then mount them onto your main application.
+
+This promotes better modularity and encapsulation, as each sub-application is a complete **Flama** app that can have its own independent set of routes (HTTP and WebSocket), components, modules, and middleware. Direct manipulation of top-level **Router** instances by the user is generally an internal concern of how <FlamaName /> structures itself.
+
+You include all routes from a sub-application into your main application under a specific path prefix using the **app.mount()** method:
+
+- **`app.mount(path_prefix, app_to_mount, name=None)`**:
+  - `path_prefix`: The URL prefix under which all routes from `app_to_mount` will be available (e.g., `"/api/v1"`).
+  - `app_to_mount`: The sub-**Flama**-application instance (or any other ASGI application) whose routes you want to include.
+  - `name`: An optional name for the mounted application.
+
+Mounting is a powerful way to structure large applications by breaking them into smaller, manageable sub-applications, each responsible for a specific domain or feature set.
+
+```python
+shop_app = Flama()
+
+@shop_app.get("/products/")
+async def list_products_in_shop():
+    return [{"name": "Sub-App Product A"}]
+
+main_app = Flama()
+main_app.mount("/shop", shop_app)
+# Now, the "/products/" route from shop_app is accessible at "/shop/products/" on main_app.
+```
+
+## Example
+
+This example demonstrates various ways to define and organise routes in a <FlamaName /> application, including using decorators for basic routes, adding a route manually, and creating and mounting a separate **Router** for a group of related endpoints.
+
+```python
+import datetime
+import flama
+from flama import Flama
+from flama.http import HTMLResponse, JSONResponse
+from flama.routing import Route, Router
+
+app = Flama(
+    openapi={
+        "info": {
+            "title": "Hello-🔥",
+            "version": "1.0",
+            "description": "My first API",
+        },
+    },
+)
+
+# Basic Routes with decorators
+@app.get("/")
+async def root_path():
+    """Handles GET requests to the root path."""
+    return HTMLResponse(
+        "<h1>Welcome to the <FlamaName /> Routes Example!</h1><p>Explore different endpoints.</p>"
+    )
+
+@app.get("/items/{item_id:int}/")
+async def get_item_by_id(item_id: int):
+    """
+    Handles GET requests for a specific item, expecting an integer item_id.
+    Demonstrates path parameter with type conversion.
+    """
+    return JSONResponse(
+        {
+            "item_id": item_id,
+            "description": f"Details for item ID: {item_id}",
+            "parameter_type": str(type(item_id).__name__),
+        }
+    )
+
+@app.post("/items/")
+async def create_new_item():
+    """
+    Handles POST requests to create a new item (conceptual).
+    In a real application, this would likely involve processing a request body.
+    """
+    return JSONResponse(
+        {"message": "Item created successfully (simulated)."}, status_code=201
+    )
+
+@app.get("/users/{username:str}/profile/")
+async def get_user_profile(username: str):
+    """Handles GET requests for a user's profile by their username."""
+    # <FlamaName /> automatically converts dictionary to JSONResponse
+    return {
+        "username": username,
+        "email": f"{username}@example.com",
+        "status": "active",
+    }
+
+# Programmatically adding Route
+async def system_status_handler():
+    """A handler for a manually added route providing system status."""
+    return {
+        "status": "All systems operational",
+        "server_time": datetime.datetime.now(),
+    }
+
+app.add_route(
+    "/system/status/", system_status_handler, methods=["GET"], name="system_status"
+)
+
+# Not-recommended: Grouping routes with a Router
+async def list_products():
+    """Lists all available products (within the product_router context)."""
+    return [
+        {"id": "prod_001", "name": "Awesome Gadget"},
+        {"id": "prod_002", "name": "Super Tool"},
+    ]
+
+async def get_product_details(product: str):
+    """Gets details for a specific product."""
+    return {
+        "sku": product,
+        "name": f"Product {product.upper()}",
+        "price": "99.99",
+    }
+
+product_router = Router(
+    routes=[
+        Route("/products/", list_products, methods=["GET"]),
+        Route("/product_details/", get_product_details, methods=["GET"]),
+    ]
+)
+app.mount("/router", product_router)
+
+@app.websocket_route("/ws-echo/")
+async def websocket_echo_endpoint(websocket: websockets.WebSocket):
+    """
+    A simple WebSocket echo endpoint.
+    It accepts a connection, then echoes back any text message it receives.
+    """
+    try:
+        await websocket.accept()
+        await websocket.send_text("Hello from websocket.")
+        while True:
+            data = await websocket.receive_text()
+            await websocket.send_text(f"Echo from Flama: {data}")
+    except Exception as e:
+        await websocket.close()
+        raise e from None
+    else:
+        await websocket.close()
+
+# Recommended: Grouping routes with sub-applications
+shop_app = Flama()
+
+@shop_app.get("/products/")
+async def list_products_shop():
+    return await list_products()
+
+@shop_app.get("/product_details/")
+async def get_product_details_shop(product: str):
+    return await get_product_details(product)
+
+app.mount("/api/v1/shop", product_router)
+
+if __name__ == "__main__":
+    flama.run(flama_app=app, server_host="0.0.0.0", server_port=8000)
+```
+
+This example covers:
+
+- Defining various GET and POST routes using `@app.get()` and `@app.post()`
+- Using path parameters with type conversion
+- Returning different response types like **HTMLResponse** and **JSONResponse** (including automatic dictionary to JSON conversion)
+- Explicitly adding a **Route** using `app.add_route()` with a named handler
+- Creating a separate **Router** instance (`product_router`) with its own set of **Route** definitions.
+- Mounting the `product_router` to the main **app** at a specific path prefix (`/router/`), so its routes become accessible at paths like `/router/products/` and `/router/product/{product_sku}/`.
+- Mounting a simple websocket that echoes whatever text is passed to it on `/ws-echo/`.
+- Creating a separate **Flama** application instance (`shop_app`) with its own set of **Route** definitions.
+- Mounting the `shop_app` to the main **app** at a specific path prefix (`/api/v1/shop`), so its routes become accessible at paths like `/api/v1/shop/products/` and `/api/v1/shop/product/{product_sku}/`.
