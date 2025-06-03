@@ -115,7 +115,8 @@ The primary way to define WebSocket routes is using the **@app.websocket_route()
   The handler function for a WebSocket route must accept a single argument, which will be an instance of **`flama.websockets.WebSocket`**.
 
   ```python
-  from flama import websockets # Typically at the top of your file
+  from flama import websockets
+
   @app.websocket_route("/ws-echo")
   async def websocket_echo(websocket: websockets.WebSocket):
       await websocket.accept()
@@ -126,9 +127,9 @@ The primary way to define WebSocket routes is using the **@app.websocket_route()
       except websockets.WebSocketDisconnect:
           # Client disconnected
           pass
+      else:
+          await websocket.close()
   ```
-
-  Using the **`flama.websockets.WebSocket`** object as an asynchronous context manager (`async with websocket:`) is often cleaner as it handles **accept()** and **close()** automatically.
 
 ###### WebSocket Routes added programmatically
 
@@ -142,8 +143,9 @@ You can also add WebSocket routes using **app.add_websocket_route()**:
 
   ```python
   async def my_websocket_handler(websocket: flama.websockets.WebSocket):
-      async with websocket: # Handles accept and close
-          await websocket.send_text("Connected to manual websocket route!")
+      await websocket.accept()
+      await websocket.send_text("Connected to manual websocket route!")
+      await websocket.close()
 
   app.add_websocket_route("/manual-ws/", my_websocket_handler)
   ```
@@ -325,6 +327,24 @@ product_router = Router(
 )
 app.mount("/router", product_router)
 
+@app.websocket_route("/ws-echo/")
+async def websocket_echo_endpoint(websocket: websockets.WebSocket):
+    """
+    A simple WebSocket echo endpoint.
+    It accepts a connection, then echoes back any text message it receives.
+    """
+    try:
+        await websocket.accept()
+        await websocket.send_text("Hello from websocket.")
+        while True:
+            data = await websocket.receive_text()
+            await websocket.send_text(f"Echo from Flama: {data}")
+    except Exception as e:
+        await websocket.close()
+        raise e from None
+    else:
+        await websocket.close()
+
 # Recommended: Grouping routes with sub-applications
 shop_app = Flama()
 
@@ -350,5 +370,6 @@ This example covers:
 - Explicitly adding a **Route** using `app.add_route()` with a named handler
 - Creating a separate **Router** instance (`product_router`) with its own set of **Route** definitions.
 - Mounting the `product_router` to the main **app** at a specific path prefix (`/router/`), so its routes become accessible at paths like `/router/products/` and `/router/product/{product_sku}/`.
+- Mounting a simple websocket that echoes whatever text is passed to it on `/ws-echo/`.
 - Creating a separate **Flama** application instance (`shop_app`) with its own set of **Route** definitions.
 - Mounting the `shop_app` to the main **app** at a specific path prefix (`/api/v1/shop`), so its routes become accessible at paths like `/api/v1/shop/products/` and `/api/v1/shop/product/{product_sku}/`.
