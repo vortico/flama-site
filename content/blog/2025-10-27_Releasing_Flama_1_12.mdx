@@ -1,0 +1,66 @@
+---
+title: Releasing Flama 1.12
+description: The main highlights of Flama 1.12 version
+authors:
+  - name: 'José Antonio Perdiguero López'
+    url: 'https://vortico.tech/team/japl/'
+  - name: 'Miguel A. Duran Olivencia'
+    url: 'https://vortico.tech/team/mado/'
+wip: false
+---
+
+# Releasing Flama 1.12
+
+We're excited to roll out the latest iteration of Flama, version
+**[1.12.0](https://github.com/vortico/flama/releases/tag/v1.12.0/)**! 🎉 This release focuses on keeping Flama modern,
+robust, and improving how your ML APIs handle data schemas and documentation.
+
+This version brings some significant under-the-hood updates and crucial fixes to enhance stability and compatibility.
+Let's dive into the key highlights of Flama 1.12!
+
+- **Support for Python 3.14 and Dropping 3.9** (1.12.0): Flama continues to embrace the latest Python advancements! We
+  now officially support **Python 3.14** and, in line with keeping the codebase modern, we've dropped support for Python
+  3.9.
+
+- **Rebuild Serialisation Protocol for Versioning** (1.12.0): This is a big step for the future! We've rebuilt the
+  internal serialisation protocol to explicitly support **versioning**. This foundational change will allow for more
+  sophisticated, backward-compatible API evolution down the line.
+
+## Bug Fixes and Stability Improvements
+
+Flama 1.12 also addresses several issues to make your development experience smoother:
+
+- **OpenAPI Generator Discovers Nested Schemas** (1.12.0): The OpenAPI specification generator is now smarter, correctly
+  discovering and documenting **nested schemas** within your API definitions, leading to more complete and accurate
+  documentation.
+
+- **Fix for Schema to Dictionary Conversion** (1.12.0): We've fixed an issue that prevented the correct conversion of
+  schemas to dictionaries when encountering **`None` objects**, ensuring more reliable serialization/deserialization
+  paths.
+
+- **Prevent Duplicate Child Schema Registration** (1.12.0): A bug that caused the registration of the same child schema
+  multiple times has been squashed, improving consistency in complex schema definitions.
+
+We're committed to providing a high-performance, modern framework for your Machine Learning APIs. Stay tuned for more
+deep dives into the serialization protocol overhaul!
+
+Happy coding! 🚀
+
+## References
+
+- [Flama documentation](https://flama.dev/docs/)
+- [Flama GitHub repository](https://github.com/vortico/flama)
+- [Flama PyPI package](https://pypi.org/project/flama/)
+
+## Support our work
+
+If you find Flama useful for building robust Machine Learning APIs, we'd be thrilled if you showed your support by
+giving us a ⭐ on [GitHub](https://github.com/vortico/flama). Your stars are the best fuel for our development efforts!
+
+You can also stay updated with the latest news and development threads by following us on
+[𝕏](https://x.com/VorticoTech).
+
+## About the authors
+
+- [Vortico](https://vortico.tech/): We specialize in software development, helping businesses enhance and expand their
+  AI and technology capabilities.```
