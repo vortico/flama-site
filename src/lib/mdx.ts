@@ -34,7 +34,7 @@ function getSlug(fullPath: string): string {
   return getFilePath(fullPath)
     .toLowerCase()
     .replace(/ /g, '-')
-    .replace(/(\d+[_-])/g, '')
+    .replace(/(?<=^|\/)((\d{4}(-\d{1,2}){1,2})|\d+)-/g, '')
     .replace(/\.mdx/g, '')
 }
 
