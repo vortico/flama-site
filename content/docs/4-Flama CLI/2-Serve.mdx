@@ -81,7 +81,7 @@ curl --request GET \
     "timestamp": "2025-04-03T19:25:40.856195",
     "framework": {
       "lib": "sklearn",
-      "version": "1.5.2"
+      "version": "1.8.0"
     },
     "model": {
       "obj": "MLPClassifier",
@@ -104,7 +104,7 @@ curl --request GET \
         "n_iter_no_change": 10,
         "nesterovs_momentum": true,
         "power_t": 0.5,
-        "random_state": null,
+        "random_state": 0,
         "shuffle": true,
         "solver": "adam",
         "tol": 0.0001,
@@ -130,7 +130,9 @@ curl --request GET \
       ]
     }
   },
-  "artifacts": null
+  "artifacts": {
+    "foo.json": "/var/folders/.../artifacts/foo.json"
+  }
 }
 ```
 

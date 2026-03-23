@@ -3,7 +3,7 @@ title: Authentication
 wip: false
 ---
 
-The privatisation of some endpoints (or even entire APIs) is a common requirement in many applications. This is especially true when dealing with sensitive data, such as Machine Learning APIs that process personal or financial information. 
+The privatisation of some endpoints (or even entire APIs) is a common requirement in many applications. This is especially true when dealing with sensitive data, such as Machine Learning APIs that process personal or financial information.
 
 <FlamaName /> provides a powerful, native, and highly integrated authentication system based on **JSON Web Tokens (JWT)**. By leveraging Flama's architecture, you can secure your API endpoints and control access based on user permissions with just a few lines of code.
 
@@ -15,7 +15,7 @@ We can start with the official definition given in the [RFC 7519](https://datatr
 
 > JSON Web Token (JWT) is a compact, URL-safe means of representing claims to be transferred between two parties. The claims in a JWT are encoded as a JSON object that is used as the payload of a JSON Web Signature (JWS) structure [...] enabling the claims to be digitally signed or integrity protected with a Message Authentication Code (MAC) and/or encrypted.
 
-In simple terms, JWT is an open standard that defines a way for transmitting information between two parties in the form of a JSON object. The information being transmitted is digitally signed to ensure its integrity and authenticity. 
+In simple terms, JWT is an open standard that defines a way for transmitting information between two parties in the form of a JSON object. The information being transmitted is digitally signed to ensure its integrity and authenticity.
 
 ### Authentication Flow
 
@@ -34,11 +34,11 @@ JWT tokens are not only useful to identify users; they can also be used to share
 
 
 
-A JWT is represented as a sequence of URL-safe parts separated by dots (`.`), with each part containing a base64url-encoded JSON object. Assuming we are using JWS (JSON Web Signature)—which is the most common representation—a JWT consists of three parts:
+A JWT is represented as a sequence of URL-safe parts separated by dots (`.`), with each part containing a base64url-encoded JSON object. Assuming we are using JWS (JSON Web Signature), which is the most common representation, a JWT consists of three parts:
 
 #### The Header
 The header contains metadata about the token and the cryptographic operations applied to it. The most commonly used fields are:
-* **`alg`**: The algorithm used to sign the token (e.g., `HS256`, `HS384`, `HS512`). 
+* **`alg`**: The algorithm used to sign the token (e.g., `HS256`, `HS384`, `HS512`).
 * **`typ`**: The media type of the token. It is recommended to have the value `JWT` to indicate the object type.
 
 #### The Payload
@@ -58,7 +58,7 @@ To implement this secure flow, <FlamaName /> relies on two of its core architect
 
 As an application grows, so does the need to add more dependencies to it. Without Dependency Injection (DI), the `Flama` application class would have to create and manage all its dependencies internally, making it tightly coupled and harder to test. With DI, dependencies are provided from the outside.
 
-In <FlamaName />, a **Component** is a building block for dependency injection. It encapsulates logic that determines how specific dependencies should be resolved when the application runs. 
+In <FlamaName />, a **Component** is a building block for dependency injection. It encapsulates logic that determines how specific dependencies should be resolved when the application runs.
 
 For authentication, we use the `AccessTokenComponent`. This component contains all the information and logic necessary for:
 1. Extracting a JWT from either the headers or cookies of an incoming request.
@@ -120,7 +120,7 @@ async def login():
             "data": {
                 "user_id": 123,
                 # The permissions this user is granted:
-                "permissions": ["read:secure"], 
+                "permissions": ["read:secure"],
             },
             "iat": 0, # Issued At
         },
@@ -141,7 +141,7 @@ With our middleware in place and tokens being generated, protecting an endpoint 
 @app.route("/secure/", methods=["GET"], tags={"permissions": ["read:secure"]})
 async def secure_info():
     """
-    The AuthenticationMiddleware blocks any request that lacks 
+    The AuthenticationMiddleware blocks any request that lacks
     a valid token with the 'read:secure' permission.
     """
     return {"message": "You have accessed the secure vault!"}
@@ -204,9 +204,9 @@ async def login():
         {
             "data": {
                 "user_id": 123,
-                "permissions": ["read:secure"],  
+                "permissions": ["read:secure"],
             },
-            "iat": 0,  
+            "iat": 0,
         },
     )
 

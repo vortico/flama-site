@@ -69,9 +69,9 @@ Let's start implementing the easiest of the ingredients we have mentioned above:
 
 ```python
 import typing
-from flama.models import Model
+from flama.models import BaseModel
 
-class MyCustomModel(Model):
+class MyCustomModel(BaseModel):
     def __init__(self, model=None, meta=None, artifacts=None):
         self.model = model
         self.meta = meta
@@ -81,16 +81,20 @@ class MyCustomModel(Model):
         return self.model.get_params()
 
     def predict(self, x: typing.Any) -> typing.Any:
-        return self.model.predict(x)
+        result = self.model.predict(x)
+        # Ensure the output is JSON-serialisable (e.g. numpy int64 -> int)
+        return [int(v) for v in result] if hasattr(result, "tolist") else result
 ```
 
-As we can see, the **MyCustomModel** class inherits from the **Model** class, which is a built-in class of <FlamaName />.
+As we can see, the **MyCustomModel** class inherits from the **BaseModel** class, which is a built-in class of <FlamaName />.
 This base class provides the initialisation of the **model** attribute, and the **inspect** and **predict** methods,
-which will be exposed as routes of our application. If we wanted to instantiate a model object of the class
+which will be exposed as routes of our application. Note that the **predict** method includes a small conversion step
+to ensure the output is JSON-serialisable, this is necessary because some ML frameworks (e.g. Scikit-Learn) return
+numpy types which are not natively supported by JSON serialisation. If we wanted to instantiate a model object of the class
 **MyCustomModel**, we would need to pass the model object as an argument to the constructor, as follows:
 
 ```python
-model_artifact = flama.load("sklearn_model.flm")
+model_artifact = flama.load(path="sklearn_model.flm")
 model = MyCustomModel(model_artifact.model)
 ```
 
@@ -118,7 +122,7 @@ class MyCustomModelComponent(ModelComponent):
         self.model = MyCustomModel()
 
     def load(self):
-        load_model = flama.load(self._model_path)
+        load_model = flama.load(path=self._model_path)
         self.model = MyCustomModel(load_model.model, load_model.meta, load_model.artifacts)
 
     def reset(self):
@@ -186,7 +190,7 @@ class MyCustomModelResource(BaseModelResource[MyCustomModelComponent]):
             }
         }
 
-    @resource_method("/unload/", methods=["GET"], name="unload-method")
+    @ResourceRoute.method("/unload/", methods=["GET"], name="unload-method")
     def unload(self):
         """
         tags:
@@ -197,7 +201,7 @@ class MyCustomModelResource(BaseModelResource[MyCustomModelComponent]):
         self.component.reset()
         return self._get_metadata()
 
-    @resource_method("/metadata/", methods=["GET"], name="metadata-method")
+    @ResourceRoute.method("/metadata/", methods=["GET"], name="metadata-method")
     def metadata(self):
         """
         tags:
@@ -280,11 +284,10 @@ from datetime import datetime
 
 import flama
 from flama import Flama
-from flama.models import BaseModelResource, ModelComponent
-from flama.models.base import Model
-from flama.resources import resource_method
+from flama.models import BaseModel, BaseModelResource, ModelComponent
+from flama.resources.routing import ResourceRoute
 
-class MyCustomModel(Model):
+class MyCustomModel(BaseModel):
     def __init__(self, model=None, meta=None, artifacts=None):
         self.model = model
         self.meta = meta
@@ -294,7 +297,8 @@ class MyCustomModel(Model):
         return self.model.get_params()
 
     def predict(self, x: typing.Any) -> typing.Any:
-        return self.model.predict(x)
+        result = self.model.predict(x)
+        return [int(v) for v in result] if hasattr(result, "tolist") else result
 
 class MyCustomModelComponent(ModelComponent):
     def __init__(self, model_path: str):
@@ -302,7 +306,7 @@ class MyCustomModelComponent(ModelComponent):
         self.model = MyCustomModel()
 
     def load(self):
-        load_model = flama.load(self._model_path)
+        load_model = flama.load(path=self._model_path)
         self.model = MyCustomModel(load_model.model, load_model.meta, load_model.artifacts)
 
     def reset(self):
@@ -343,7 +347,7 @@ class MyCustomModelResource(BaseModelResource[MyCustomModelComponent]):
             }
         }
 
-    @resource_method("/unload/", methods=["GET"], name="unload-method")
+    @ResourceRoute.method("/unload/", methods=["GET"], name="unload-method")
     def unload(self):
         """
         tags:
@@ -354,7 +358,7 @@ class MyCustomModelResource(BaseModelResource[MyCustomModelComponent]):
         self.component.reset()
         return self._get_metadata()
 
-    @resource_method("/metadata/", methods=["GET"], name="metadata-method")
+    @ResourceRoute.method("/metadata/", methods=["GET"], name="metadata-method")
     def metadata(self):
         """
         tags:

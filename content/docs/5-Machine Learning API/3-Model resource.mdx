@@ -54,7 +54,7 @@ from flama import Flama
 
 # New imports (not seen so far):
 from flama.models import ModelResource
-from flama.resources import resource_method
+from flama.resources.routing import ResourceRoute
 
 # Flama app instantiation:
 app = Flama(
@@ -97,8 +97,8 @@ As can be seen, there are two ingredients imported which we haven't seen yet, na
   We agree with such a claim, which is why you won't need to worry about them because you won't even have to import **ModelResourceType**,
   since this is already handled for you by the **ModelResource** class.
 
-- **resource_method**: This is a <FlamaName /> built-in decorator which allows us to convert a given class method into
-  an **app** endpoint, with the following main arguments:
+- **ResourceRoute.method**: This is a <FlamaName /> built-in class method (of `ResourceRoute`) which allows us to
+  convert a given class method into an **app** endpoint, with the following main arguments:
 
   - **path**: Route path through which we'll be able to call the decorated method, e.g. **/predict/**
   - **methods**: HTTP methods associated with the endpoint, e.g. **GET** or **POST**
@@ -121,7 +121,7 @@ class MySKModel(ModelResource):
 
     # FIXME: Missing types
     #       This won't work, but it's almost correct
-    @resource_method("/predict", methods=["POST"], name="model-predict")
+    @ResourceRoute.method("/predict", methods=["POST"], name="model-predict")
     def predict(self, data):
         return self.model.predict(data)
 ```
@@ -138,7 +138,7 @@ amount of the pieces required, so we can start talking about these ingredients:
   **verbose_name** defines a tag for the documentation, and **name** is used only internally,
   but required to uniquely identify the resource being added.
 
-- **@resource_method**: The first argument determines the path associated to the method which
+- **@ResourceRoute.method**: The first argument determines the path associated to the method which
   the decorator accompanies to, e.g. **/predict/**. It also receives as parameter **methods**,
   which refers to the request methods to which this endpoint responds to (e.g. **POST**),
   and **name**, a parameter used internally to uniquely identify this endpoint.
@@ -169,7 +169,7 @@ class MySKModel(ModelResource):
     name = "sk_model"
 
     # Correct typed method with some documentation
-    @resource_method("/predict/", methods=["POST"], name="model-predict")
+    @ResourceRoute.method("/predict/", methods=["POST"], name="model-predict")
     def predict(self, data: X) -> Y:
         """
         tags:
@@ -222,7 +222,7 @@ class MyModel(ModelResource):
     verbose_name = "My ML model"
     model_path = "path/to/your_model_file.flm"
 
-    @resource_method("/inspect/", methods=["GET"], name="model-inspect-model")
+    @ResourceRoute.method("/inspect/", methods=["GET"], name="model-inspect-model")
     def inspect_model(self):
         """
         tags:
@@ -257,7 +257,7 @@ class MyModel(ModelResource):
         "library_version": "1.0.2",
     }
 
-    @resource_method("/metadata/", methods=["GET"], name="metadata-method")
+    @ResourceRoute.method("/metadata/", methods=["GET"], name="metadata-method")
     def metadata(self):
         """
         tags:
@@ -296,7 +296,7 @@ app.models.add_model_resource(path="/my_model", resource=MyModel)
 ### Decorator
 
 ```python
-@app.models.model("/model")
+@app.models.model_resource("/model")
 class MyModel(ModelResource):
     ...
 ```
@@ -327,7 +327,7 @@ namely:
 ### PyTorch
 
 ```python
-@app.models.model("/pytorch_model/")
+@app.models.model_resource("/pytorch_model/")
 class PyTorchModel(ModelResource):
     name = "pythorch_model"
     verbose_name = "PyTorch model"
@@ -338,7 +338,7 @@ class PyTorchModel(ModelResource):
         "library_version": "1.0.2",
     }
 
-    @resource_method("/metadata/", methods=["GET"], name="pytorch-metadata")
+    @ResourceRoute.method("/metadata/", methods=["GET"], name="pytorch-metadata")
     def metadata(self):
         """
         tags:
@@ -361,7 +361,7 @@ class PyTorchModel(ModelResource):
 ### Scikit-Learn
 
 ```python
-@app.models.model("/sklearn_model/")
+@app.models.model_resource("/sklearn_model/")
 class SKLearnModel(ModelResource):
     name = "pythorch_model"
     verbose_name = "ScikitLearn model"
@@ -372,7 +372,7 @@ class SKLearnModel(ModelResource):
         "library_version": "1.0.2",
     }
 
-    @resource_method("/metadata/", methods=["GET"], name="sklearn-metadata")
+    @ResourceRoute.method("/metadata/", methods=["GET"], name="sklearn-metadata")
     def metadata(self):
         """
         tags:
@@ -395,7 +395,7 @@ class SKLearnModel(ModelResource):
 ### TensorFlow
 
 ```python
-@app.models.model("/tensorflow_model/")
+@app.models.model_resource("/tensorflow_model/")
 class SKLearnModel(ModelResource):
     name = "tensorflow_model"
     verbose_name = "TensorFlow model"
@@ -406,7 +406,7 @@ class SKLearnModel(ModelResource):
         "library_version": "1.0.2",
     }
 
-    @resource_method("/metadata/", methods=["GET"], name="tensorflow-metadata")
+    @ResourceRoute.method("/metadata/", methods=["GET"], name="tensorflow-metadata")
     def metadata(self):
         """
         tags:
