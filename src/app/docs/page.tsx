@@ -1,23 +1,27 @@
 import React from 'react'
 
+import { IconBolt, IconBrain, IconRocket, IconTerminal2, IconTopologyStar3, IconWand } from '@tabler/icons-react'
 import { Metadata } from 'next'
 
 import { LinkButton } from '@/components/elements'
+import { FlamaName } from '@/components/names'
 
 interface DocsDashboardItemProps {
+  icon: React.ReactNode
   title: string
-  description: string
+  description: React.ReactNode
   url: string
 }
 
-function DocsDashboardItem({ title, description, url }: DocsDashboardItemProps) {
+function DocsDashboardItem({ icon, title, description, url }: DocsDashboardItemProps) {
   return (
-    <div className="flex max-w-xs flex-col justify-between">
-      <div className="">
-        <h2 className="text-center text-2xl font-semibold text-primary-800 dark:text-primary-200">{title}</h2>
-        <p className="mt-4">{description}</p>
+    <div className="group flex h-full flex-col rounded-lg border border-primary-200 bg-white p-8 transition-all duration-200 hover:border-brand-300 hover:shadow-lg dark:border-primary-700 dark:bg-primary-900 dark:hover:border-brand-600">
+      <div className="flex h-12 w-12 flex-none items-center justify-center rounded-full bg-brand-500/90 p-2.5 text-primary-100 shadow ring-1 ring-primary-900/30 transition-transform duration-200 group-hover:scale-110 dark:bg-brand-500/80 dark:text-primary-800">
+        {icon}
       </div>
-      <div className="mt-8 h-8 max-w-3xl">
+      <h2 className="mt-5 text-xl font-semibold text-primary-800 dark:text-primary-200">{title}</h2>
+      <p className="mt-3 flex-1 text-sm leading-relaxed text-primary-500 dark:text-primary-400">{description}</p>
+      <div className="mt-6 h-8">
         <LinkButton href={url} text="Read more" rightIcon />
       </div>
     </div>
@@ -26,21 +30,78 @@ function DocsDashboardItem({ title, description, url }: DocsDashboardItemProps) 
 
 function DocsDashboard() {
   return (
-    <div className="grid justify-items-center gap-12 sm:grid-cols-1 lg:grid-cols-3">
+    <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
       <DocsDashboardItem
+        icon={<IconRocket className="h-full w-full" />}
         title="Quickstart"
-        description="Follow this guide to develop your first API, and explore the main functionality offered by Flama. In this guide, you will learn how to create a new project, define your first endpoint, and run your API locally."
+        description={
+          <>
+            Follow this guide to develop your first <strong>API</strong>, and explore the main functionality offered by{' '}
+            <FlamaName />. Learn how to create a new project, define your first <strong>endpoint</strong>, and run your
+            API locally.
+          </>
+        }
         url="/docs/getting-started/quickstart/"
       />
       <DocsDashboardItem
-        title="Core"
-        description="Deep dive into the core functionality of Flama. Learn how to package your models as binary files for reusability, and how to integrate them into your API. Also, customise the interaction with models through Components and Resources."
+        icon={<IconBolt className="h-full w-full" />}
+        title="Fundamentals"
+        description={
+          <>
+            Deep dive into the foundational building blocks of <FlamaName />. Learn how <strong>applications</strong>,
+            routes, schemas, <strong>components</strong>, modules, middlewares, endpoints, and resources work together
+            to form a coherent ASGI application.
+          </>
+        }
+        url="/docs/fundamentals/applications/"
+      />
+      <DocsDashboardItem
+        icon={<IconBrain className="h-full w-full" />}
+        title="ML APIs"
+        description={
+          <>
+            Learn how to package your <strong>ML models</strong> as lightweight binary files, integrate them into your
+            API, and customise the interaction with models through <strong>Components</strong> and{' '}
+            <strong>Resources</strong> for full control over their lifecycle.
+          </>
+        }
         url="/docs/machine-learning-api/packaging-models/"
       />
       <DocsDashboardItem
+        icon={<IconTerminal2 className="h-full w-full" />}
         title="CLI"
-        description="Discover the Flama command line interface, and uncover the power of serving ML models codeless. This guide shows how to run an API locally, serve ML models with, and interact with them, without typing a single line of code."
+        description={
+          <>
+            Discover the <FlamaName /> <strong>command line interface</strong>, and uncover the power of serving ML
+            models codeless. This guide shows how to run an API locally, <strong>serve ML models</strong>, and interact
+            with them, without typing a single line of code.
+          </>
+        }
         url="/docs/flama-cli/run/"
+      />
+      <DocsDashboardItem
+        icon={<IconWand className="h-full w-full" />}
+        title="Advanced"
+        description={
+          <>
+            Explore advanced features such as <strong>configuration</strong> management, pagination, error handling,
+            background tasks, lifespan events, <strong>authentication</strong> with JWT, and other production-ready
+            patterns for building robust APIs.
+          </>
+        }
+        url="/docs/advanced-topics/configuration/"
+      />
+      <DocsDashboardItem
+        icon={<IconTopologyStar3 className="h-full w-full" />}
+        title="Domain Driven Design"
+        description={
+          <>
+            Place your <strong>business domain</strong> at the centre of your architecture. Learn how to apply
+            Domain-Driven Design patterns within <FlamaName />, including <strong>repositories</strong>, workers, and
+            domain models, to build maintainable systems.
+          </>
+        }
+        url="/docs/domain-driven-design/introduction/"
       />
     </div>
   )

@@ -21,7 +21,7 @@ The `Client` serves two primary purposes in your ecosystem:
 It provides all the standard HTTP methods you expect (`get`, `post`, `put`, `delete`, `patch`) with a clean, Pythonic API.
 It handles JSON serialisation, headers, and parameter encoding automatically.
 - Second, and perhaps more importantly, it acts as a **Lifecycle Manager**.
-When testing an application, you often need to set up complex resources before a request can be handled—connecting to a database,
+When testing an application, you often need to set up complex resources before a request can be handled, connecting to a database,
 loading a machine learning model into memory, or establishing a cache connection.
 The Client handles this orchestration for you seamlessly.
 
@@ -73,8 +73,8 @@ await client.get(str(url))
 By using `resolve_url`, your tests become resilient.
 You can change the underlying path structure of your API completely, and as long as the route names remain consistent, your tests will pass without modification.
 
-### Testing 
- 
+### Testing
+
 The Flama Client is designed to be the backbone of your test suite.
 The most effective way to use it is by defining a `pytest` fixture.
 This allows you to inject a fully configured, lifecycle-managed client into any test function.
