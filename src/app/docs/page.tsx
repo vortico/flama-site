@@ -1,6 +1,15 @@
 import React from 'react'
 
-import { IconBolt, IconBrain, IconRocket, IconTerminal2, IconTopologyStar3, IconWand } from '@tabler/icons-react'
+import {
+  IconBolt,
+  IconBrain,
+  IconDownload,
+  IconRocket,
+  IconSparkles,
+  IconTerminal2,
+  IconTopologyStar3,
+  IconWand,
+} from '@tabler/icons-react'
 import { Metadata } from 'next'
 
 import { LinkButton } from '@/components/elements'
@@ -107,6 +116,37 @@ function DocsDashboard() {
   )
 }
 
+function SkillBanner() {
+  return (
+    <div className="rounded-lg border border-brand-200 bg-gradient-to-r from-brand-500/5 to-brand-500/10 p-6 dark:border-brand-600/30 dark:from-brand-500/5 dark:to-brand-500/10">
+      <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex items-center gap-4">
+          <div className="flex h-10 w-10 flex-none items-center justify-center rounded-full bg-brand-500/90 p-2 text-primary-100 shadow ring-1 ring-primary-900/30 dark:bg-brand-500/80 dark:text-primary-800">
+            <IconSparkles className="h-full w-full" />
+          </div>
+          <div>
+            <h3 className="text-sm font-semibold text-primary-800 dark:text-primary-200">
+              <FlamaName /> for your AI assistant
+            </h3>
+            <p className="mt-0.5 text-sm text-primary-500 dark:text-primary-400">
+              Download the <strong>skill.md</strong> file and let your AI coding assistant build <FlamaName /> apps with
+              full framework knowledge.
+            </p>
+          </div>
+        </div>
+        <a
+          href="/skill.md"
+          download="flama-skill.md"
+          className="inline-flex flex-none items-center gap-2 rounded-full bg-brand-200 px-4 py-2 text-sm font-semibold text-brand-700 transition-colors duration-200 hover:bg-brand-300 hover:text-brand-700 focus:outline-none focus:ring-2 focus:ring-brand-600 dark:bg-primary-600 dark:text-primary-100 dark:hover:bg-primary-500 dark:hover:text-primary-50 dark:focus:ring-primary-500"
+        >
+          <IconDownload className="h-4 w-4" />
+          Download
+        </a>
+      </div>
+    </div>
+  )
+}
+
 export const metadata: Metadata = {
   title: 'Docs',
   description: 'Flama documentation',
@@ -125,6 +165,7 @@ export default function Docs() {
         <p className="text-lg">Learn how to build, package, and deploy your modern and robust machine learning APIs.</p>
       </header>
       <main className="mx-auto mb-20 max-w-5xl space-y-16 px-4 sm:mb-32 sm:px-6 md:mb-40 md:px-8">
+        <SkillBanner />
         <DocsDashboard />
       </main>
     </>
