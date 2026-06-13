@@ -1,0 +1,95 @@
+---
+title: Get
+wip: true
+---
+
+## Fetching models from a hub
+
+So far we have served models that were already packaged as **.flm** files. But where do those files come from when the
+model lives on a remote hub rather than on your disk? The command **get** downloads a model from a supported source and
+serialises it into the <FlamaName /> `.flm` format in a single step, ready for [serve](/docs/flama-cli/serve/) or
+[model](/docs/flama-cli/model/).
+
+This command works for both traditional predictive models and generative models. The artifact family is
+declared explicitly and recorded in the manifest, so it drives runtime dispatch when the model is later loaded. To
+inspect the command options, run:
+
+```console
+flama get --help
+
+Usage: flama get [OPTIONS] MODEL_NAME
+
+  Download and package a model as .flm.
+
+Options:
+  --source [huggingface]          Model source provider.  [required]
+  --family [ml|llm]               Artifact family recorded in the manifest.
+                                  [required]
+  -o, --output TEXT               Output .flm path (default: <model-name>.flm).
+  --max-concurrent INTEGER RANGE  Maximum number of files to download
+                                  concurrently.  [default: 8; x>=1]
+  --help                          Show this message and exit.
+```
+
+## Parameters
+
+### Selecting the model
+
+The model to fetch is identified by a single positional argument together with two required options that describe where
+it comes from and how it should be treated:
+
+- **MODEL_NAME** (required): the source-specific model identifier, e.g. a [HuggingFace](https://huggingface.co/)
+  repository such as `google/gemma-4-E2B-it`.
+- **source** (required): the provider to download from. Currently `huggingface` is supported.
+- **family** (required): `ml` for traditional predictive models, or `llm` for generative models. This choice is
+  persisted in the `.flm` manifest and drives runtime dispatch, so it cannot be changed without repacking.
+
+### Output options
+
+The remaining options control where the artifact is written and how many files are fetched at once:
+
+- **output** (`-o`): the destination `.flm` path. Defaults to `<model-name>.flm` with slashes replaced by underscores,
+  so `google/gemma-4-E2B-it` becomes `google_gemma-4-E2B-it.flm`.
+- **max-concurrent**: the maximum number of files to download in parallel (default: 8).
+
+## Examples
+
+### Predictive model
+
+To download and package a predictive model from HuggingFace as an `ml` artifact:
+
+```console
+flama get --source huggingface --family ml scikit-learn/Fish-Weight
+
+Downloading ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 4.1 MB 12.0 MB/s 0:00:00
+Packaging...
+Model saved to scikit-learn_Fish-Weight.flm
+```
+
+### Generative model
+
+To download and package a generative model as an `llm` artifact:
+
+```console
+flama get --source huggingface --family llm google/gemma-4-E2B-it
+
+Downloading ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 5.1 GB 24.3 MB/s 0:00:00
+Packaging...
+Model saved to google_gemma-4-E2B-it.flm
+```
+
+### Choosing the output path
+
+By default the artifact is named after the model. Pass `--output` to write it elsewhere:
+
+```console
+flama get --source huggingface --family llm google/gemma-4-E2B-it --output models/assistant.flm
+
+Downloading ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 5.1 GB 31.0 MB/s 0:00:00
+Packaging...
+Model saved to models/assistant.flm
+```
+
+Once a model is packaged, verify it with [model inspect](/docs/flama-cli/model/#inspect) and serve it with
+[serve](/docs/flama-cli/serve/). For more on serving generative models, see the
+[Generative AI](/docs/generative-ai/getting-models/) section.
