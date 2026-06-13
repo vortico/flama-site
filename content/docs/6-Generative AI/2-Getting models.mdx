@@ -1,0 +1,124 @@
+---
+title: Getting models
+wip: true
+---
+
+Before serving a large language model (LLM) with <FlamaName />, you need it packaged as a self-contained artifact. In
+the [Predictive AI](/docs/predictive-ai/packaging-models/) section we saw how traditional models are serialised
+into **.flm** files; generative models use the very same format, but rather than serialising a model you have trained
+yourself, you typically *fetch* a pre-trained model from a hub and let <FlamaName /> package it for you. This page covers
+the `flama get` command, the one-step way to download and package a model ready for serving.
+
+## What is an LLM artifact?
+
+In <FlamaName />, an **LLM artifact** is a **.flm** file (a *Flama Lightweight Model*) whose manifest records the model
+**family** as `llm`. As we saw with predictive models, a `.flm` file bundles the model weights, its configuration, and
+the metadata <FlamaName /> needs to build a serving application around it. The family is the crucial difference: it is
+persisted in the manifest at download time and drives runtime dispatch, so an `llm` artifact is routed through the LLM
+machinery (vLLM or MLX) while an `ml` artifact runs through its predictive framework.
+
+**Why does the family matter?**
+
+- **Dispatch**: The family tells <FlamaName /> whether to wrap the artifact in an `LLMResource` or a predictive
+  `ModelResource`, and which backend to load.
+- **Portability**: The on-disk weights are framework-agnostic; the family, not the original library, decides how they
+  are run, so the same artifact serves on vLLM (Linux/CUDA) or MLX (Apple Silicon).
+- **Immutability**: The family is fixed at packaging time and cannot be changed without repacking, which keeps the
+  serving behaviour reproducible across environments.
+
+## Fetching a model with `flama get`
+
+The `flama get` command downloads a model from a supported source and serialises it into a `.flm` artifact in a single
+step. Its inspection output describes the required options:
+
+```console
+flama get --help
+
+Usage: flama get [OPTIONS] MODEL_NAME
+
+  Download and package a model as .flm.
+
+  Download a model from a supported source and serialize it into Flama's .flm
+  format, ready for serving with 'flama serve' or interaction with 'flama
+  model'.
+
+Options:
+  --source [huggingface]          Model source provider.  [required]
+  --family [ml|llm]               Artifact family recorded in the manifest.
+                                  [required]
+  -o, --output TEXT               Output .flm path (default: <model-name>.flm).
+  --max-concurrent INTEGER RANGE  Maximum number of files to download
+                                  concurrently.  [default: 8; x>=1]
+  --help                          Show this message and exit.
+```
+
+Two options are required: `--source` selects the provider (currently [HuggingFace](https://huggingface.co/)), and
+`--family` declares whether the artifact is a traditional `ml` model or an `llm`. For generative models you always pass
+`--family llm`.
+
+## Examples
+
+Let us fetch a small instruction-tuned model so the examples in the rest of this section have something concrete to
+serve. We will use [Gemma 4 E2B](https://huggingface.co/google/gemma-4-E2B-it), the smallest model in the Gemma 4 family:
+
+```console
+flama get --source huggingface --family llm google/gemma-4-E2B-it
+
+Downloading ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 5.1 GB 24.3 MB/s 0:00:00
+Packaging...
+Model saved to google_gemma-4-E2B-it.flm
+```
+
+By default the artifact is written to `<model-name>.flm` with slashes replaced by underscores, hence
+`google_gemma-4-E2B-it.flm`. To choose a different path, pass `--output`:
+
+```console
+flama get --source huggingface --family llm google/gemma-4-E2B-it --output models/assistant.flm
+
+Downloading ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 5.1 GB 31.0 MB/s 0:00:00
+Packaging...
+Model saved to models/assistant.flm
+```
+
+### Inspecting the artifact
+
+Once the model is packaged, you can verify its metadata without loading the weights using the `flama model` command
+introduced in the [CLI section](/docs/flama-cli/model/). The `inspect` sub-command reads only the cheap metadata header:
+
+```console
+flama model google_gemma-4-E2B-it.flm inspect --pretty
+
+{
+    "manifest": [
+        "config.json",
+        "model.safetensors",
+        "tokenizer.json",
+        "tokenizer_config.json"
+    ],
+    "meta": {
+        "id": "0d7c3a4e-1f2b-4c8a-9e6d-5b4a3c2d1e0f",
+        "timestamp": "2026-06-13T09:12:44.512030",
+        "framework": {
+            "family": "llm",
+            "lib": "transformers",
+            "version": "4.57.0",
+            "config": null
+        },
+        "model": {
+            "obj": null,
+            "info": null,
+            "params": {},
+            "metrics": {}
+        },
+        "extra": {
+            "model_name": "google/gemma-4-E2B-it"
+        }
+    }
+}
+```
+
+Note the `framework.family` field set to `llm`: this is what tells <FlamaName /> to treat the artifact as a generative
+model when it is served. With a packaged model in hand, we are ready to serve it.
+
+In the [next page](/docs/generative-ai/serving-llms/) we will register this artifact in a <FlamaName /> application
+and interact with it over the native and vendor-compatible dialects.

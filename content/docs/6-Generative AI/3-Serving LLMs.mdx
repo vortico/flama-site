@@ -1,0 +1,248 @@
+---
+title: Serving LLMs
+wip: true
+---
+
+With a packaged model in hand, serving it is the same exercise as serving a predictive model: you register the artifact
+on a <FlamaName /> application under a URL path, and the framework wires up the endpoints. The difference is *which*
+endpoints, and which protocols they speak. In this page we register a large language model (LLM) programmatically, choose
+the serving dialects it should expose, and interact with it over HTTP, both buffered and streamed.
+
+This page mirrors the [Add models](/docs/predictive-ai/add-models/) page from the Predictive AI section; if you
+have served a predictive model before, the registration API will feel immediately familiar.
+
+## Registering a model
+
+Every <FlamaName /> application exposes a `models` module with an `add_model` method. For an LLM artifact,
+<FlamaName /> auto-detects the `llm` family from the manifest and wraps it in an `LLMResource`:
+
+```python
+app.models.add_model(
+    path="/llm/",
+    model="google_gemma-4-E2B-it.flm",
+    name="assistant",
+    serving=("native", "openai"),
+)
+```
+
+The arguments are:
+
+- **path**: the URL prefix under which the model's endpoints are mounted.
+- **model**: the local file path to the `.flm` artifact.
+- **name**: the resource name, used for dependency injection and OpenAPI tags.
+- **serving**: a tuple of dialect names to enable. When omitted, every available dialect is mounted.
+
+Registration is deliberately cheap: only the artifact's metadata header is read so the right resource class can be
+selected. The heavy deserialisation happens during application startup, after the server has bound its port, so models
+that weigh several gigabytes do not delay the boot.
+
+### Tuning generation defaults
+
+Default generation parameters are passed through `params`, and the special `reasoning` flag controls whether the model is
+asked to produce reasoning content:
+
+```python
+app.models.add_model(
+    path="/llm/",
+    model="google_gemma-4-E2B-it.flm",
+    name="assistant",
+    serving=("native", "openai"),
+    params={"temperature": 0.7, "max_tokens": 512, "reasoning": True},
+)
+```
+
+Reserved keys such as `reasoning` are lifted onto the resource; the remaining parameters (`temperature`, `max_tokens`,
+and any other generation hints) are forwarded to the backend on every request, and can be overridden per call.
+
+### Using a resource class
+
+For finer control, define an `LLMResource` subclass and register it with the `model_resource` decorator. This is the
+generative counterpart to a custom [model resource](/docs/predictive-ai/model-resource/):
+
+```python
+from flama.models import LLMResource
+
+
+@app.models.model_resource("/llm/")
+class Assistant(LLMResource):
+    name = "assistant"
+    verbose_name = "Assistant"
+    model_path = "google_gemma-4-E2B-it.flm"
+    serving = ("native", "openai")
+    reasoning = True
+    heartbeat_interval = 15.0
+```
+
+The `reasoning` attribute sets the resource default, and `heartbeat_interval` controls how often a comment-only
+heartbeat is emitted on idle streams to keep connections alive.
+
+## Serving dialects
+
+A **dialect** is the wire protocol a client uses to talk to the model. Each enabled dialect mounts its routes under a
+fixed prefix relative to the resource path, so one resource can serve several clients simultaneously.
+
+### Native
+
+The native dialect is the channel-aware <FlamaName /> protocol. Mounted directly under the resource path (no prefix), it
+exposes:
+
+- <Label color="green">GET</Label> **/llm/** Retrieve the model's introspection payload (metadata and bundled
+  artifacts).
+- <Label color="orange">PUT</Label> **/llm/** Configure the default generation parameters for the resource.
+- <Label color="blue">POST</Label> **/llm/query/** Send a prompt and receive a buffered response.
+- <Label color="blue">POST</Label> **/llm/stream/** Create a generation and receive a stream identifier.
+- <Label color="green">GET</Label> `/llm/stream/{stream_id}/` Consume the generation as Server-Sent Events (SSE).
+- <Label color="green">GET</Label> **/llm/chat/** The built-in HTML chat interface (covered in the
+  [next page](/docs/generative-ai/chatbot-application/)).
+
+### Vendor-compatible dialects
+
+The remaining dialects are drop-in compatible with the corresponding vendor clients, so you can point an existing SDK at
+your <FlamaName /> deployment by changing only its base URL:
+
+- **OpenAI** (prefix `/openai`): <Label color="blue">POST</Label> **/llm/openai/v1/chat/completions**,
+  <Label color="blue">POST</Label> **/llm/openai/v1/completions**, <Label color="blue">POST</Label>
+  **/llm/openai/v1/responses**, and <Label color="green">GET</Label> **/llm/openai/v1/models**.
+- **Anthropic** (prefix `/anthropic`): <Label color="blue">POST</Label> **/llm/anthropic/v1/messages** and
+  <Label color="green">GET</Label> **/llm/anthropic/v1/models**.
+- **Ollama** (prefix `/ollama`): <Label color="blue">POST</Label> **/llm/ollama/api/chat**,
+  <Label color="blue">POST</Label> **/llm/ollama/api/generate**, and <Label color="green">GET</Label>
+  **/llm/ollama/api/tags**, among others.
+
+## Transports
+
+A **transport** is the shape of the input you send. The native `query` and `stream` endpoints accept a `transport` field
+with three values:
+
+- **raw**: the `prompt` is forwarded verbatim, without a chat template.
+- **chat**: the `prompt` is rendered through the model's chat template, with an optional `system` instruction.
+- **conversation**: a list of `messages` (each with a `role` and `content`) is rendered through the chat template.
+
+When `transport` is omitted, the model's default is used: `chat` when the backend exposes a chat template, `raw`
+otherwise.
+
+## Interacting with the model
+
+### Buffered queries
+
+The simplest interaction is a buffered query: send a prompt, receive the full response once generation completes. Using
+the native dialect:
+
+```console
+curl --request POST \
+  --url http://127.0.0.1:8000/llm/query/ \
+  --header 'Content-Type: application/json' \
+  --data '{
+  "transport": "chat",
+  "prompt": "What is Flama in one sentence?",
+  "system": "You are a concise assistant.",
+  "params": {"temperature": 0.7, "max_tokens": 128}
+}'
+```
+
+The response is an envelope with channel-tagged blocks. The user-visible answer arrives on the `output` channel, while
+reasoning, when present, arrives on a separate channel:
+
+```json
+{
+  "id": "0b9f1c2d-3e4a-5b6c-7d8e-9f0a1b2c3d4e",
+  "created": 1781679164,
+  "blocks": [
+    {
+      "type": "text",
+      "channel": "output",
+      "text": "Flama is a Python framework for building production-ready ML and LLM APIs with minimal code."
+    }
+  ],
+  "stop_reason": "stop",
+  "usage": {"input_tokens": 23, "output_tokens": 19}
+}
+```
+
+### Streaming responses
+
+For responsive, token-by-token output, the native dialect uses a two-step flow. First, create a generation with a
+<Label color="blue">POST</Label> to `/llm/stream/`; it returns a stream identifier and kicks off generation in the
+background:
+
+```console
+curl --request POST \
+  --url http://127.0.0.1:8000/llm/stream/ \
+  --header 'Content-Type: application/json' \
+  --data '{"transport": "chat", "prompt": "Explain dependency injection."}'
+
+{"id": "5b4a3c2d-1e0f-4a9b-8c7d-6e5f4a3b2c1d"}
+```
+
+Then consume the stream with a <Label color="green">GET</Label> to `/llm/stream/{id}/`, which returns
+`text/event-stream`. The two-step design lets browsers use a native `EventSource` (which only supports GET) and
+reconnect transparently with the `Last-Event-ID` header:
+
+```console
+curl --request GET \
+  --url http://127.0.0.1:8000/llm/stream/5b4a3c2d-1e0f-4a9b-8c7d-6e5f4a3b2c1d/ \
+  --header 'Accept: text/event-stream'
+
+event: message.start
+data: {"id": "5b4a3c2d-1e0f-4a9b-8c7d-6e5f4a3b2c1d"}
+
+event: block.delta
+data: {"channel": "output", "text": "Dependency injection is "}
+
+event: block.delta
+data: {"channel": "output", "text": "a pattern where ..."}
+
+event: message.stop
+data: {"stop_reason": "stop", "usage": {"input_tokens": 12, "output_tokens": 64}}
+```
+
+## Example
+
+Putting it together, here is a complete application that serves a single model across the native and OpenAI dialects with
+sensible generation defaults:
+
+```python
+# examples/serving_llms.py
+import flama
+from flama import Flama
+
+app = Flama(
+    openapi={
+        "info": {
+            "title": "Generative AI API",
+            "version": "1.0.0",
+            "description": "Serving large language models with Flama 🔥",
+        },
+    },
+    docs="/docs/",
+)
+
+app.models.add_model(
+    path="/llm/",
+    model="google_gemma-4-E2B-it.flm",
+    name="assistant",
+    serving=("native", "openai"),
+    params={"temperature": 0.7, "max_tokens": 512},
+)
+
+
+if __name__ == "__main__":
+    flama.run(flama_app=app, server_host="0.0.0.0", server_port=8000)
+```
+
+Run it with the CLI and explore the auto-generated documentation at `http://127.0.0.1:8000/docs/`:
+
+```console
+flama run examples.serving_llms:app
+
+INFO:     Started server process [42137]
+INFO:     Waiting for application startup.
+INFO:     Model starting (name: assistant)
+INFO:     Model ready (name: assistant)
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
+```
+
+If you would rather serve a model without writing any code at all, the
+[serve](/docs/flama-cli/serve/) command does exactly this from the command line. In the
+[next page](/docs/generative-ai/chatbot-application/) we turn this bare API into an interactive chat application.
