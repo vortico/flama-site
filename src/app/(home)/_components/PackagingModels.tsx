@@ -2,7 +2,7 @@
 
 import React, { useCallback, useMemo, useState } from 'react'
 
-import { IconRobot } from '@tabler/icons-react'
+import { IconPackage } from '@tabler/icons-react'
 import { motion } from 'framer-motion'
 
 import { Window } from '@/components/elements'
@@ -11,9 +11,9 @@ import { FlamaName } from '@/components/names'
 import { ISample } from '@/lib/samples'
 
 import HomeSection from './HomeSection'
-import SelectableList, { ISelectableItem } from './SelectableList'
+import SelectableIcons, { ISelectableIconItem } from './SelectableIcons'
 
-const frameworks: ISelectableItem[] = [
+const frameworks: ISelectableIconItem[] = [
   {
     id: 'sklearn',
     name: 'scikit-learn',
@@ -31,7 +31,7 @@ const frameworks: ISelectableItem[] = [
   },
 ]
 
-export default function MachineLearningResponsive({ samples }: { samples: ISample[] }) {
+export default function PackagingModels({ samples }: { samples: ISample[] }) {
   const [selected, setSelected] = useState<string>(frameworks[0].id)
 
   const onSelect = useCallback(
@@ -45,12 +45,12 @@ export default function MachineLearningResponsive({ samples }: { samples: ISampl
 
   return (
     <HomeSection
-      id="machine-learning-responsive"
-      icon={<IconRobot className="h-full w-full" />}
-      title="Machine Learning Responsive"
-      docRef="/docs/"
+      id="any-framework-one-format"
+      icon={<IconPackage className="h-full w-full" />}
+      title="Any Framework, One Format"
+      docRef="/docs/predictive-ai/packaging-models/"
       selectableList={
-        <SelectableList
+        <SelectableIcons
           items={frameworks.map(({ id, name, icon }) => ({ id, name, icon }))}
           selected={selected}
           onSelect={onSelect}
@@ -59,14 +59,14 @@ export default function MachineLearningResponsive({ samples }: { samples: ISampl
       body={
         <>
           <p>
-            Let’s face it, there isn’t a single ML framework. Models developed in such different frameworks should be
-            easily integrated together in a single API. However this integration presents a technical challenge,
-            typically unproductive and annoying for a data scientist.
+            There isn’t a single ML framework, and the models you build in scikit-learn, TensorFlow, or PyTorch should
+            be just as easy to ship together. That integration is usually the unproductive, fiddly part of a data
+            scientist’s day.
           </p>
           <br />
           <p>
-            <FlamaName /> is thought from the very beginning to be compatible with the mainstream data-science
-            frameworks, and it makes easy and simple the packaging of ML models to be integrated together.
+            <FlamaName /> packages a model from any of the mainstream frameworks into a single portable format, the .flm
+            file, so every model looks the same to your API no matter where it came from.
           </p>
         </>
       }

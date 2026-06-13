@@ -4,20 +4,26 @@ import { Code } from '@/components/elements'
 import { loadSample, type ISample } from '@/lib/samples'
 
 import {
+  Chatbot,
   DevelopmentTools,
   EffortlessDevelopment,
   Extensibility,
+  GenerativeAIServing,
   Hero,
-  MachineLearningResponsive,
-  ModelsLifecycle,
+  ModelContextProtocol,
+  ModelsOnDemand,
+  PackagingModels,
   ProductionReadyFirst,
+  RustCore,
 } from './_components'
 
 interface Samples {
   hero: ISample[]
-  machineLearningResponsive: ISample[]
+  packagingModels: ISample[]
+  modelsOnDemand: ISample[]
+  generativeAIServing: ISample[]
+  modelContextProtocol: ISample[]
   productionReadyFirst: ISample[]
-  modelsLifecycle: ISample[]
   extensibility: ISample[]
 }
 
@@ -25,47 +31,123 @@ async function getSamples(): Promise<Samples> {
   return {
     hero: [
       {
-        id: 'framework',
-        title: 'Framework',
-        code: <Code code={await loadSample('home/hero_framework.py')} language="python" lines={{ type: 'number' }} />,
-      },
-      {
-        id: 'application',
-        title: 'Application',
+        id: 'run',
+        title: 'Run a model',
         code: (
-          <Code
-            code={await loadSample('home/hero_application.sh')}
-            language="console"
-            lines={{ type: 'token', token: '>' }}
-          />
+          <Code code={await loadSample('home/hero_run.sh')} language="console" lines={{ type: 'token', token: '>' }} />
         ),
       },
+      {
+        id: 'mcp',
+        title: 'MCP server',
+        code: <Code code={await loadSample('home/hero_mcp.py')} language="python" lines={{ type: 'number' }} />,
+      },
+      {
+        id: 'rest',
+        title: 'REST API',
+        code: <Code code={await loadSample('home/hero_rest.py')} language="python" lines={{ type: 'number' }} />,
+      },
     ],
-    machineLearningResponsive: [
+    packagingModels: [
       {
         id: 'tf',
         title: 'TensorFlow',
         code: (
-          <Code
-            code={await loadSample('home/ml_responsive_tensorflow.py')}
-            language="python"
-            lines={{ type: 'number' }}
-          />
+          <Code code={await loadSample('home/packaging_tensorflow.py')} language="python" lines={{ type: 'number' }} />
         ),
       },
       {
         id: 'sklearn',
-        title: 'Scikit Learn',
+        title: 'scikit-learn',
         code: (
-          <Code code={await loadSample('home/ml_responsive_sklearn.py')} language="python" lines={{ type: 'number' }} />
+          <Code code={await loadSample('home/packaging_sklearn.py')} language="python" lines={{ type: 'number' }} />
         ),
       },
       {
         id: 'pytorch',
         title: 'PyTorch',
         code: (
-          <Code code={await loadSample('home/ml_responsive_pytorch.py')} language="python" lines={{ type: 'number' }} />
+          <Code code={await loadSample('home/packaging_pytorch.py')} language="python" lines={{ type: 'number' }} />
         ),
+      },
+    ],
+    modelsOnDemand: [
+      {
+        id: 'ml',
+        title: 'Predictive',
+        code: (
+          <Code code={await loadSample('home/get_ml.sh')} language="console" lines={{ type: 'token', token: '>' }} />
+        ),
+      },
+      {
+        id: 'llm',
+        title: 'Generative',
+        code: (
+          <Code code={await loadSample('home/get_llm.sh')} language="console" lines={{ type: 'token', token: '>' }} />
+        ),
+      },
+    ],
+    generativeAIServing: [
+      {
+        id: 'native',
+        title: 'Native',
+        code: (
+          <Code
+            code={await loadSample('home/llm_serving_native_cli.sh')}
+            language="console"
+            lines={{ type: 'token', token: '>' }}
+          />
+        ),
+      },
+      {
+        id: 'openai',
+        title: 'OpenAI',
+        code: (
+          <Code
+            code={await loadSample('home/llm_serving_openai_cli.sh')}
+            language="console"
+            lines={{ type: 'token', token: '>' }}
+          />
+        ),
+      },
+      {
+        id: 'anthropic',
+        title: 'Anthropic',
+        code: (
+          <Code
+            code={await loadSample('home/llm_serving_anthropic_cli.sh')}
+            language="console"
+            lines={{ type: 'token', token: '>' }}
+          />
+        ),
+      },
+      {
+        id: 'ollama',
+        title: 'Ollama',
+        code: (
+          <Code
+            code={await loadSample('home/llm_serving_ollama_cli.sh')}
+            language="console"
+            lines={{ type: 'token', token: '>' }}
+          />
+        ),
+      },
+    ],
+    modelContextProtocol: [
+      {
+        id: 'tool',
+        title: 'Tool',
+        code: <Code code={await loadSample('home/mcp_tool.py')} language="python" lines={{ type: 'number' }} />,
+      },
+      {
+        id: 'resource',
+        title: 'Resource',
+        code: <Code code={await loadSample('home/mcp_resource.py')} language="python" lines={{ type: 'number' }} />,
+      },
+      {
+        id: 'prompt',
+        title: 'Prompt',
+        code: <Code code={await loadSample('home/mcp_prompt.py')} language="python" lines={{ type: 'number' }} />,
       },
     ],
     productionReadyFirst: [
@@ -92,6 +174,24 @@ async function getSamples(): Promise<Samples> {
         ),
       },
       {
+        id: 'spec',
+        title: 'Spec file',
+        code: (
+          <div className="space-y-2">
+            <Code
+              code={await loadSample('home/production_ready_first_spec.json')}
+              language="json"
+              lines={{ type: 'number' }}
+            />
+            <Code
+              code={await loadSample('home/production_ready_first_spec_run.sh')}
+              language="console"
+              lines={{ type: 'token', token: '>' }}
+            />
+          </div>
+        ),
+      },
+      {
         id: 'docker',
         title: 'Docker',
         code: (
@@ -101,13 +201,6 @@ async function getSamples(): Promise<Samples> {
             lines={{ type: 'token', token: '>' }}
           />
         ),
-      },
-    ],
-    modelsLifecycle: [
-      {
-        id: 'models-lifecycle',
-        title: 'Models Lifecycle',
-        code: <Code code={await loadSample('home/models_lifecycle.py')} language="python" lines={{ type: 'number' }} />,
       },
     ],
     extensibility: [
@@ -129,10 +222,14 @@ export default async function Page() {
         <Hero samples={samples.hero} />
       </header>
       <main className="mb-20 space-y-20 pt-20 sm:mb-32 sm:space-y-32 sm:pt-32 md:mb-40 md:space-y-40 md:pt-40">
-        <MachineLearningResponsive samples={samples.machineLearningResponsive} />
+        <PackagingModels samples={samples.packagingModels} />
+        <ModelsOnDemand samples={samples.modelsOnDemand} />
+        <GenerativeAIServing samples={samples.generativeAIServing} />
+        <Chatbot />
+        <ModelContextProtocol samples={samples.modelContextProtocol} />
         <ProductionReadyFirst samples={samples.productionReadyFirst} />
+        <RustCore />
         <EffortlessDevelopment />
-        <ModelsLifecycle samples={samples.modelsLifecycle} />
         <Extensibility samples={samples.extensibility} />
         <DevelopmentTools />
       </main>

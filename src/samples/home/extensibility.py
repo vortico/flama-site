@@ -1,13 +1,13 @@
 import typing
 
 import mlflow
-from flama import Module, Flama
+from flama import Flama, Module
 
 
 class MLFlowModule(Module):
     name = "mlflow"
 
-    def __init__(self, app: Flama, url: str = None, *args, **kwargs):
+    def __init__(self, app: Flama, url: typing.Optional[str] = None, *args, **kwargs):
         super().__init__(app, *args, **kwargs)
         self.url = url
 
@@ -24,4 +24,4 @@ class MLFlowModule(Module):
 app = Flama(modules=[MLFlowModule])
 
 # Module usage example
-model = app.mlflow.search_runs(["foo"], "tags.name = 'bar'")
+runs = app.mlflow.search_runs(["foo"], "tags.name = 'bar'")
