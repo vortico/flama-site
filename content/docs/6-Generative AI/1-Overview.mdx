@@ -1,0 +1,139 @@
+---
+title: Overview
+wip: true
+---
+
+<FlamaName /> began life as a framework for productionising machine-learning models with as little ceremony as
+possible. With the 2.0 release, that same one-line philosophy extends to generative AI: serving a large language model
+(LLM) behind a production-ready HTTP API is now a first-class citizen of the framework. This section introduces the
+concepts behind generative serving in <FlamaName />, explains why they matter, and walks you through serving your own
+models, building a chat interface, and exposing tools to AI clients through the Model Context Protocol (MCP).
+
+## What is generative AI serving?
+
+In <FlamaName />, **generative AI serving** is the process of exposing a packaged generative model, typically a large
+language model, behind a set of HTTP endpoints that speak the protocols your clients already understand. Where a
+*predictive* model answers "what is this?" by returning a label or a score, a *generative* model answers "create
+something that satisfies this description" by streaming back tokens that compose into text, code, or structured tool
+calls.
+
+The headline benefit is that you do not have to choose between writing your own serving stack and adopting a heavyweight
+inference server. <FlamaName /> packages a model into a single artifact and serves it through the same application that
+already hosts your REST endpoints, your predictive models, and your business logic.
+
+**Why does it matter?**
+
+- **Compatibility**: Existing clients written for OpenAI, Anthropic, or Ollama can talk to your model without code
+  changes, because <FlamaName /> speaks those dialects natively.
+- **Portability**: The same packaged model runs on whichever runtime your hardware offers, with the framework selecting
+  the backend at load time rather than baking it into the artifact.
+- **Streaming-first**: Responses stream over Server-Sent Events (SSE) by default, so first-token latency stays low and
+  long generations remain responsive.
+- **Uniformity**: Generative models are registered, injected, and inspected exactly like the predictive models covered
+  in the [Predictive AI](/docs/predictive-ai/packaging-models/) section, so everything you already know carries
+  across.
+- **Tooling**: A built-in chat interface and native MCP support turn a bare model into an interactive application and an
+  agent-ready tool provider.
+
+## Key concepts
+
+Before serving a model, let us establish four concepts that this section builds upon. Together they describe how a
+request travels from a client, through a *dialect*, into a *transport*, down to a *backend*, and back out through the
+*decoder*.
+
+### Dialects
+
+A **dialect** (also called a *serving layer*) is the wire protocol a client uses to talk to your model. <FlamaName />
+ships four dialects, each mounted under its own path prefix so a single resource can speak several at once:
+
+| Dialect | Prefix | Representative routes |
+|---|---|---|
+| **Native** | _(none)_ | `/query/`, `/stream/`, `/chat/` |
+| **OpenAI** | `/openai` | `/v1/chat/completions`, `/v1/completions`, `/v1/responses`, `/v1/models` |
+| **Anthropic** | `/anthropic` | `/v1/messages`, `/v1/models` |
+| **Ollama** | `/ollama` | `/api/chat`, `/api/generate`, `/api/tags` |
+
+The native dialect is the channel-aware <FlamaName /> protocol and powers the built-in chat interface; the others are
+drop-in compatible with the corresponding vendor clients.
+
+### Backends
+
+A **backend** is the runtime that actually executes the model. <FlamaName /> integrates with
+[HuggingFace](https://huggingface.co/) transformers, [vLLM](https://docs.vllm.ai/) on Linux with CUDA, and
+[MLX](https://ml-explore.github.io/mlx/) on Apple Silicon. The choice is *hardware-driven and not persisted* in the
+artifact: at load time the framework picks vLLM when its package is importable and MLX when `mlx.core` is importable, so
+the very same `.flm` file runs wherever you deploy it.
+
+### Transports
+
+A **transport** is the shape of the input you send to the model. There are three:
+
+- *raw*: the prompt is forwarded verbatim, without any chat template.
+- *chat*: a single-turn prompt is rendered through the model's chat template, with an optional system instruction.
+- *conversation*: a multi-turn list of messages is rendered through the chat template.
+
+When you do not specify a transport, the model uses its default: `chat` if the backend exposes a chat template, and
+`raw` otherwise.
+
+### Decoder and channels
+
+Modern models interleave several kinds of output in a single stream: user-visible text, hidden reasoning, and structured
+tool calls. The **decoder** splits that stream into typed events tagged by **channel**. The `output` channel carries the
+user-visible answer; other channels (such as `thought` or `analysis`) carry reasoning the model emits between markers
+like `<think>...</think>`; and `<tool_call>...</tool_call>` blocks are parsed into structured tool events. The decoder
+auto-detects the right strategy when the model starts, so most models work without any configuration.
+
+## Base application
+
+To ground the discussion, here is the minimal skeleton we will build upon throughout this section. It registers a single
+packaged LLM under `/llm/`, speaking both the native and OpenAI dialects:
+
+```python
+# examples/generative_ai.py
+import flama
+from flama import Flama
+
+app = Flama(
+    openapi={
+        "info": {
+            "title": "Generative AI API",
+            "version": "1.0.0",
+            "description": "Serving large language models with Flama 🔥",
+        },
+    },
+    docs="/docs/",
+)
+
+app.models.add_model(
+    path="/llm/",
+    model="google_gemma-4-E2B-it.flm",
+    name="assistant",
+    serving=("native", "openai"),
+)
+
+
+if __name__ == "__main__":
+    flama.run(flama_app=app, server_host="0.0.0.0", server_port=8000)
+```
+
+This is a complete, runnable generative API. Over the following pages we will see where the `.flm` file comes from, how
+the serving layers expose the model, how to turn it into an interactive chat application, and how to expose tools to AI
+agents through MCP.
+
+## What comes next
+
+This section is a progressive, hands-on guide. Each page introduces one building block and demonstrates it with working
+code:
+
+- **Overview** (this page): the concepts behind generative serving in <FlamaName />.
+- **[Getting models](/docs/generative-ai/getting-models/)**: fetching and packaging large language models as `.flm`
+  artifacts with the <FlamaName /> CLI.
+- **[Serving LLMs](/docs/generative-ai/serving-llms/)**: registering models programmatically, choosing serving
+  dialects, and interacting with them over HTTP.
+- **[Chatbot application](/docs/generative-ai/chatbot-application/)**: the built-in chat interface and the
+  standalone chatbot template.
+- **[Model Context Protocol](/docs/generative-ai/model-context-protocol/)**: exposing tools, resources, and prompts
+  to AI clients with native MCP support.
+
+By the end, you will be able to serve any generative model behind the protocols your clients already speak, give it a
+chat interface, and make it an agent-ready tool provider.

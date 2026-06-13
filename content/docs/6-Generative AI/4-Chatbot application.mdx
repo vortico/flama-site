@@ -1,0 +1,110 @@
+---
+title: Chatbot application
+wip: true
+---
+
+Serving a large language model (LLM) over HTTP is the foundation; talking to it through `curl` is not how most people
+want to interact with a model. <FlamaName /> ships a complete, ready-to-use chat interface as part of the native serving
+layer, so any model you serve comes with a polished web application out of the box, no frontend code required. This page
+covers the built-in chat interface, how to enable it, and the template it is built from.
+
+## What is the built-in chat interface?
+
+In <FlamaName />, the **chat interface** is a single-page web application served directly from your model's resource. It
+is part of the *native* serving dialect: when the native layer is enabled, the model exposes a
+<Label color="green">GET</Label> **/chat/** route that returns a self-contained HTML application wired to the model's
+streaming endpoint. Open it in a browser and you have a working chat client against your own model.
+
+**Why is it useful?**
+
+- **Zero frontend effort**: A production-quality chat UI ships with the framework; you do not write or build any
+  JavaScript.
+- **Rich rendering**: Responses render as Markdown, with LaTeX math (via [KaTeX](https://katex.org/)) and
+  [Mermaid](https://mermaid.js.org/) diagrams, so technical answers display the way they were meant to.
+- **Streaming and resumption**: The interface consumes the native Server-Sent Events (SSE) stream, displaying tokens as
+  they arrive and reconnecting transparently with `Last-Event-ID` if the connection drops.
+- **Self-contained**: The whole application is a single HTML file with no external runtime dependencies, so it works
+  behind a firewall and deploys wherever your API does.
+
+## Enabling the chat interface
+
+The chat interface is part of the native serving dialect, so you enable it by including `"native"` in the
+resource's `serving` tuple (it is included by default when `serving` is omitted):
+
+```python
+# examples/chatbot.py
+import flama
+from flama import Flama
+
+app = Flama(
+    openapi={
+        "info": {
+            "title": "Generative AI API",
+            "version": "1.0.0",
+            "description": "A chatbot powered by Flama 🔥",
+        },
+    },
+    docs="/docs/",
+)
+
+app.models.add_model(
+    path="/llm/",
+    model="google_gemma-4-E2B-it.flm",
+    name="assistant",
+    serving=("native",),
+)
+
+
+if __name__ == "__main__":
+    flama.run(flama_app=app, server_host="0.0.0.0", server_port=8000)
+```
+
+Run the application as usual:
+
+```console
+flama run examples.chatbot:app
+
+INFO:     Started server process [44021]
+INFO:     Waiting for application startup.
+INFO:     Model ready (name: assistant)
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
+```
+
+## Using the chat interface
+
+With the application running, navigate to **http://127.0.0.1:8000/llm/chat/** in your browser. You are greeted with a
+chat window where you can type a prompt and watch the model's reply stream in token by token. Markdown formatting, code
+blocks, mathematical expressions, and diagrams are all rendered as the response arrives.
+
+Because the interface is mounted relative to the resource path, each model you serve gets its own chat window. If you
+register a second model under `/coder/`, its chat interface lives at `/coder/chat/`, talking to that model's own
+streaming endpoint.
+
+## How it works
+
+The chat interface is a thin client over the native streaming endpoints described in the
+[previous page](/docs/generative-ai/serving-llms/). When the page loads, it resolves the URL of the resource's
+`create_stream` endpoint and uses it to drive a two-step exchange for every message:
+
+1. A <Label color="blue">POST</Label> to **/llm/stream/** creates a generation and returns a stream identifier.
+2. A native `EventSource` connects to <Label color="green">GET</Label> `/llm/stream/{id}/` and renders each
+   `block.delta` event as it arrives, until the closing `message.stop` event.
+
+This is the same flow any custom frontend would use, which means the built-in interface is also a reference
+implementation: if you outgrow it, you can build your own client against exactly the same endpoints.
+
+## The chatbot template
+
+The interface is not a one-off HTML blob; it is produced from a proper frontend application, the **chatbot template**.
+The template is built with [pnpm](https://pnpm.io/) and the [`@vortico/ui`](https://www.npmjs.com/org/vortico) component
+library, and compiled into the single self-contained HTML file that <FlamaName /> ships and serves. It is responsible
+for the Markdown, LaTeX, and Mermaid rendering described above, and is organised in a per-application layout so it can be
+adapted to your own branding and behaviour.
+
+For most use cases the bundled interface is all you need, and it requires no build step on your part. If you want to
+customise it, the template gives you a modern, component-based starting point rather than forcing you to start from a
+blank page.
+
+In the [next page](/docs/generative-ai/model-context-protocol/) we move from serving a model to exposing tools,
+resources, and prompts to AI clients through the Model Context Protocol.

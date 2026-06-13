@@ -145,7 +145,7 @@ function DocsDashboard() {
               <strong>Model Context Protocol</strong>.
             </>
           }
-          url="/docs/generative-ai/introduction/"
+          url="/docs/generative-ai/overview/"
         />
         <DocsDashboardItem
           icon={<IconTopologyStar3 className="h-full w-full" />}

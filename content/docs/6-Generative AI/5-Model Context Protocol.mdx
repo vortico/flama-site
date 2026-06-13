@@ -1,0 +1,261 @@
+---
+title: Model Context Protocol
+wip: true
+---
+
+Serving a model is one half of the generative AI story; the other half is giving models access to *your* world, the
+functions they can call, the data they can read, and the prompts they can reuse. The **Model Context Protocol** (MCP) is
+the open standard for exactly that, and <FlamaName /> provides native, first-class support for building MCP servers.
+This page shows how to expose tools, resources, and prompts to AI clients, and how to use the advanced extensions for
+background tasks, interactive input, and embedded user interfaces.
+
+## What is the Model Context Protocol?
+
+The **Model Context Protocol** is an open standard that lets AI applications connect to external capabilities through a
+uniform interface. An **MCP server** advertises three kinds of capability: *tools* (functions the model can invoke),
+*resources* (data the model can read), and *prompts* (reusable prompt templates). Clients such as AI assistants discover
+these capabilities and call them over [JSON-RPC](https://www.jsonrpc.org/) (a lightweight remote-procedure-call protocol
+that exchanges JSON messages).
+
+In <FlamaName />, an MCP server is a registry you populate with decorated Python functions, and then mount on your
+application like any other route. The framework implements the **stateless `2026-07-28`** revision of the protocol:
+rather than negotiating a session once through an `initialize` handshake, every request is self-contained, carrying its
+protocol version and capabilities in a `_meta` object and its routing data in `Mcp-Method` / `Mcp-Name` headers. This
+makes MCP servers trivial to scale horizontally, since no per-client state is held between calls.
+
+**Why does it matter?**
+
+- **Interoperability**: Any MCP-capable client can use your tools without bespoke integration code.
+- **Reuse**: The same Python functions that power your API can be exposed to AI agents with a single decorator.
+- **Type safety**: <FlamaName /> derives each tool's input and output JSON Schema from the handler's type hints, so
+  clients receive accurate, self-contained contracts.
+- **Statelessness**: The `2026-07-28` protocol holds no session state, so servers scale horizontally without sticky
+  sessions.
+- **Extensibility**: Optional extensions add background Tasks, interactive Elicitation, and embeddable MCP Apps user
+  interfaces.
+
+## Creating an MCP server
+
+An MCP server is an instance of `MCPServer`. You register tools on it with the `tool` decorator; <FlamaName /> infers
+each tool's input schema from the handler's type hints:
+
+```python
+from flama.mcp.server import MCPServer
+
+tools_server = MCPServer("tools", version="2.0.0", instructions="Flama demo MCP tools server")
+
+
+@tools_server.tool("add", description="Add two integers")
+def add(a: int, b: int) -> int:
+    return a + b
+
+
+@tools_server.tool(description="Greet someone by name")
+async def greet(name: str) -> str:
+    return f"Hello, {name}!"
+```
+
+Tools may be synchronous or asynchronous functions. When you omit the name, the function's own name is used; when you
+omit the description, its docstring is used. The parameters and return annotation become the tool's `inputSchema` and
+`outputSchema`, advertised to clients verbatim.
+
+## Mounting servers
+
+A server becomes reachable once you mount it on the application through the `mcp` module. Each server is mounted at its
+own path, and a single application can host several:
+
+```python
+app.mcp.add_server("/mcp/tools/", "tools", server=tools_server)
+app.mcp.add_server("/mcp/math/", "math", server=math_server)
+```
+
+If you do not have a pre-built server, `add_server` can construct one for you from keyword arguments
+(`version`, `instructions`, and so on); pass `server=` only when you have already populated a server instance.
+
+## Calling a tool
+
+Clients interact with a mounted server by POSTing a JSON-RPC request to its path, with the routing headers that identify
+the method and target. To invoke the `add` tool defined above:
+
+```console
+curl --request POST \
+  --url http://127.0.0.1:8000/mcp/tools/ \
+  --header 'Content-Type: application/json' \
+  --header 'Mcp-Method: tools/call' \
+  --header 'Mcp-Name: add' \
+  --header 'MCP-Protocol-Version: 2026-07-28' \
+  --data '{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "method": "tools/call",
+  "params": {"name": "add", "arguments": {"a": 2, "b": 3}}
+}'
+```
+
+The server replies with a JSON-RPC result carrying the rendered content and, because `add` declares a return type, a
+structured representation of the result:
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "result": {
+    "content": [{"type": "text", "text": "5"}],
+    "structuredContent": 5
+  }
+}
+```
+
+Clients discover the available tools the same way, by sending a `tools/list` method, so an AI assistant can enumerate
+your capabilities before deciding which to call.
+
+## Resources and prompts
+
+Beyond tools, a server can expose **resources** (readable data, addressed by a URI) and **prompts** (named, reusable
+prompt templates). Both use the same decorator style:
+
+```python
+import json
+
+
+@tools_server.resource("config://app", name="config", description="Application configuration",
+                       mime_type="application/json")
+def config():
+    return json.dumps({"debug": True, "name": "flama-mcp"})
+
+
+@tools_server.prompt("summarise", description="Summarise the given text")
+def summarise(text: str):
+    return f"Summarise the following:\n\n{text}"
+```
+
+Resources are listed and read by their URI; prompts are listed by name and rendered with arguments supplied by the
+client.
+
+## Advanced extensions
+
+The `2026-07-28` protocol defines optional extensions, all supported natively. A server advertises the extensions it
+uses in its discovery capabilities, so clients negotiate them per request.
+
+### Tasks
+
+Long-running tools can run as background **Tasks** rather than blocking the call. Pass `task=True` and the server returns
+a task handle the client can poll:
+
+```python
+@tools_server.tool("square", task=True, description="Square a number as a background task")
+async def square(x: int) -> int:
+    return x * x
+```
+
+### Elicitation
+
+A tool can pause mid-call to **elicit** further input from the user. The handler declares a parameter annotated with
+`Elicitation` to read the answers gathered so far, and returns `Elicit.require(...)` to request more:
+
+```python
+from flama.mcp.data_structures import Elicit, Elicitation
+
+
+@tools_server.tool("confirm", description="Confirm an action through an elicitation round-trip")
+def confirm(elicitation: Elicitation) -> str:
+    if "confirm" not in elicitation:
+        return Elicit.require("Are you sure?", {"type": "boolean"}, name="confirm")
+    return f"confirmed={elicitation['confirm']}"
+```
+
+The `elicitation` parameter is supplied by the server and excluded from the tool's input schema, so it never appears as
+a tool argument. Because the protocol is stateless, the answers gathered so far are round-tripped through an opaque
+continuation token the client echoes back on the retry.
+
+### MCP Apps
+
+A tool can declare a prefetchable user-interface template (an **MCP App**) that hosts render alongside its result.
+Register the template with `app_template` and point the tool at it with `ui_template`:
+
+```python
+@tools_server.app_template("ui://widget", name="widget", description="A small UI widget")
+def widget():
+    return "<html><body><h1>Flama widget</h1></body></html>"
+
+
+@tools_server.tool("with_ui", description="A tool that declares a prefetchable UI template", ui_template="ui://widget")
+def with_ui() -> str:
+    return "rendered"
+```
+
+## Example
+
+The following application assembles a tools server with a synchronous tool, an async tool, a background task, an
+elicitation round-trip, a resource, and a prompt, plus a second server mounted on the same application:
+
+```python
+# examples/mcp.py
+import json
+
+import flama
+from flama import Flama
+from flama.mcp.data_structures import Elicit, Elicitation
+from flama.mcp.server import MCPServer
+
+tools_server = MCPServer("tools", version="2.0.0", instructions="Flama demo MCP tools server")
+
+
+@tools_server.tool("add", description="Add two integers")
+def add(a: int, b: int) -> int:
+    return a + b
+
+
+@tools_server.tool("square", task=True, description="Square a number as a background task")
+async def square(x: int) -> int:
+    return x * x
+
+
+@tools_server.tool("confirm", description="Confirm an action through an elicitation round-trip")
+def confirm(elicitation: Elicitation) -> str:
+    if "confirm" not in elicitation:
+        return Elicit.require("Are you sure?", {"type": "boolean"}, name="confirm")
+    return f"confirmed={elicitation['confirm']}"
+
+
+@tools_server.resource("config://app", name="config", description="Application configuration",
+                       mime_type="application/json")
+def config():
+    return json.dumps({"debug": True, "name": "flama-mcp"})
+
+
+@tools_server.prompt("summarise", description="Summarise the given text")
+def summarise(text: str):
+    return f"Summarise the following:\n\n{text}"
+
+
+math_server = MCPServer("math", version="2.0.0")
+
+
+@math_server.tool("multiply", description="Multiply two integers")
+def multiply(a: int, b: int) -> int:
+    return a * b
+
+
+app = Flama(
+    openapi={
+        "info": {
+            "title": "Generative AI API",
+            "version": "1.0.0",
+            "description": "Model Context Protocol servers with Flama 🔥",
+        },
+    },
+)
+
+app.mcp.add_server("/mcp/tools/", "tools", server=tools_server)
+app.mcp.add_server("/mcp/math/", "math", server=math_server)
+
+
+if __name__ == "__main__":
+    flama.run(flama_app=app, server_host="0.0.0.0", server_port=8000)
+```
+
+With this, your application serves models, a chat interface, and a set of agent-ready tools from a single codebase. To
+revisit how those models are served, return to [Serving LLMs](/docs/generative-ai/serving-llms/); to learn how
+<FlamaName /> structures larger applications, continue to the
+[Domain-driven design](/docs/domain-driven-design/introduction/) section.
