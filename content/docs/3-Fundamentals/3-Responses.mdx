@@ -1,0 +1,371 @@
+---
+title: Responses
+wip: true
+---
+
+Every request handler in a <FlamaName /> application ultimately produces a **response**: the status code, headers, and
+body that are sent back to the client. <FlamaName /> treats HTTP as a foundational, streaming-first layer, and exposes a
+single, coherent hierarchy of response types that ranges from a fully buffered JSON payload to a live token stream. This
+page is the reference for that hierarchy, describing what each response type is for and how to return it from a handler.
+
+## What is a response?
+
+In <FlamaName />, a **`Response`** is the object responsible for turning the result of a handler into the messages sent
+back to the client over the connection. Every response type derives from the abstract base **`flama.http.Response`**,
+which holds the elements common to any reply:
+
+- a `status_code`, defaulting to `200`,
+- a `headers` mapping,
+- an optional `media_type`,
+- an optional `background` task, executed once the body has been sent,
+- and the `set_cookie()` and `delete_cookie()` helpers for managing cookies.
+
+From this base grow two families, distinguished by _when_ the body is delivered to the client:
+
+- **`BufferedResponse`** renders the complete body before sending it, sets a `Content-Length` header, and delivers it in
+  a single message. Most everyday responses are buffered.
+- **`StreamingResponse`** wraps a synchronous or asynchronous iterator and emits each chunk as it is produced. It omits
+  the `Content-Length` header, so the connection can remain open for as long as the iterator keeps yielding.
+
+Each concrete response sets its own `media_type` and renders its body accordingly, so you rarely interact with these base
+classes directly. Instead, you choose the concrete type that matches the payload you want to return. All of them are
+re-exported from **`flama.http`**, so a single import reaches the whole hierarchy:
+
+```python
+from flama.http import APIResponse, JSONResponse, NDJSONResponse, ServerSentEventResponse
+```
+
+**Why are they important?**
+
+- **Correct wire format**: each response type sets the appropriate `Content-Type` and headers, so that clients interpret
+  the body exactly as intended.
+- **Validation and serialisation**: schema-aware responses, such as `APIResponse`, serialise and validate the content
+  against a schema before it leaves the server.
+- **Memory and latency**: buffered responses are straightforward but hold the whole body in memory, whereas streaming
+  responses bound memory usage and let the client act on the first chunk immediately.
+- **Protocol conformance**: specialised responses, such as `OpenAPIResponse` and the JSON-RPC responses, emit precisely
+  the structure that their respective protocols mandate.
+- **Interoperability**: formats like NDJSON and Server-Sent Events are widely understood, and can be consumed from
+  browsers, command-line tools, and data pipelines alike.
+
+The main virtue this hierarchy brings is **letting you return the smallest response that is correct for the task at
+hand**, balancing correctness, performance, and protocol fidelity.
+
+## Buffered responses
+
+A **buffered** response computes its entire body before sending it, which makes it the natural choice whenever the
+payload is known in full ahead of time. <FlamaName /> ships a buffered type for each common payload shape:
+
+| Response | Media type | Use it for |
+| --- | --- | --- |
+| `JSONResponse` | `application/json` | compact JSON payloads |
+| `PlainTextResponse` | `text/plain` | plain text |
+| `HTMLResponse` | `text/html` | pre-rendered HTML |
+| `HTMLTemplateResponse` | `text/html` | HTML rendered from a Jinja2 template |
+| `RedirectResponse` | n/a | 3xx redirects |
+| `FileResponse` | guessed from the file name | files on disk, with range support |
+| `APIResponse` | `application/json` | schema-validated API payloads |
+| `APIErrorResponse` | `application/json` | structured error payloads |
+| `OpenAPIResponse` | `application/vnd.oai.openapi+json` | the application's OpenAPI document |
+| `JSONRPCResponse` / `JSONRPCErrorResponse` | `application/json` | JSON-RPC results and errors |
+
+### `JSONResponse`, `PlainTextResponse`, and `HTMLResponse`
+
+The three most common buffered responses serialise their content to JSON, UTF-8 encoded text, and HTML respectively.
+Each one accepts the content as its first argument and takes care of setting the matching `Content-Type`:
+
+```python
+from flama.http import HTMLResponse, JSONResponse, PlainTextResponse
+
+
+@app.route("/json/", name="json")
+def json():
+    return JSONResponse({"message": "hello"})
+
+
+@app.route("/text/", name="text")
+def text():
+    return PlainTextResponse("hello")
+
+
+@app.route("/html/", name="html")
+def html():
+    return HTMLResponse("<h1>hello</h1>")
+```
+
+### `HTMLTemplateResponse`
+
+When the HTML is produced from a template rather than a literal string, `HTMLTemplateResponse` renders a Jinja2 template
+loaded from a `templates/` directory relative to the working directory. To avoid clashing with front-end templating
+syntaxes, <FlamaName /> configures Jinja2 with custom delimiters: `||@ ... @||` for variables, `||% ... %||` for blocks,
+and `||* ... *||` for comments.
+
+```python
+from flama.http import HTMLTemplateResponse
+
+
+@app.route("/page/", name="page")
+def page():
+    return HTMLTemplateResponse("page.html", context={"title": "Home"})
+```
+
+### `RedirectResponse`
+
+A `RedirectResponse` carries no body, defaults to a `307 Temporary Redirect`, and percent-encodes the target so that the
+`Location` header is always well-formed:
+
+```python
+from flama.http import RedirectResponse
+
+
+@app.route("/old/", name="old")
+def old():
+    return RedirectResponse("/new/")
+```
+
+### `FileResponse`
+
+A `FileResponse` serves a file from disk, guessing the media type from its name and setting the `ETag`, `Last-Modified`,
+and `Accept-Ranges` headers. It honours HTTP `Range` requests, including multipart byte ranges, which makes it suitable
+for large downloads and resumable transfers. Provide a `filename` to control the `Content-Disposition` header:
+
+```python
+from flama.http import FileResponse
+
+
+@app.route("/download/", name="download")
+def download():
+    return FileResponse("reports/summary.pdf", filename="summary.pdf")
+```
+
+### `APIResponse` and `APIErrorResponse`
+
+`APIResponse` is the response that powers <FlamaName />'s schema-aware endpoints. Given a `schema`, it serialises and
+validates the content against it before sending the payload, raising a serialisation error if the content does not
+conform to the declared schema. The schema is supplied in the same form used throughout the
+[Schemas](/docs/fundamentals/schemas/) section, wrapping the model with `schemas.Schema` and `schemas.SchemaMetadata`:
+
+```python
+import typing as t
+
+import pydantic
+
+from flama import schemas
+from flama.http import APIResponse
+
+
+class Puppy(pydantic.BaseModel):
+    id: int
+    name: str
+
+
+@app.route("/puppy/", name="puppy")
+def puppy():
+    return APIResponse(
+        {"id": 1, "name": "Canna"},
+        schema=t.Annotated[schemas.Schema, schemas.SchemaMetadata(Puppy)],
+    )
+```
+
+Its companion, `APIErrorResponse`, standardises error payloads into a consistent `detail`, `error`, and `status_code`
+structure, and defaults to a `400 Bad Request`:
+
+```python
+from flama.http import APIErrorResponse
+
+
+@app.route("/fail/", name="fail")
+def fail():
+    return APIErrorResponse(detail="Puppy not found", status_code=404)
+```
+
+### `OpenAPIResponse`
+
+`OpenAPIResponse` serves the generated OpenAPI document under the `application/vnd.oai.openapi+json` media type.
+<FlamaName /> returns it for you at the schema route of your application, building it from your routes and schemas, so in
+practice you seldom construct it by hand. It exists as a dedicated type so that the schema is always advertised with the
+media type that OpenAPI tooling expects.
+
+### `JSONRPCResponse` and `JSONRPCErrorResponse`
+
+The JSON-RPC responses wrap results and errors in the envelope defined by the JSON-RPC protocol, which underpins the
+[Model Context Protocol](/docs/generative-ai/model-context-protocol/) (MCP). Both always reply with an HTTP `200 OK`
+status: the outcome of the call is conveyed inside the JSON body, not through the HTTP status code.
+
+`JSONRPCResponse` reports a successful call. It takes the `result` of the invocation together with the request `id`, and
+renders the `{"jsonrpc": ..., "id": ..., "result": ...}` envelope:
+
+```python
+from flama.http import JSONRPCResponse
+
+JSONRPCResponse(result={"ok": True}, id=1)
+```
+
+`JSONRPCErrorResponse` reports a failed call. Here the `status_code` is the JSON-RPC error code carried within the body,
+rather than the HTTP status, and is paired with a human-readable `message` and an optional `data` field:
+
+```python
+from flama.http import JSONRPCErrorResponse
+
+JSONRPCErrorResponse(status_code=-32601, message="Method not found", id=1)
+```
+
+This renders the `{"jsonrpc": ..., "id": 1, "error": {"code": -32601, "message": "Method not found"}}` envelope. As with
+the OpenAPI document, <FlamaName /> emits these responses for you while serving MCP, but they remain available whenever
+you need to speak JSON-RPC from your own routes.
+
+## Streaming responses
+
+A **streaming** response wraps an iterator — most often an asynchronous generator — and sends each item it yields as a
+separate chunk over a single, long-lived connection. Every concrete streaming type implements an `encode()` method that
+turns one yielded item into the bytes placed on the wire. Because no `Content-Length` is sent, the client can begin
+processing the first chunk while the server is still producing the rest, which is precisely what makes these responses
+well-suited to large or open-ended payloads.
+
+### `NDJSONResponse`
+
+An `NDJSONResponse` wraps an asynchronous iterator that yields dictionaries, encoding each one as a single compact JSON
+line under the `application/x-ndjson` media type. It is a natural fit for data feeds that a program consumes line by
+line:
+
+```python
+import typing as t
+
+from flama.http import NDJSONResponse
+
+
+@app.route("/ndjson/", name="ndjson")
+def ndjson():
+    async def numbers() -> t.AsyncIterator[dict]:
+        for i in range(50):
+            yield {"i": i, "square": i * i}
+
+    return NDJSONResponse(numbers())
+```
+
+Each object is flushed as soon as it is produced, so a consumer can read and react to every line without waiting for the
+stream to finish.
+
+### Server-Sent Events
+
+A `ServerSentEventResponse` wraps an asynchronous iterator that yields `ServerSentEvent` objects (or plain strings),
+serving them under the `text/event-stream` media type and adding the `Cache-Control: no-cache` and
+`Connection: keep-alive` headers automatically. Each event may carry a `data` payload, a named `event`, an `id`, and a
+reconnection `retry` hint; alternatively, an event that sets only a `comment` becomes a **heartbeat** that keeps the
+connection alive through proxies without delivering any data:
+
+```python
+import typing as t
+
+from flama.http import ServerSentEvent, ServerSentEventResponse
+
+
+@app.route("/sse/", name="sse")
+def sse():
+    async def ticks() -> t.AsyncIterator[ServerSentEvent]:
+        for i in range(50):
+            if i % 10 == 0:
+                yield ServerSentEvent(comment="heartbeat")
+            yield ServerSentEvent(data=str(i), event="tick", id=str(i))
+
+    return ServerSentEventResponse(ticks())
+```
+
+#### Resuming a stream
+
+Because each event carries an `id`, a browser `EventSource` automatically resends the last id it received in the
+`Last-Event-ID` header when it reconnects. The handler can read that header to resume the stream exactly where the client
+left off:
+
+```python
+import typing as t
+
+from flama import http
+from flama.http import ServerSentEvent, ServerSentEventResponse
+
+
+@app.route("/sse/resume/", name="sse_resume")
+def sse_resume(request: http.Request):
+    start = int(request.headers.get("last-event-id", "-1")) + 1
+
+    async def ticks() -> t.AsyncIterator[ServerSentEvent]:
+        for i in range(start, start + 5):
+            yield ServerSentEvent(data=str(i), event="tick", id=str(i))
+
+    return ServerSentEventResponse(ticks())
+```
+
+These same primitives underpin generative serving: see [Serving LLMs](/docs/generative-ai/serving-llms/) for how token
+streams are delivered to chat clients over Server-Sent Events.
+
+## Example
+
+The following self-contained application brings the two families together, exposing a buffered JSON route, an NDJSON
+feed, and a resumable Server-Sent Events stream:
+
+```python
+# examples/responses.py
+import typing as t
+
+import flama
+from flama import Flama, http
+from flama.http import JSONResponse, NDJSONResponse, ServerSentEvent, ServerSentEventResponse
+
+app = Flama(
+    openapi={
+        "info": {
+            "title": "Responses",
+            "version": "1.0.0",
+            "description": "Buffered and streaming responses with Flama 🔥",
+        },
+    },
+    docs="/docs/",
+)
+
+
+@app.route("/json/", name="json")
+def json():
+    return JSONResponse({"message": "hello"})
+
+
+@app.route("/ndjson/", name="ndjson")
+def ndjson():
+    async def numbers() -> t.AsyncIterator[dict]:
+        for i in range(50):
+            yield {"i": i, "square": i * i}
+
+    return NDJSONResponse(numbers())
+
+
+@app.route("/sse/resume/", name="sse_resume")
+def sse_resume(request: http.Request):
+    start = int(request.headers.get("last-event-id", "-1")) + 1
+
+    async def ticks() -> t.AsyncIterator[ServerSentEvent]:
+        for i in range(start, start + 5):
+            yield ServerSentEvent(data=str(i), event="tick", id=str(i))
+
+    return ServerSentEventResponse(ticks())
+
+
+if __name__ == "__main__":
+    flama.run(flama_app=app, server_host="0.0.0.0", server_port=8000)
+```
+
+We can consume the Server-Sent Events stream with `curl` and watch the events arrive one by one:
+
+```console
+curl --request GET --url http://127.0.0.1:8000/sse/resume/ --header 'Accept: text/event-stream'
+
+id: 0
+event: tick
+data: 0
+
+id: 1
+event: tick
+data: 1
+```
+
+In the [previous page](/docs/fundamentals/routes/) we mapped incoming requests to handlers; here we have covered what
+those handlers send back. In the [next page](/docs/fundamentals/schemas/) we look at how <FlamaName /> validates and
+serialises the data that flows through them.
