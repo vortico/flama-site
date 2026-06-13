@@ -4,6 +4,7 @@ import {
   IconBolt,
   IconBrain,
   IconDownload,
+  IconHeartHandshake,
   IconMessageChatbot,
   IconRocket,
   IconSparkles,
@@ -29,7 +30,7 @@ function DocsDashboardItem({ icon, title, description, url }: DocsDashboardItemP
       <div className="flex h-12 w-12 flex-none items-center justify-center rounded-full bg-brand-500/90 p-2.5 text-primary-100 shadow ring-1 ring-primary-900/30 transition-transform duration-200 group-hover:scale-110 dark:bg-brand-500/80 dark:text-primary-800">
         {icon}
       </div>
-      <h2 className="mt-5 text-xl font-semibold text-primary-800 dark:text-primary-200">{title}</h2>
+      <h3 className="mt-5 text-xl font-semibold text-primary-800 dark:text-primary-200">{title}</h3>
       <p className="mt-3 flex-1 text-sm leading-relaxed text-primary-500 dark:text-primary-400">{description}</p>
       <div className="mt-6 h-8">
         <LinkButton href={url} text="Read more" rightIcon />
@@ -38,93 +39,127 @@ function DocsDashboardItem({ icon, title, description, url }: DocsDashboardItemP
   )
 }
 
+interface DocsDashboardGroupProps {
+  title: string
+  description: React.ReactNode
+  gridClassName?: string
+  children: React.ReactNode
+}
+
+function DocsDashboardGroup({ title, description, gridClassName, children }: DocsDashboardGroupProps) {
+  return (
+    <section className="space-y-6">
+      <div className="space-y-1">
+        <h2 className="text-2xl font-bold tracking-tight text-primary-800 dark:text-primary-200">{title}</h2>
+        <p className="text-sm text-primary-500 dark:text-primary-400">{description}</p>
+      </div>
+      <div className={gridClassName ?? 'grid gap-8 sm:grid-cols-2 lg:grid-cols-3'}>{children}</div>
+    </section>
+  )
+}
+
 function DocsDashboard() {
   return (
-    <div className="grid gap-8 sm:grid-cols-2 lg:grid-cols-3">
-      <DocsDashboardItem
-        icon={<IconRocket className="h-full w-full" />}
-        title="Quickstart"
+    <div className="space-y-14">
+      <DocsDashboardGroup
+        title="Core"
         description={
           <>
-            Follow this guide to develop your first <strong>API</strong>, and explore the main functionality offered by{' '}
-            <FlamaName />. Learn how to create a new project, define your first <strong>endpoint</strong>, and run your
-            API locally.
+            The building blocks every <FlamaName /> application shares, whatever you are serving.
           </>
         }
-        url="/docs/getting-started/quickstart/"
-      />
-      <DocsDashboardItem
-        icon={<IconBolt className="h-full w-full" />}
-        title="Fundamentals"
-        description={
-          <>
-            Deep dive into the foundational building blocks of <FlamaName />. Learn how <strong>applications</strong>,
-            routes, schemas, <strong>components</strong>, modules, middlewares, endpoints, and resources work together
-            to form a coherent ASGI application.
-          </>
-        }
-        url="/docs/fundamentals/applications/"
-      />
-      <DocsDashboardItem
-        icon={<IconBrain className="h-full w-full" />}
-        title="Predictive AI"
-        description={
-          <>
-            Learn how to package your <strong>ML models</strong> as lightweight binary files, integrate them into your
-            API, and customise the interaction with models through <strong>Components</strong> and{' '}
-            <strong>Resources</strong> for full control over their lifecycle.
-          </>
-        }
-        url="/docs/predictive-ai/packaging-models/"
-      />
-      <DocsDashboardItem
-        icon={<IconMessageChatbot className="h-full w-full" />}
-        title="Generative AI"
-        description={
-          <>
-            Serve <strong>large language models</strong> behind OpenAI-, Anthropic-, and Ollama-compatible APIs, ship a
-            built-in <strong>chatbot</strong>, and expose tools to AI agents through the{' '}
-            <strong>Model Context Protocol</strong>.
-          </>
-        }
-        url="/docs/generative-ai/introduction/"
-      />
-      <DocsDashboardItem
-        icon={<IconTerminal2 className="h-full w-full" />}
-        title="CLI"
-        description={
-          <>
-            Discover the <FlamaName /> <strong>command line interface</strong>, and uncover the power of codeless model
-            serving. This guide shows how to run an API locally, <strong>serve predictive and generative models</strong>
-            , fetch and upgrade, and interact with them, without typing a single line of code.
-          </>
-        }
-        url="/docs/flama-cli/run/"
-      />
-      <DocsDashboardItem
-        icon={<IconWand className="h-full w-full" />}
-        title="Advanced"
-        description={
-          <>
-            Explore advanced features such as <strong>configuration</strong> management, pagination, error handling,
-            background tasks, lifespan events, <strong>authentication</strong> with JWT, and other production-ready
-            patterns for building robust APIs.
-          </>
-        }
-        url="/docs/advanced-topics/configuration/"
-      />
-      <DocsDashboardItem
-        icon={<IconTopologyStar3 className="h-full w-full" />}
-        title="Domain Driven Design"
-        description={
-          <>
-            Place your <strong>business domain</strong> at the centre of your architecture. Learn how to apply
-            Domain-Driven Design patterns within <FlamaName />, including <strong>repositories</strong>, workers, and
-            domain models, to build maintainable systems.
-          </>
-        }
-        url="/docs/domain-driven-design/introduction/"
-      />
+        gridClassName="grid gap-8 sm:grid-cols-2"
+      >
+        <DocsDashboardItem
+          icon={<IconRocket className="h-full w-full" />}
+          title="Quickstart"
+          description={
+            <>
+              Follow this guide to develop your first <strong>API</strong>, and explore the main functionality offered
+              by <FlamaName />. Learn how to create a new project, define your first <strong>endpoint</strong>, and run
+              your API locally.
+            </>
+          }
+          url="/docs/getting-started/quickstart/"
+        />
+        <DocsDashboardItem
+          icon={<IconBolt className="h-full w-full" />}
+          title="Fundamentals"
+          description={
+            <>
+              Deep dive into the foundational building blocks of <FlamaName />. Learn how <strong>applications</strong>,
+              routes, schemas, <strong>components</strong>, modules, middlewares, endpoints, and resources work together
+              to form a coherent ASGI application.
+            </>
+          }
+          url="/docs/fundamentals/applications/"
+        />
+        <DocsDashboardItem
+          icon={<IconTerminal2 className="h-full w-full" />}
+          title="CLI"
+          description={
+            <>
+              Discover the <FlamaName /> <strong>command line interface</strong>, and uncover the power of codeless
+              model serving. This guide shows how to run an API locally,{' '}
+              <strong>serve predictive and generative models</strong>, fetch and upgrade, and interact with them,
+              without typing a single line of code.
+            </>
+          }
+          url="/docs/flama-cli/run/"
+        />
+        <DocsDashboardItem
+          icon={<IconWand className="h-full w-full" />}
+          title="Advanced"
+          description={
+            <>
+              Explore advanced features such as <strong>configuration</strong> management, pagination, error handling,
+              background tasks, lifespan events, <strong>authentication</strong> with JWT, and other production-ready
+              patterns for building robust APIs.
+            </>
+          }
+          url="/docs/advanced-topics/configuration/"
+        />
+      </DocsDashboardGroup>
+
+      <DocsDashboardGroup title="Flavours" description="Specialised tracks for the kind of system you are building.">
+        <DocsDashboardItem
+          icon={<IconBrain className="h-full w-full" />}
+          title="Predictive AI"
+          description={
+            <>
+              Learn how to package your <strong>ML models</strong> as lightweight binary files, integrate them into your
+              API, and customise the interaction with models through <strong>Components</strong> and{' '}
+              <strong>Resources</strong> for full control over their lifecycle.
+            </>
+          }
+          url="/docs/predictive-ai/packaging-models/"
+        />
+        <DocsDashboardItem
+          icon={<IconMessageChatbot className="h-full w-full" />}
+          title="Generative AI"
+          description={
+            <>
+              Learn how to serve <strong>large language models</strong> with a first-class serving layer, and expose
+              them through OpenAI, Anthropic, and Ollama compatible endpoints. Integrate a built-in{' '}
+              <strong>chatbot</strong>, and provide tools to AI agents through the{' '}
+              <strong>Model Context Protocol</strong>.
+            </>
+          }
+          url="/docs/generative-ai/introduction/"
+        />
+        <DocsDashboardItem
+          icon={<IconTopologyStar3 className="h-full w-full" />}
+          title="Domain Driven Design"
+          description={
+            <>
+              Place your <strong>business domain</strong> at the centre of your architecture. Learn how to apply
+              Domain-Driven Design patterns within <FlamaName />, including <strong>repositories</strong>, workers, and
+              domain models, to build maintainable systems.
+            </>
+          }
+          url="/docs/domain-driven-design/introduction/"
+        />
+      </DocsDashboardGroup>
     </div>
   )
 }
@@ -160,6 +195,32 @@ function SkillBanner() {
   )
 }
 
+function ContributeBanner() {
+  return (
+    <div className="rounded-lg border border-brand-200 bg-gradient-to-r from-brand-500/5 to-brand-500/10 p-6 dark:border-brand-600/30 dark:from-brand-500/5 dark:to-brand-500/10">
+      <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex items-center gap-4">
+          <div className="flex h-10 w-10 flex-none items-center justify-center rounded-full bg-brand-500/90 p-2 text-primary-100 shadow ring-1 ring-primary-900/30 dark:bg-brand-500/80 dark:text-primary-800">
+            <IconHeartHandshake className="h-full w-full" />
+          </div>
+          <div>
+            <h3 className="text-sm font-semibold text-primary-800 dark:text-primary-200">
+              Contribute to <FlamaName />
+            </h3>
+            <p className="mt-0.5 text-sm text-primary-500 dark:text-primary-400">
+              Found a bug, missing a feature, or want to improve the docs? Learn how to get involved and help shape the
+              future of <FlamaName />.
+            </p>
+          </div>
+        </div>
+        <div className="flex-none">
+          <LinkButton href="/docs/contributing/how-to-contribute/" text="Get involved" rightIcon />
+        </div>
+      </div>
+    </div>
+  )
+}
+
 export const metadata: Metadata = {
   title: 'Docs',
   description: 'Flama documentation',
@@ -182,6 +243,7 @@ export default function Docs() {
       <main className="mx-auto mb-20 max-w-5xl space-y-16 px-4 sm:mb-32 sm:px-6 md:mb-40 md:px-8">
         <SkillBanner />
         <DocsDashboard />
+        <ContributeBanner />
       </main>
     </>
   )
