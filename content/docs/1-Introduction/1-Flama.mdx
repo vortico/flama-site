@@ -3,38 +3,52 @@ title: Flama
 wip: false
 ---
 
-<FlamaName /> is a python library which establishes a standard framework for development and deployment of APIs with
-special focus on machine learning (ML). The main aim of the framework is to make ridiculously simple the deployment of
-ML APIs, simplifying (when possible) the entire process to a single line of code. This is a **Framework** for the
-development of **Lightweight** **Applications** and **Machine-learning** **Automation**.
+<FlamaName /> is a <PythonName /> framework that establishes a standard for the development and deployment of
+production-ready APIs, with a special focus on predictive machine learning (ML) and generative AI. Its guiding
+philosophy is to make the deployment of an API ridiculously simple, reducing the entire process, where possible, to a
+single line of code. This is a **Framework** for **Lightweight** **Applications**, **Machine-learning**, and
+**Automation**.
 
-The library builds on Starlette, and provides an easy-to-learn philosophy to speed up the building of highly performant
-GraphQL, REST and ML APIs. Besides, it comprises an ideal solution for the development of asynchronous and
-production-ready services, offering automatic deployment for ML models.
+With the 2.0 release, <FlamaName /> spans the full spectrum of modern model serving: from REST APIs, through predictive
+ML models, all the way to large language models (LLMs). The same one-line developer experience now serves generative
+models behind OpenAI-, Anthropic-, and Ollama-compatible endpoints, and exposes tools to AI agents through the Model
+Context Protocol (MCP).
 
 Some remarkable characteristics:
 
-    - Generic classes for API resources with the convenience of standard CRUD methods
-          over SQLAlchemy tables.
+- A **Rust-powered core**: the performance-critical paths (routing, JSON encoding, request parsing, and compression)
+  are compiled into a native extension, so you get the speed-ups by simply running `pip install`, with no Rust toolchain
+  required.
 
-    - A schema system (based on Pydantic, Marshmallow, or Typesystem) which allows the
-          declaration of inputs and outputs of endpoints very easily, with the convenience of
-          reliable and automatic data-type validation.
+- **Predictive AI serving**: package a model trained with Scikit-Learn, TensorFlow, or PyTorch and serve it as an API
+  endpoint with minimal boilerplate.
 
-    - Dependency injection to make ease the process of managing parameters needed
-          in endpoints via the use of **Components**.
-          Flama ASGI objects like **Request**, **Response**, **Session** and so on
-          are defined as **Components** ready to be injected in your endpoints.
+- **Generative AI serving**: serve LLMs behind OpenAI, Anthropic, Ollama, and native dialects, with HuggingFace, vLLM,
+  and MLX backends auto-detected at load time.
 
-    - **Components** as the base of the plugin ecosystem, allowing you to create
-          custom or use those already defined in your endpoints, injected as parameters.
+- **Model Context Protocol**: native MCP support (stateless `2026-07-28`) for exposing tools, resources, and prompts,
+  including Tasks, Elicitation, and MCP Apps.
 
-    - Auto generated API schema using OpenAPI standard.
+- **Streaming-first HTTP**: Server-Sent Events (SSE) and NDJSON responses, plus stream-oriented HTTP throughout, so long
+  generations stay responsive.
 
-    - Auto generated **docs**, and provides a <FlamaName /> docs endpoint.
+- Generic classes for API resources with the convenience of standard CRUD methods over SQLAlchemy tables.
 
-    - Automatic handling of pagination, with several methods at your disposal
-          such as **limit**, **offset**, page numbers, to name a few.
+- A pluggable schema system, with optional **Pydantic**, **Typesystem**, and **Marshmallow** backends, for declaring
+  endpoint inputs and outputs with reliable, automatic data-type validation.
+
+- Dependency injection to ease the management of parameters needed in endpoints via the use of **Components**.
+  <FlamaName /> objects such as **Request**, **Response**, and **Session** are defined as **Components** ready to be
+  injected into your endpoints.
+
+- **Components** as the base of the plugin ecosystem, allowing you to create custom ones or reuse those already defined,
+  injected as parameters.
+
+- Auto-generated API schema using the OpenAPI standard, with auto-generated interactive **docs** served from a
+  <FlamaName /> docs endpoint.
+
+- Automatic handling of pagination, with several methods at your disposal such as **limit**, **offset**, and page
+  numbers, to name a few.
 
 Now that you know the main advantages of <FlamaName />, you can learn how to install it and run your first API
 [here](/docs/getting-started/installation/).

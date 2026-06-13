@@ -5,8 +5,9 @@ wip: false
 
 ## Python version
 
-<FlamaName /> is fully compatible with all <PythonName /> [supported versions](https://devguide.python.org/versions/).
-If you do not have any preference, we recommend you to use the latest version available.
+<FlamaName /> 2.0 supports <PythonName /> **3.10 to 3.14** (`requires-python = ">=3.10,<3.15"`), and is distributed as
+native, per-version wheels for Linux, macOS, and Windows, so there is no Rust toolchain to install. If you do not have
+any preference, we recommend you to use the latest supported version available.
 
 As a first step, check the version of your active <PythonName /> environment:
 
@@ -59,36 +60,38 @@ After running this command line, you'll have <FlamaName /> installed and ready t
 
 ### Extras
 
-You have installed the core functionality of <FlamaName /> already. However, you might need some dependencies to
-add extra functionality to your project:
+You have installed the core functionality of <FlamaName /> already. In 2.0 the schema libraries and the generative AI
+backends are split into optional packages, so you install only what your project needs. The following dependencies are
+automatically pulled in when you specify the appropriate [extra](https://packaging.python.org/en/latest/tutorials/installing-packages/#installing-extras):
 
-- [Pydantic](https://docs.pydantic.dev/): A library for data validation and settings management with
-  support for type hints.
+- **pydantic** to declare schemas with [Pydantic](https://docs.pydantic.dev/), a library for data validation and
+  settings management with support for type hints.
 
-- [Typesystem](https://www.encode.io/typesystem/): A comprehensive library for data validation typically used to define
-  typed data schemas which provides data validation and object serialization & deserialization tools.
+- **typesystem** to declare schemas with [Typesystem](https://www.encode.io/typesystem/), a library for typed data
+  schemas with validation and (de)serialisation tools.
 
-- [Marshmallow](https://marshmallow.readthedocs.io/en/stable/quickstart.html#): A library for data validation and
-  serialization/deserialization.
+- **marshmallow** to declare schemas with [Marshmallow](https://marshmallow.readthedocs.io/en/stable/), a library for
+  data validation and (de)serialisation.
 
-- [SQlAlchemy](https://www.sqlalchemy.org/): SQL toolkit and Object Relational Mapper that gives application developers
-  the full power and flexibility of SQL.
+- **database** to interact with a database through [SQLAlchemy](https://www.sqlalchemy.org/), the SQL toolkit and Object
+  Relational Mapper.
 
-- [HTTPX](https://www.python-httpx.org/): HTTPX is a fully featured HTTP client for Python 3, which provides sync and async APIs, and support for both HTTP/1.1 and HTTP/2.
+- **llm** to serve large language models, pulling in the generative AI backends:
+  [vLLM](https://docs.vllm.ai/) on Linux and [MLX](https://ml-explore.github.io/mlx/) on Apple Silicon, along with the
+  image and audio decoding dependencies.
 
-These dependencies are automatically included when installing <FlamaName /> if the appropriate [extra](https://packaging.python.org/en/latest/tutorials/installing-packages/#installing-extras)
-is specified:
+- **full** to install every extra at once.
 
-- **pydantic** to make use of `Pydantic` schemas
-- **typesystem** to make use of `Typesystem` schemas
-- **marshmallow** to make use of `Marshmallow` schemas
-- **database** to interact with a database through `SQlAlchemy` functionality
-- **client** to interact with a <FlamaName /> model, or a <FlamaName /> application (e.g., for testing purposes), or any other HTTP resource
-
-An example of installation including **pydantic**, **database**, and **client** would be as follows:
+An example of installation including **pydantic** and **database** would be as follows:
 
 ```console
-pip install flama[pydantic, database, client]
+pip install flama[pydantic,database]
+```
+
+To serve generative models, add the **llm** extra (the appropriate backend for your platform is selected automatically):
+
+```console
+pip install flama[llm]
 ```
 
 ### Development
@@ -119,10 +122,12 @@ Options:
   --help     Get help about how to use Flama CLI
 
 Commands:
-  model  Interact with an ML model without server.
-  run    Run a Flama Application based on a route.
-  serve  Serve an ML model file within a Flama Application.
-  start  Start a Flama Application based on a config file.
+  get      Download and package a model as .flm.
+  model    Interact with a packaged model without server.
+  run      Run a Flama Application based on a route.
+  serve    Serve one or more models within a Flama Application.
+  start    Start a Flama Application based on a config file.
+  upgrade  Upgrade a Flama codebase to a newer major version.
 ```
 
 To check what version of the library you have installed, simply run:
