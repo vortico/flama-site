@@ -5,8 +5,8 @@ wip: true
 
 ## Python version
 
-<FlamaName /> 2.0 supports <PythonName /> **3.10 to 3.14** (`requires-python = ">=3.10,<3.15"`), and is distributed as
-native, per-version wheels for Linux, macOS, and Windows, so there is no Rust toolchain to install. If you do not have
+<FlamaName /> supports all currently maintained <PythonName /> versions, and is distributed as native, per-version
+wheels for Linux, macOS, and Windows, so there is no Rust toolchain to install. If you do not have
 any preference, we recommend you to use the latest supported version available.
 
 As a first step, check the version of your active <PythonName /> environment:
@@ -60,8 +60,8 @@ After running this command line, you'll have <FlamaName /> installed and ready t
 
 ### Extras
 
-You have installed the core functionality of <FlamaName /> already. In 2.0 the schema libraries and the generative AI
-backends are split into optional packages, so you install only what your project needs. The following dependencies are
+You have installed the core functionality of <FlamaName /> already. The schema libraries and the generative AI backends
+are split into optional packages, so you install only what your project needs. The following dependencies are
 automatically pulled in when you specify the appropriate [extra](https://packaging.python.org/en/latest/tutorials/installing-packages/#installing-extras):
 
 - **pydantic** to declare schemas with [Pydantic](https://docs.pydantic.dev/), a library for data validation and

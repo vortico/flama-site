@@ -137,20 +137,17 @@ ecosystem:
 To illustrate the practical impact of these choices, the following table summarises the key characteristics of each
 format, measured on a simple Scikit-Learn model (`MLPClassifier` trained on XOR):
 
-| Format | File size | Dump speed | Load speed | Standard library |
+| Format | File size | Dump speed | Load speed | Always available |
 |--------|-----------|------------|------------|------------------|
 | `bz2`  | ~24.9 KB  | ~9.3 ms    | ~3.5 ms    | Yes              |
 | `lzma` | ~21.2 KB  | ~23.4 ms   | ~2.8 ms    | Yes              |
 | `zlib` | ~22.9 KB  | ~2.9 ms    | ~1.0 ms    | Yes              |
-| `zstd` | ~20.5 KB  | ~2.2 ms    | ~1.0 ms    | From Python 3.14 |
+| `zstd` | ~20.5 KB  | ~2.2 ms    | ~1.0 ms    | Yes              |
 
 As the results clearly show, **Zstandard** (`"zstd"`) stands out as the winner in most practical scenarios, combining
 the smallest file size with the fastest dump and load times. This is precisely why <FlamaName /> uses it as the default
-compression format. For Python versions prior to 3.14, where `zstd` is not yet part of the standard library,
-<FlamaName /> relies on the [python-zstd](https://pypi.org/project/zstd/) package as a compatibility layer. From Python
-3.14 onwards, `zstd` is included in the new
-[compression](https://docs.python.org/3/library/compression.html) standard library module, and <FlamaName /> will
-use it natively.
+compression format. Because `zstd` is provided directly by <FlamaName />'s Rust-powered core, it is available out of the
+box on every supported <PythonName /> version, with no additional dependency to install.
 
 You can specify the desired compression format when calling `flama.dump`:
 
