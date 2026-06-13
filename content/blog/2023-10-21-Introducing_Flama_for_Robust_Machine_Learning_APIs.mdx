@@ -546,7 +546,7 @@ Model saved successfully:
 The first two parameters are the ML pipeline object itself, and the path where the resulting file will be stored,
 respectively. The remaining parameters are optional, and are used to add metadata to the resulting file which might be
 quite useful for model management purposes. For further details on the use of these parameters, you can check the
-official [documentation](https://flama.dev/docs/machine-learning-api/packaging-models/).
+official [documentation](https://flama.dev/docs/predictive-ai/packaging-models/).
 
 At this point, if you run the script again, you should see a new file in the `data` folder called `model.flm`. This is
 the file we will use later on to serve the ML pipeline via an ML-API. Indeed, the running of the script should produce
@@ -569,7 +569,7 @@ Model saved successfully:
 OK, so we have the ML pipeline packaged as an FLM file, but what's that? FLM stands for _Flama Lightweight Model_. This
 comes from the fact that, FLM files are a lightweight representation of ML models, which come with useful metadata
 needed for later purposes, e.g. building a wrapper Flama API containing the model. To know more about FLM files, you can
-check the official [documentation](https://flama.dev/docs/machine-learning-api/packaging-models/#flm-files).
+check the official [documentation](https://flama.dev/docs/predictive-ai/packaging-models/#flm-files).
 
 The structure of an FLM file is thought to be as simple as possible, and aims at keeping in a single file all the
 information needed to load and use the model. The structure of an FLM file is as follows:
@@ -1059,7 +1059,7 @@ ever noticing. Specifically:
 #### The base application
 
 If we want to develop a custom ML-API, we need to start by creating a **Flama** application, and we will do so taking
-some inspiration from the official [documentation](https://flama.dev/docs/machine-learning-api/add-models/). For this,
+some inspiration from the official [documentation](https://flama.dev/docs/predictive-ai/add-models/). For this,
 we will create a new folder called `src/api`:
 
 ```console

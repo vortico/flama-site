@@ -15,17 +15,27 @@ const links = [
     name: 'Interact with Flama',
     links: [
       { name: 'Run applications', url: '/docs/flama-cli/run/' },
-      { name: 'Serve machine-learning models', url: '/docs/flama-cli/serve/' },
-      { name: 'Start with definition files', url: '/docs/flama-cli/start/' },
+      { name: 'Serve models', url: '/docs/flama-cli/serve/' },
+      { name: 'Get models', url: '/docs/flama-cli/get/' },
+      { name: 'Upgrade codebases', url: '/docs/flama-cli/upgrade/' },
     ],
   },
   {
-    name: 'Core Concepts',
+    name: 'Predictive AI',
     links: [
-      { name: 'Flama Artifacts', url: '/docs/machine-learning-api/packaging-models/' },
-      { name: 'Flama Applications', url: '/docs/machine-learning-api/add-models/' },
-      { name: 'Model Resources', url: '/docs/machine-learning-api/model-resource/' },
-      { name: 'Model Components', url: '/docs/machine-learning-api/model-components/' },
+      { name: 'Packaging models', url: '/docs/predictive-ai/packaging-models/' },
+      { name: 'Adding models', url: '/docs/predictive-ai/add-models/' },
+      { name: 'Model Resources', url: '/docs/predictive-ai/model-resource/' },
+      { name: 'Model Components', url: '/docs/predictive-ai/model-components/' },
+    ],
+  },
+  {
+    name: 'Generative AI',
+    links: [
+      { name: 'Serving LLMs', url: '/docs/generative-ai/serving-llms/' },
+      { name: 'Chatbot application', url: '/docs/generative-ai/chatbot-application/' },
+      { name: 'Model Context Protocol', url: '/docs/generative-ai/model-context-protocol/' },
+      { name: 'Getting models', url: '/docs/generative-ai/getting-models/' },
     ],
   },
   {
@@ -42,7 +52,7 @@ const links = [
 export default function Footer() {
   return (
     <footer className="mx-auto max-w-[90rem] space-y-16 divide-y divide-primary-300 px-4 pb-16 pt-8 text-sm leading-6 dark:divide-primary-700 sm:px-6 md:px-8">
-      <div className="grid grid-cols-2 gap-x-20 gap-y-10 md:grid-cols-4">
+      <div className="grid grid-cols-2 gap-x-20 gap-y-10 md:grid-cols-3 lg:grid-cols-5">
         {links.map((category, i) => (
           <div key={i}>
             <h2 className="font-semibold text-primary-700 dark:text-primary-200">{category.name}</h2>

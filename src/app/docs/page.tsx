@@ -4,6 +4,7 @@ import {
   IconBolt,
   IconBrain,
   IconDownload,
+  IconMessageChatbot,
   IconRocket,
   IconSparkles,
   IconTerminal2,
@@ -66,7 +67,7 @@ function DocsDashboard() {
       />
       <DocsDashboardItem
         icon={<IconBrain className="h-full w-full" />}
-        title="ML APIs"
+        title="Predictive AI"
         description={
           <>
             Learn how to package your <strong>ML models</strong> as lightweight binary files, integrate them into your
@@ -74,16 +75,28 @@ function DocsDashboard() {
             <strong>Resources</strong> for full control over their lifecycle.
           </>
         }
-        url="/docs/machine-learning-api/packaging-models/"
+        url="/docs/predictive-ai/packaging-models/"
+      />
+      <DocsDashboardItem
+        icon={<IconMessageChatbot className="h-full w-full" />}
+        title="Generative AI"
+        description={
+          <>
+            Serve <strong>large language models</strong> behind OpenAI-, Anthropic-, and Ollama-compatible APIs, ship a
+            built-in <strong>chatbot</strong>, and expose tools to AI agents through the{' '}
+            <strong>Model Context Protocol</strong>.
+          </>
+        }
+        url="/docs/generative-ai/introduction/"
       />
       <DocsDashboardItem
         icon={<IconTerminal2 className="h-full w-full" />}
         title="CLI"
         description={
           <>
-            Discover the <FlamaName /> <strong>command line interface</strong>, and uncover the power of serving ML
-            models codeless. This guide shows how to run an API locally, <strong>serve ML models</strong>, and interact
-            with them, without typing a single line of code.
+            Discover the <FlamaName /> <strong>command line interface</strong>, and uncover the power of codeless model
+            serving. This guide shows how to run an API locally, <strong>serve predictive and generative models</strong>
+            , fetch and upgrade, and interact with them, without typing a single line of code.
           </>
         }
         url="/docs/flama-cli/run/"
@@ -162,7 +175,9 @@ export default function Docs() {
         <h1 className="text-3xl font-extrabold tracking-tight text-primary-700 dark:text-primary-200 sm:text-4xl">
           Get started with Flama documentation
         </h1>
-        <p className="text-lg">Learn how to build, package, and deploy your modern and robust machine learning APIs.</p>
+        <p className="text-lg">
+          Learn how to build, package, and deploy your modern and robust APIs, for predictive and generative AI alike.
+        </p>
       </header>
       <main className="mx-auto mb-20 max-w-5xl space-y-16 px-4 sm:mb-32 sm:px-6 md:mb-40 md:px-8">
         <SkillBanner />
