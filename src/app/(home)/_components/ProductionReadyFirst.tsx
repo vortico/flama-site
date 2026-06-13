@@ -2,7 +2,7 @@
 
 import React, { useCallback, useMemo, useState } from 'react'
 
-import { IconSparkles, IconTerminal2 } from '@tabler/icons-react'
+import { IconFileCode, IconRocket, IconTerminal2 } from '@tabler/icons-react'
 import { motion } from 'framer-motion'
 
 import { Window } from '@/components/elements'
@@ -11,9 +11,9 @@ import { FlamaName } from '@/components/names'
 import { type ISample } from '@/lib/samples'
 
 import HomeSection from './HomeSection'
-import SelectableList, { ISelectableItem } from './SelectableList'
+import SelectableIcons, { ISelectableIconItem } from './SelectableIcons'
 
-const items: ISelectableItem[] = [
+const items: ISelectableIconItem[] = [
   {
     id: 'cli',
     name: 'Command Line',
@@ -23,6 +23,11 @@ const items: ISelectableItem[] = [
     id: 'python',
     name: 'Python',
     icon: <PythonIcon fillOpacity=".8" />,
+  },
+  {
+    id: 'spec',
+    name: 'Spec file',
+    icon: <IconFileCode className="h-full w-full" fillOpacity=".8" />,
   },
   {
     id: 'docker',
@@ -46,11 +51,11 @@ export default function ProductionReadyFirst({ samples }: { samples: ISample[] }
   return (
     <HomeSection
       id="production-ready-first"
-      icon={<IconSparkles className="h-full w-full" />}
+      icon={<IconRocket className="h-full w-full" />}
       title="Production-Ready First"
       docRef="/docs/"
       selectableList={
-        <SelectableList
+        <SelectableIcons
           items={items.map(({ id, name, icon }) => ({ id, name, icon }))}
           selected={selected}
           onSelect={onSelect}
@@ -59,14 +64,13 @@ export default function ProductionReadyFirst({ samples }: { samples: ISample[] }
       body={
         <>
           <p>
-            Need your models serving ASAP? It does not feel right to have to wait months to see if your models work
-            outside a Jupyter notebook, does it?{' '}
+            Going from a packaged model to a running service should take minutes, not months. <FlamaName /> makes that
+            the default, whether you are serving a predictive model or a generative one.
           </p>
           <br />
           <p>
-            <FlamaName /> makes the deployment of ML models into production as straightforwardly as possible. With the
-            ease of a single command line your packaged models will be ready to serve via HTTP requests in seconds.{' '}
-            <FlamaName /> transforms any model into an ML-API ready to serve its purpose.
+            Point it at a packaged model from the command line, in Python, with a specification file, or inside a
+            container, and it is ready to serve over HTTP in seconds.
           </p>
         </>
       }

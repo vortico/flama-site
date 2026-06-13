@@ -1,6 +1,7 @@
 import React from 'react'
 
 import {
+  IconArrowRight,
   IconBolt,
   IconBrain,
   IconDownload,
@@ -14,7 +15,7 @@ import {
 } from '@tabler/icons-react'
 import { Metadata } from 'next'
 
-import { LinkButton } from '@/components/elements'
+import { Link, LinkButton } from '@/components/elements'
 import { FlamaName } from '@/components/names'
 
 interface DocsDashboardItemProps {
@@ -164,60 +165,82 @@ function DocsDashboard() {
   )
 }
 
-function SkillBanner() {
+const BANNER_ACTION_CLASS =
+  'inline-flex flex-none items-center gap-2 rounded-full bg-brand-200 px-4 py-2 text-sm font-semibold text-brand-700 transition-colors duration-200 hover:bg-brand-300 hover:text-brand-700 focus:outline-none focus:ring-2 focus:ring-brand-600 dark:bg-primary-600 dark:text-primary-100 dark:hover:bg-primary-500 dark:hover:text-primary-50 dark:focus:ring-primary-500'
+
+interface BannerProps {
+  icon: React.ReactNode
+  title: React.ReactNode
+  description: React.ReactNode
+  action: React.ReactNode
+}
+
+function Banner({ icon, title, description, action }: BannerProps) {
   return (
     <div className="rounded-lg border border-brand-200 bg-gradient-to-r from-brand-500/5 to-brand-500/10 p-6 dark:border-brand-600/30 dark:from-brand-500/5 dark:to-brand-500/10">
       <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-center sm:justify-between">
         <div className="flex items-center gap-4">
           <div className="flex h-10 w-10 flex-none items-center justify-center rounded-full bg-brand-500/90 p-2 text-primary-100 shadow ring-1 ring-primary-900/30 dark:bg-brand-500/80 dark:text-primary-800">
-            <IconSparkles className="h-full w-full" />
+            {icon}
           </div>
           <div>
-            <h3 className="text-sm font-semibold text-primary-800 dark:text-primary-200">
-              <FlamaName /> for your AI assistant
-            </h3>
-            <p className="mt-0.5 text-sm text-primary-500 dark:text-primary-400">
-              Download the <strong>skill.md</strong> file and let your AI coding assistant build <FlamaName /> apps with
-              full framework knowledge.
-            </p>
+            <h3 className="text-sm font-semibold text-primary-800 dark:text-primary-200">{title}</h3>
+            <p className="mt-0.5 text-sm text-primary-500 dark:text-primary-400">{description}</p>
           </div>
         </div>
-        <a
-          href="/skill.md"
-          download="flama-skill.md"
-          className="inline-flex flex-none items-center gap-2 rounded-full bg-brand-200 px-4 py-2 text-sm font-semibold text-brand-700 transition-colors duration-200 hover:bg-brand-300 hover:text-brand-700 focus:outline-none focus:ring-2 focus:ring-brand-600 dark:bg-primary-600 dark:text-primary-100 dark:hover:bg-primary-500 dark:hover:text-primary-50 dark:focus:ring-primary-500"
-        >
-          <IconDownload className="h-4 w-4" />
-          Download
-        </a>
+        {action}
       </div>
     </div>
   )
 }
 
+function SkillBanner() {
+  return (
+    <Banner
+      icon={<IconSparkles className="h-full w-full" />}
+      title={
+        <>
+          <FlamaName /> for your AI assistant
+        </>
+      }
+      description={
+        <>
+          Download the <strong>skill.md</strong> file and let your AI coding assistant build <FlamaName /> apps with
+          full framework knowledge.
+        </>
+      }
+      action={
+        <a href="/skill.md" download="flama-skill.md" className={BANNER_ACTION_CLASS}>
+          <IconDownload className="h-4 w-4" />
+          Download
+        </a>
+      }
+    />
+  )
+}
+
 function ContributeBanner() {
   return (
-    <div className="rounded-lg border border-brand-200 bg-gradient-to-r from-brand-500/5 to-brand-500/10 p-6 dark:border-brand-600/30 dark:from-brand-500/5 dark:to-brand-500/10">
-      <div className="flex flex-col items-start gap-4 sm:flex-row sm:items-center sm:justify-between">
-        <div className="flex items-center gap-4">
-          <div className="flex h-10 w-10 flex-none items-center justify-center rounded-full bg-brand-500/90 p-2 text-primary-100 shadow ring-1 ring-primary-900/30 dark:bg-brand-500/80 dark:text-primary-800">
-            <IconHeartHandshake className="h-full w-full" />
-          </div>
-          <div>
-            <h3 className="text-sm font-semibold text-primary-800 dark:text-primary-200">
-              Contribute to <FlamaName />
-            </h3>
-            <p className="mt-0.5 text-sm text-primary-500 dark:text-primary-400">
-              Found a bug, missing a feature, or want to improve the docs? Learn how to get involved and help shape the
-              future of <FlamaName />.
-            </p>
-          </div>
-        </div>
-        <div className="flex-none">
-          <LinkButton href="/docs/contributing/how-to-contribute/" text="Get involved" rightIcon />
-        </div>
-      </div>
-    </div>
+    <Banner
+      icon={<IconHeartHandshake className="h-full w-full" />}
+      title={
+        <>
+          Contribute to <FlamaName />
+        </>
+      }
+      description={
+        <>
+          Found a bug, missing a feature, or want to improve the docs? Learn how to get involved and help shape the
+          future of <FlamaName />.
+        </>
+      }
+      action={
+        <Link href="/docs/contributing/how-to-contribute/" className={BANNER_ACTION_CLASS}>
+          <IconArrowRight className="h-4 w-4" />
+          Get involved
+        </Link>
+      }
+    />
   )
 }
 

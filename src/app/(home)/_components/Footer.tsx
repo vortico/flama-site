@@ -1,7 +1,8 @@
 import React from 'react'
 
 import { Link } from '@/components/elements'
-import { FlamaIcon } from '@/components/icons'
+import { FlamaIcon, VorticoIcon } from '@/components/icons'
+import { VorticoName } from '@/components/names'
 
 const links = [
   {
@@ -71,9 +72,20 @@ export default function Footer() {
           </div>
         ))}
       </div>
-      <div className="flex items-center gap-x-2 pt-10 text-brand-500">
-        <FlamaIcon className="h-6 w-6 md:h-7 md:w-7" />
-        <span className="text-2xl md:text-3xl">Flama</span>
+      <div className="flex flex-col items-start gap-4 pt-10 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex items-center gap-x-2 text-brand-500">
+          <FlamaIcon className="h-6 w-6 md:h-7 md:w-7" />
+          <span className="text-2xl md:text-3xl">Flama</span>
+        </div>
+        <Link
+          href="https://vortico.tech"
+          className="flex items-center gap-1 text-primary-500 transition-colors duration-200 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-200"
+          aria-label="Made by Vortico"
+        >
+          <span className="text-sm">Made by</span>
+          <VorticoIcon className="h-5 w-5" />
+          <VorticoName />
+        </Link>
       </div>
     </footer>
   )

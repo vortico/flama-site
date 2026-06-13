@@ -1,13 +1,14 @@
 'use client'
 
-import React, { useCallback, useMemo, useState } from 'react'
+import React, { useMemo, useState } from 'react'
 
-import { IconBolt, IconChevronRight } from '@tabler/icons-react'
+import { IconBolt } from '@tabler/icons-react'
 import { motion } from 'framer-motion'
 
 import { FlamaName } from '@/components/names'
 
 import HomeSection from './HomeSection'
+import SelectableText from './SelectableText'
 
 const samples = [
   {
@@ -21,9 +22,9 @@ const samples = [
         </p>
         <br />
         <p>
-          <FlamaName /> natively supports both Typesystem and Marshmallow, data type validation libraries which make
-          possible the standardisation of the API via generation of OpenAPI schemas, and allow the user to define API
-          schemas effortlessly.
+          <FlamaName /> natively supports Pydantic, Typesystem, and Marshmallow, now split into optional packages so you
+          install only what you need. These data-type validation libraries make possible the standardisation of the API
+          via generation of OpenAPI schemas, and allow the user to define API schemas effortlessly.
         </p>
         <br />
         <p>
@@ -89,6 +90,68 @@ const samples = [
           with <code>Components</code>, which make possible to load objects on demand without pain and automatically
           resolving all the required inputs via dependency injection.
         </p>
+        <br />
+        <p>
+          This is also how <FlamaName /> manages your models: they are loaded once on startup and injected wherever they
+          are needed, so their lifecycle is handled for you and never leaks into your request handlers.
+        </p>
+      </>
+    ),
+  },
+  {
+    id: 'ddd',
+    title: 'Domain-Driven Design',
+    description: (
+      <>
+        <p>
+          As an application grows, business logic tends to leak into routes and data access, blurring the line between
+          what the business needs and how the code is structured. Domain-Driven Design keeps the domain at the centre,
+          but wiring up its patterns by hand is repetitive and error-prone.
+        </p>
+        <br />
+        <p>
+          <FlamaName /> ships native, first-class support for DDD. Model your data, hide persistence behind a{' '}
+          <code>Repository</code>, wrap atomic transactions in a <code>Worker</code> (the unit of work), and expose your
+          business logic through a <code>Resource</code>. The SQLAlchemy and HTTP backends share the same interfaces, so
+          your domain stays decoupled from storage and transport.
+        </p>
+      </>
+    ),
+  },
+  {
+    id: 'authentication',
+    title: 'Authentication & Authorisation',
+    description: (
+      <>
+        <p>
+          Privatising endpoints, or whole APIs, is a common requirement, especially for ML APIs handling sensitive or
+          proprietary data. Building that gatekeeping from scratch is tedious and easy to get wrong.
+        </p>
+        <br />
+        <p>
+          <FlamaName /> provides a native authentication system based on JSON Web Tokens (JWT). Register the{' '}
+          <code>AccessTokenComponent</code> with your secret and the <code>AuthenticationMiddleware</code>, then protect
+          any route by listing the permissions it requires in its <code>tags</code>. The decoded token is injected
+          straight into your handlers through dependency injection, keeping route logic clean and secure.
+        </p>
+      </>
+    ),
+  },
+  {
+    id: 'streaming',
+    title: 'Streaming responses',
+    description: (
+      <>
+        <p>
+          Some responses are best delivered as they are produced rather than buffered whole, e.g. a live feed of events
+          or the tokens of a language model. <FlamaName /> is streaming-first to make this effortless.
+        </p>
+        <br />
+        <p>
+          Return a <code>ServerSentEventResponse</code> or an <code>NDJSONResponse</code> wrapping an async generator,
+          and <FlamaName /> takes care of the rest, including named events, heartbeats, and <code>Last-Event-ID</code>{' '}
+          based resumption, so clients see the first chunk immediately and memory stays bounded.
+        </p>
       </>
     ),
   },
@@ -114,8 +177,6 @@ const samples = [
 export default function EffortlessDevelopment() {
   const [selected, setSelected] = useState<string>(samples[0].id)
 
-  const onSelect = useCallback((value: string) => () => setSelected(value), [setSelected])
-
   const selectedSample = useMemo(() => samples.find(({ id }) => id === selected), [selected])
 
   return (
@@ -139,22 +200,7 @@ export default function EffortlessDevelopment() {
         viewport={{ once: true }}
         className="flex flex-col items-start justify-start gap-y-10 lg:flex-row lg:justify-center"
       >
-        <div className="h-full w-full basis-full space-y-6 pl-9 lg:basis-1/3">
-          {samples.map(({ id, title }) => (
-            <button key={id} className="flex items-center" onClick={onSelect(id)}>
-              {selected === id && <IconChevronRight className="-ml-7 inline h-7 w-7 text-brand-500" />}
-              <span
-                className={`text-lg tracking-tight transition-all duration-200 sm:text-xl ${
-                  selected === id
-                    ? 'font-semibold text-primary-700 underline decoration-brand-500 decoration-2 underline-offset-8 dark:text-primary-200'
-                    : 'text-primary-300 hover:text-primary-700 dark:text-primary-500 dark:hover:text-primary-200'
-                }`}
-              >
-                {title}
-              </span>
-            </button>
-          ))}
-        </div>
+        <SelectableText items={samples} selected={selected} onSelect={setSelected} />
         <div className="h-full min-h-[16rem] w-full basis-full lg:basis-2/3">
           {selectedSample && selectedSample.description}
         </div>

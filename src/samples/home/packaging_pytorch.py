@@ -1,6 +1,7 @@
 import flama
 import torch
 
+
 class Model(torch.nn.Module):
     def __init__(self):
         super().__init__()
@@ -9,10 +10,11 @@ class Model(torch.nn.Module):
 
     def forward(self, x):
         x = torch.tanh(self.l1(x))
-        x = torch.sigmoid(self.l2(x))
-        return x
+        return torch.sigmoid(self.l2(x))
+
 
 model = Model()
-model.train()
 
-flama.dump(model, "torch_model.flm")
+# Training
+
+flama.dump(model, "model.flm")

@@ -2,7 +2,7 @@
 
 import React from 'react'
 
-import { IconPlug } from '@tabler/icons-react'
+import { IconPuzzle } from '@tabler/icons-react'
 import { motion } from 'framer-motion'
 
 import { Window } from '@/components/elements'
@@ -17,20 +17,19 @@ export default function Extensibility({ samples }: { samples: ISample[] }) {
   return (
     <HomeSection
       id="extensibility"
-      icon={<IconPlug className="h-full w-full" />}
+      icon={<IconPuzzle className="h-full w-full" />}
       title="Extensibility"
       docRef="/docs/"
       body={
         <>
           <p>
-            <FlamaName /> consists of a core of functionality for creating, maintaining and deploying ML-APIs. However,
-            the ML arena is constantly changing, with new products for managing ML projects appearing very often. Being
-            able to integrate your API with such third parties is of crucial importance.
+            <FlamaName /> ships a focused core for building, maintaining, and deploying model APIs, but the ecosystem
+            around models moves fast and new tools appear all the time. Being able to plug those into your API matters.
           </p>
           <br />
           <p>
-            <FlamaName /> is natively an extensible framework. With the ease of <code>Module</code> you will be able to
-            rapidly develop your own plugins and keep improving <FlamaName /> integrability.
+            <FlamaName /> is extensible by design. With a simple <code>Module</code> you can build your own plugins and
+            grow what <FlamaName /> integrates with, without touching the core.
           </p>
         </>
       }
