@@ -31,68 +31,53 @@ target version. Anything that has no automatic replacement is never silently dro
 The workflow that follows is deliberately version agnostic: the same steps apply whichever version you are moving from
 and to.
 
-## Updating the Flama CLI
+## Upgrading your codebase
 
-The first step is to make sure the `flama` command you run is the one that knows about the version you are upgrading to.
-Because the upgrade tool is a standalone command-line application, we recommend installing it with
-[pipx](https://pipx.pypa.io/), which keeps the CLI in its own isolated environment, separate from any project's
-dependencies:
+With the concepts in place, let's walk through a typical upgrade, from previewing the changes to confirming that your
+project still behaves as expected.
+
+### Previewing the changes
+
+The first step is always to see what would change, without altering a single file. The recommended way to run the
+command is with [pipx](https://pipx.pypa.io/), which fetches and runs it in a throwaway environment, leaving your
+project's dependencies untouched:
 
 ```console
-pipx install flama
+pipx run flama upgrade src/ tests/
 ```
 
-If you already manage the CLI with pipx, update it to the latest release before upgrading:
+Point the command at the files and directories you want to process; directories are scanned recursively. Alternatively,
+install <FlamaName /> into your active environment and call the command directly:
 
 ```console
-pipx upgrade flama
-```
-
-You can also run a one-off invocation without a persistent installation, which is handy for pinning an exact version:
-
-```console
-pipx run flama upgrade --help
-```
-
-Alternatively, if you prefer to manage everything with [pip](https://pip.pypa.io/) inside your active environment, install
-or update <FlamaName /> there:
-
-```console
-pip install --upgrade flama
-```
-
-> [!WARNING]
-> The upgrade command rewrites files in place when applied. Commit or stash your work first, so that you always have a
-> clean diff to review and can revert if needed.
-
-## Previewing the changes
-
-By default, **upgrade** previews the changes as a unified diff without modifying anything. This is the safe first step:
-point the command at the files and directories you want to process, where directories are scanned recursively.
-
-```console
+pip install flama
 flama upgrade src/ tests/
 ```
 
-When run in this preview mode and changes are found, the command exits with a non-zero status. This makes it convenient
-to use as a check, as we will see [below](#upgrading-in-continuous-integration).
+By default, **upgrade** previews the changes as a unified diff and modifies nothing, which makes this the safe first
+step. When it finds pending changes in this mode, it exits with a non-zero status — a detail we will
+[put to use](#upgrading-in-continuous-integration) shortly.
 
 Read through the diff carefully. Automatic rewrites generally fall into a few categories: modules that moved to a new
 location, symbols that were renamed or relocated, and call patterns that changed shape. Anything the command cannot
 rewrite on its own is left untouched and tagged with a `# flama-upgrade` marker for you to address by hand.
 
-## Applying the changes
+### Applying the changes
 
-Once you are happy with the proposed diff, apply it in place with `--write`:
+Once you are happy with the proposed diff, apply it in place with the `--write` flag.
+
+> [!WARNING]
+> The upgrade command rewrites files in place when applied. Commit or stash your work first, so that you always have a
+> clean diff to review and can revert if needed.
 
 ```console
 flama upgrade --write src/ tests/
 ```
 
-The command now edits your files directly. Since you reviewed the diff in the previous step and your working tree was
+The command now edits your files directly. Because you reviewed the diff in the previous step and your working tree was
 clean, you can inspect the result with your version control tooling and revert selectively if anything looks off.
 
-## Resolving manual follow-ups
+### Resolving manual follow-ups
 
 Not every change can be made mechanically. When a symbol has been removed without a drop-in replacement, or a pattern
 needs a decision only you can make, the command leaves a `# flama-upgrade` marker at the relevant line and lists it as a
@@ -102,27 +87,22 @@ follow-up. Search your codebase for the markers and resolve each one:
 grep -rn "# flama-upgrade" src/ tests/
 ```
 
-Each marker is accompanied by a short note explaining what changed and what to do instead. Work through them, remove the
-markers as you go, and your migration is complete once none remain.
+Each marker is accompanied by a short note explaining what changed and what to do instead. Work through them, removing
+the markers as you go. Once none remain, pin your project's <FlamaName /> dependency to the new version, reinstall it,
+and run your test suite to confirm the migration is complete.
 
-## Targeting a version and selecting operations
+### Targeting a specific version
 
 By default, the command detects the version installed in the environment as the source, and uses the latest known
-migration as the target. You can make either explicit, which is recommended when running the CLI from an isolated pipx
-environment where the detected version may differ from your project's:
+migration as the target. When you run it from an isolated pipx environment, where the detected version may differ from
+your project's, it is worth being explicit about both ends:
 
 ```console
 flama upgrade --from 1.0 --to 2.0 src/
 ```
 
-When you want fine-grained control over which transformations run, use `--select` to run only specific operations, or
-`--skip` to exclude them. Both accept a comma-separated list of operation ids:
-
-```console
-flama upgrade --skip move-module:flama.asgi src/
-```
-
-For the full list of options, run `flama upgrade --help` or see the [Upgrade](/docs/flama-cli/upgrade/) command reference.
+You can also restrict which transformations run with `--select` and `--skip`. For the full list of options, run
+`flama upgrade --help` or see the [Upgrade](/docs/flama-cli/upgrade/) command reference.
 
 ## Upgrading in continuous integration
 
@@ -134,18 +114,5 @@ codebase has drifted behind the targeted version, reminding you to run the upgra
 flama upgrade src/ tests/
 ```
 
-## Putting it all together
-
-A typical upgrade, from a clean working tree to a passing test suite, looks like this:
-
-```console
-pipx upgrade flama                    # get the CLI for the target version
-flama upgrade src/ tests/             # preview the diff
-flama upgrade --write src/ tests/     # apply it
-grep -rn "# flama-upgrade" src/ tests/  # find manual follow-ups
-pip install --upgrade flama           # update the dependency in your project
-pytest                                # confirm everything works
-```
-
-With that, your project is aligned with the new version of <FlamaName />. To explore the command's options in more
+With that, your project stays aligned with the latest version of <FlamaName />. To explore the command's options in more
 detail, head to the [Upgrade](/docs/flama-cli/upgrade/) reference in the [Flama CLI](/docs/flama-cli/run/) section.
