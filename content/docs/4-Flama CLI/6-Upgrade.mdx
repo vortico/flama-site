@@ -1,0 +1,89 @@
+---
+title: Upgrade
+wip: true
+---
+
+## Upgrading a codebase
+
+Major releases of <FlamaName /> occasionally relocate modules, rename symbols, or change a few call patterns. Rather
+than asking you to track down every affected import by hand, the command **upgrade** rewrites your codebase to match a
+target version, applying a set of codemods (automated source-to-source transformations) across your <PythonName /> files.
+
+Symbols that have no automatic replacement are never silently dropped: they are flagged in place with a `# flama-upgrade`
+marker and reported as manual follow-ups. This page documents the command itself; for the end-to-end migration workflow,
+see the [Upgrading](/docs/getting-started/upgrading/) guide. To inspect the command options, run:
+
+```console
+flama upgrade --help
+
+Usage: flama upgrade [OPTIONS] PATHS...
+
+  Upgrade a Flama codebase to a newer major version.
+
+Options:
+  --to TEXT        Target Flama version (default: latest known migration).
+  --from TEXT      Source Flama version (default: detect installed).
+  --diff / --write Preview a diff (default) or rewrite files in place.
+  --select TEXT    Comma-separated operation ids to run exclusively.
+  --skip TEXT      Comma-separated operation ids to skip.
+  --help           Show this message and exit.
+```
+
+## Parameters
+
+### Paths
+
+- **PATHS** (required): the files and directories to process. Directories are scanned recursively.
+
+### Source and target versions
+
+By default the command detects the version installed in your environment as the source, and uses the latest known
+migration as the target. You can pin either end explicitly:
+
+- **from**: the source version to migrate away from. Defaults to the installed <FlamaName /> version.
+- **to**: the target version to migrate to. Defaults to the latest known migration.
+
+### Preview and apply
+
+- **diff / write**: by default the command previews a unified diff and leaves your files untouched; pass `--write` to
+  apply the changes in place.
+
+### Selecting operations
+
+Every transformation has a stable operation id, so individual codemods can be run or excluded:
+
+- **select**: a comma-separated list of operation ids to run exclusively.
+- **skip**: a comma-separated list of operation ids to skip.
+
+## Examples
+
+### Previewing changes
+
+By default, **upgrade** previews the changes as a unified diff without modifying anything, which makes it the safe first
+step:
+
+```console
+flama upgrade src/
+```
+
+When run in preview mode and changes are found, the command exits with a non-zero status, which makes it convenient to
+use as a check in a continuous integration and continuous deployment (CI/CD) pipeline.
+
+### Applying changes
+
+Once you have reviewed the diff, apply it in place with `--write`:
+
+```console
+flama upgrade --write src/ tests/
+```
+
+### Targeting a version and selecting operations
+
+You can pin the source and target versions, and restrict which codemods run:
+
+```console
+flama upgrade --from 1.0 --to 2.0 --skip move-module:flama.asgi src/
+```
+
+After running the codemods, address any `# flama-upgrade` markers left in your code, then run your test suite to confirm
+the migration is complete. For a step-by-step walkthrough, see the [Upgrading](/docs/getting-started/upgrading/) guide.
