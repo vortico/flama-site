@@ -1,0 +1,230 @@
+---
+title: Releasing Flama 2.0
+description: The main highlights of Flama 2.0 version
+authors:
+  - name: 'José Antonio Perdiguero López'
+    url: 'https://vortico.tech/team/japl/'
+  - name: 'Miguel A. Duran Olivencia'
+    url: 'https://vortico.tech/team/mado/'
+wip: false
+---
+
+# Releasing Flama 2.0
+
+We are thrilled to announce **[Flama 2.0](https://github.com/vortico/flama/releases/tag/v2.0.0/)** 🎉, the largest
+release in the history of the framework. This is not an incremental update: Flama 2.0 is a ground-up rethinking of the
+framework's foundations, performance characteristics, and scope. What started as a framework for productionising
+machine-learning models with minimal ceremony has grown into a complete platform for building production-ready APIs that
+span REST endpoints, predictive models, generative AI, and agent-ready tooling, all from a single codebase.
+
+The headline changes: a **Rust-powered core** that compiles the framework's hot paths into native code, **first-class
+LLM serving** with multi-dialect compatibility, native **Model Context Protocol (MCP)** support for agentic workflows,
+a **streaming-first HTTP stack**, and a **painless migration path** from 1.x via automated codemods. Let's dive into
+everything that's new.
+
+## A Rust-powered core
+
+Performance has always mattered for serving workloads, but in Flama 1.x, the framework's overhead (routing, JSON
+encoding, request parsing, compression) was pure Python. In 2.0, these hot paths have moved into a compiled Rust crate
+(`flama-core`, exposed as `_core`), built with [PyO3](https://pyo3.rs/) and
+[maturin](https://www.maturin.rs/):
+
+- **Path matching and route resolving**: The router now evaluates path patterns in compiled Rust, eliminating per-request
+  regex overhead.
+- **JSON encoding**: Response serialisation uses a native encoder, significantly reducing latency on large payloads.
+- **Request parsing**: Multipart and URL-encoded form parsing is handled at the native layer, benefiting file uploads
+  and complex form submissions.
+- **Compression codecs**: Gzip/deflate, Brotli, Bzip2, LZMA, and Zstd compression are now stream-based and compiled,
+  so compressed responses no longer pay a Python-interpreter tax.
+
+The Rust crate ships as native wheels per Python version (no abi3), so you get the speedups with a simple `pip install`,
+no Rust toolchain required. Safety is enforced at the crate level with `unsafe_code = forbid`.
+
+**What this means in practice**: lower latency, higher throughput, and less CPU spent on framework overhead, leaving
+more headroom for your application logic and model inference.
+
+## First-class LLM serving
+
+Flama 2.0 turns the framework into a serving layer for generative models. The same one-line philosophy that made
+predictive model serving trivial now extends to large language models:
+
+### Serving dialects
+
+A single model can speak multiple wire protocols simultaneously, so your existing clients work without modification:
+
+| Dialect | Prefix | Representative routes |
+|---|---|---|
+| **Native** | _(none)_ | `/query/`, `/stream/`, `/chat/` |
+| **OpenAI** | `/openai` | `/v1/chat/completions`, `/v1/completions`, `/v1/responses`, `/v1/models` |
+| **Anthropic** | `/anthropic` | `/v1/messages`, `/v1/models` |
+| **Ollama** | `/ollama` | `/api/chat`, `/api/generate`, `/api/tags` |
+
+This means you can point any OpenAI SDK, Anthropic client, or Ollama-compatible tool at your Flama server and it will
+work without code changes.
+
+### Hardware backends
+
+Flama integrates with two runtime backends, chosen automatically at load time based on what is available in your
+environment:
+
+- **vLLM**: High-throughput serving on Linux with CUDA GPUs.
+- **MLX**: Native acceleration on Apple Silicon (M1/M2/M3/M4).
+
+The backend choice is not persisted in the model artifact. The same `.flm` file runs on vLLM in your Linux production
+cluster and on MLX on your MacBook during development.
+
+### The CLI workflow
+
+The complete workflow, from zero to a production API, is three commands:
+
+```console
+# 1. Download and package the model
+flama get --family llm --source huggingface mlx-community/gemma-4-e2b-it-4bit
+
+# 2. Test it locally in your terminal
+echo "What is Flama?" | flama model mlx-community_gemma-4-e2b-it-4bit.flm stream --system "Be concise."
+
+# 3. Serve it over HTTP
+flama serve --model file=mlx-community_gemma-4-e2b-it-4bit.flm,url=/,name=gemma
+```
+
+### Built-in chat interface
+
+Every served model comes with a polished chat interface at `/chat/` (part of the native dialect). It renders Markdown,
+LaTeX math via KaTeX, and Mermaid diagrams, with streaming token delivery over Server-Sent Events. No frontend code, no
+build step, no external dependencies.
+
+### Transport and decoder
+
+A dedicated transport layer handles three input shapes: **raw** (verbatim prompt), **chat** (single-turn with system
+instruction), and **conversation** (multi-turn message list). The decoder splits the model's output stream into typed
+events tagged by channel (`output`, `thought`, tool calls), auto-detecting the right strategy per model.
+
+## Model Context Protocol (MCP)
+
+Serving a model is one half of the generative AI story; the other half is giving models access to your world. The
+**Model Context Protocol** is the open standard for exactly that, and Flama provides native, first-class support.
+
+### What Flama's MCP support offers
+
+- **Up-to-date protocol**: Every request is self-contained (no session negotiation, no sticky sessions),
+  so MCP servers scale horizontally without any special infrastructure.
+- **Tools, resources, and prompts**: Expose Python functions as tools AI agents can invoke, data as readable resources,
+  and reusable prompt templates, all with a single decorator.
+- **Type-safe schemas**: Input and output JSON Schema are derived from your handler's type hints automatically.
+- **Advanced extensions**: Background **Tasks** (long-running tools return a pollable handle), interactive
+  **Elicitation** (tools can pause to request user input), and **MCP Apps** (prefetchable UI templates alongside tool
+  results).
+
+### A quick example
+
+```python
+from flama import Flama
+from flama.mcp.server import MCPServer
+
+tools_server = MCPServer("tools", version="2.0.0", instructions="Demo MCP tools server")
+
+@tools_server.tool("add", description="Add two integers")
+def add(a: int, b: int) -> int:
+    return a + b
+
+@tools_server.tool("greet", description="Greet someone by name")
+async def greet(name: str) -> str:
+    return f"Hello, {name}!"
+
+app = Flama()
+app.mcp.add_server("/mcp/tools/", "tools", server=tools_server)
+```
+
+Any MCP-capable client (Claude, Cursor, VS Code Copilot, custom agents) can discover and invoke these tools through the
+standard JSON-RPC interface. No bespoke integration code required.
+
+## Streaming-first HTTP
+
+Flama 2.0 reorganises the HTTP layer into a foundational package (`flama.http`) with new response types designed for
+modern, real-time workloads:
+
+- **Server-Sent Events (SSE)**: First-class response type for token-by-token LLM streaming, live updates, and
+  event-driven architectures.
+- **NDJSON responses**: Newline-delimited JSON for streaming structured data to clients that prefer JSON over SSE.
+- **Stream-oriented HTTP responses**: The entire response pipeline is stream-aware, from compression through to the
+  wire.
+
+The middleware layer has been similarly reorganised into its own foundational package (`flama.middleware`), making it
+straightforward to compose request/response transformations.
+
+## Chatbot template and UI
+
+The built-in chat interface is produced from a proper frontend application, the **chatbot template**. In 2.0:
+
+- Markdown rendering includes **LaTeX math** and **Mermaid diagram** support.
+- Templates have been restructured into a per-application layout, so customisation is straightforward.
+
+The result is a modern, component-based chat UI that ships with the framework and requires zero effort from you.
+
+## Developer experience and tooling
+
+### Automatic upgrade
+
+Upgrading a major version should not hurt. The `flama upgrade` command rewrites your imports and renamed symbols via
+automated codemods:
+
+```console
+# Preview changes (diff only, nothing modified):
+flama upgrade src/
+
+# Apply in place:
+flama upgrade --write src/ tests/
+
+# Target a specific version or skip operations:
+flama upgrade --to 2.0 --skip move-module:flama.asgi src/
+```
+
+Symbols without an automatic replacement are flagged with a `# flama-upgrade` marker and listed as manual follow-ups.
+Minutes, not days.
+
+## Platform support
+
+- **Python 3.10 through 3.14** (`requires-python = ">=3.10,<3.15"`).
+- Native wheels per Python version (no abi3), for Linux, macOS, and Windows.
+- Published to PyPI via **Trusted Publishing (OIDC)**, so the supply chain is verifiable.
+
+## Breaking changes
+
+Flama 2.0 is a major release with intentional breaking changes:
+
+- **HTTP foundational package**: HTTP types and responses have been relocated and restructured into `flama.http`.
+- **Middleware foundational package**: Middleware has been relocated and restructured into `flama.middleware`.
+- **Serialisation protocol v2**: New, versioned model serialisation format (older `.flm` files need re-packaging).
+- **`torch.export` serialisation**: Upgraded model export format for PyTorch-based models.
+- **MCP protocol**: Adapted to the latest stateless protocol revision.
+
+Most import and symbol moves are handled automatically by `flama upgrade`. See the
+[migration guide](https://flama.dev/docs/migration/) for full details.
+
+We are incredibly excited about where Flama is headed. This release represents years of work and a fundamental expansion
+of what the framework can do. Whether you are serving predictive models, generative models, or building agent-ready
+tooling, Flama 2.0 has you covered.
+
+Happy coding! 🚀
+
+## References
+
+- [Flama documentation](https://flama.dev/docs/)
+- [Flama GitHub repository](https://github.com/vortico/flama)
+- [Flama PyPI package](https://pypi.org/project/flama/)
+- [Changelog: v1.12.4 → v2.0.0](https://github.com/vortico/flama/compare/v1.12.4...v2.0.0)
+
+## Support our work
+
+If you find Flama useful for building robust Machine Learning and Generative AI APIs, we'd be thrilled if you showed
+your support by giving us a ⭐ on [GitHub](https://github.com/vortico/flama). Your stars are the best fuel for our
+development efforts!
+
+You can also stay updated with the latest news and development threads by following us on
+[𝕏](https://x.com/VorticoTech).
+
+## About the authors
+
+- [Vortico](https://vortico.tech/): We specialize in software development, helping businesses enhance and expand their
+  AI and technology capabilities.
