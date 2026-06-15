@@ -1,0 +1,359 @@
+---
+title: Serving LLMs with the Flama CLI
+description: How to download, interact with, and serve large language models using the Flama command-line interface
+authors:
+  - name: 'José Antonio Perdiguero López'
+    url: 'https://vortico.tech/team/japl/'
+  - name: 'Miguel A. Duran Olivencia'
+    url: 'https://vortico.tech/team/mado/'
+wip: false
+---
+
+# Serving LLMs with the Flama CLI
+
+Flama 2.0 brings first-class support for generative AI: downloading, packaging, and serving large language models (LLMs)
+is now as simple as running a few commands in your terminal. No boilerplate code, no custom serving infrastructure, no
+configuration files. Just the CLI and a model.
+
+In this post, we walk through the entire workflow: fetching a model from HuggingFace, interacting with it locally in
+your terminal, and serving it over HTTP with a production-ready API and a built-in chat interface. We will also show how
+a locally served model can power agentic workflows, using Claude CLI as a practical example.
+
+Before we dive into the details, we recommend you to have the following resources at hand:
+
+- Official Flama documentation: [Flama documentation](https://flama.dev/docs/)
+- Generative AI section: [Generative AI docs](https://flama.dev/docs/generative-ai/overview/)
+- Flama GitHub repository: [Flama on GitHub](https://github.com/vortico/flama)
+
+## Table of contents
+
+- [Fetching a model with `flama get`](#fetching-a-model-with-flama-get)
+  - [What happens under the hood](#what-happens-under-the-hood)
+- [Interacting with the model locally](#interacting-with-the-model-locally)
+  - [One-shot queries with `flama model run`](#one-shot-queries-with-flama-model-run)
+  - [Streaming responses with `flama model stream`](#streaming-responses-with-flama-model-stream)
+- [Serving the model over HTTP](#serving-the-model-over-http)
+  - [The `flama serve` command](#the-flama-serve-command)
+  - [The built-in chat interface](#the-built-in-chat-interface)
+- [Powering agentic workflows](#powering-agentic-workflows)
+  - [Using Claude CLI with a local model](#using-claude-cli-with-a-local-model)
+- [Conclusions](#conclusions)
+- [References](#references)
+- [Support our work](#support-our-work)
+- [About the authors](#about-the-authors)
+
+## Fetching a model with `flama get`
+
+The first step in serving an LLM with Flama is downloading and packaging a model into a `.flm` artifact (a *Flama
+Lightweight Model* file). The `flama get` command handles this in a single step: it downloads the model weights and
+configuration from a supported source and serialises them into the portable `.flm` format.
+
+All examples in this post assume Flama has been installed with the LLM extras via
+[uv](https://docs.astral.sh/uv/):
+
+```console
+uv pip install "flama[llm,pydantic]"
+```
+
+Alternatively, you can run any command without a prior install by using
+`uvx --from "flama[llm,pydantic]" flama ...`, but for brevity we assume Flama is already installed throughout.
+
+Let us fetch a quantised version of Google's Gemma 4 model, optimised for Apple Silicon via the MLX Community:
+
+```console
+flama get --family llm --source huggingface mlx-community/gemma-4-e2b-it-4bit
+
+Downloading ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 2.3 GB 28.7 MB/s 0:00:00
+Packaging...
+Model saved to mlx-community_gemma-4-e2b-it-4bit.flm
+```
+
+Two options are required: `--source` tells Flama where to download from (currently HuggingFace), and `--family` declares
+whether the artifact is a traditional machine-learning model (`ml`) or a generative model (`llm`). For large language
+models, you always pass `--family llm`.
+
+The output path defaults to `<model-name>.flm` with slashes replaced by underscores. If you prefer a custom path, pass
+`--output`:
+
+```console
+flama get --family llm --source huggingface mlx-community/gemma-4-e2b-it-4bit --output models/gemma.flm
+```
+
+### What happens under the hood
+
+When you run `flama get`, the following happens:
+
+1. Flama resolves the model identifier against the HuggingFace Hub and discovers the files that make up the model (weights, tokenizer, configuration).
+2. Files are downloaded concurrently (up to 8 parallel downloads by default, configurable with `--max-concurrent`).
+3. Once all files are on disk, Flama packages them into a single `.flm` archive alongside a manifest that records the model family, the originating library, and metadata such as the model name and creation timestamp.
+
+The result is a self-contained, portable artifact. The `.flm` format is framework-agnostic: the same file runs on vLLM
+(Linux with CUDA) or MLX (Apple Silicon), with Flama selecting the appropriate backend at load time based on what is
+available in the environment.
+
+## Interacting with the model locally
+
+Once you have a packaged `.flm` artifact, you can interact with it directly from your terminal using the
+`flama model` command. No server, no HTTP, no code. This is invaluable for quick testing, prompt experimentation, and
+pipeline scripting.
+
+### One-shot queries with `flama model run`
+
+The `run` sub-command sends a prompt to the model, waits for the full response, and prints it:
+
+```console
+echo "What is Flama?" | flama model mlx-community_gemma-4-e2b-it-4bit.flm run --system "Be concise."
+
+Flama is a Python framework for building production-ready APIs with a focus on machine learning
+and generative AI, enabling one-line model serving behind HTTP endpoints.
+```
+
+You can tune generation with `--param` flags:
+
+```console
+echo "Explain dependency injection in three sentences." | \
+  flama model mlx-community_gemma-4-e2b-it-4bit.flm run \
+    --system "You are a software engineering instructor." \
+    --param temperature=0.7 \
+    --param max_tokens=256
+```
+
+For multi-turn conversations, use the `--transport conversation` flag and pass a JSON message list:
+
+```console
+echo '[{"role": "user", "content": "Hi!"}, {"role": "assistant", "content": "Hello! How can I help?"}, {"role": "user", "content": "What is an API?"}]' | \
+  flama model mlx-community_gemma-4-e2b-it-4bit.flm run --transport conversation
+```
+
+### Streaming responses with `flama model stream`
+
+For an interactive, token-by-token experience (especially useful with larger responses), use `stream` instead of `run`.
+Tokens are printed as they are generated, giving you immediate feedback:
+
+```console
+echo "What is flama (python package)?" | \
+  flama model mlx-community_gemma-4-e2b-it-4bit.flm stream --system "Be concise."
+
+Flama is a Python framework for building production-ready ML and generative AI APIs.
+It lets you serve models behind HTTP endpoints with minimal code, supporting
+HuggingFace, vLLM, and MLX backends, OpenAI/Anthropic/Ollama-compatible protocols,
+built-in chat interfaces, and the Model Context Protocol for agent tooling.
+```
+
+The streaming output appears progressively in your terminal, character by character, making it feel like a real
+conversation. This is especially satisfying when working with models that produce longer, more detailed responses.
+
+You can also ask the model about itself and the framework it runs on:
+
+```console
+echo "How do I serve an ML model with Flama?" | \
+  flama model mlx-community_gemma-4-e2b-it-4bit.flm stream \
+    --system "You are a helpful assistant that knows about the Flama Python framework."
+```
+
+If you want to see multiple output channels (for instance, reasoning and output), pass `--channel`:
+
+```console
+echo "Solve step by step: what is 23 * 47?" | \
+  flama model mlx-community_gemma-4-e2b-it-4bit.flm stream \
+    --channel thinking --channel output
+```
+
+## Serving the model over HTTP
+
+The true power of Flama lies in going from a local model to a production-ready HTTP API in a single command. No Python
+code, no configuration files, no Docker images. Just `flama serve`.
+
+### The `flama serve` command
+
+To serve the model we downloaded earlier:
+
+```console
+flama serve --model file=mlx-community_gemma-4-e2b-it-4bit.flm,url=/,name=gemma
+
+INFO:     Started server process [52341]
+INFO:     Waiting for application startup.
+INFO:     Model starting (name: gemma)
+INFO:     Model ready (name: gemma)
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://127.0.0.1:8000 (Press CTRL+C to quit)
+```
+
+That is it. A single command and your model is live behind a full HTTP API. Let us unpack what `--model` accepts:
+
+- **`file`** (required): Path to the `.flm` artifact.
+- **`url`**: The URL prefix under which the model's endpoints are mounted (default: `/`).
+- **`name`**: The resource name, used for OpenAPI tags and dependency injection.
+- **`serving`**: Comma-separated list of dialects to enable (e.g., `native,openai,anthropic,ollama`). When omitted, all
+  dialects are mounted.
+- **`params`**: Default generation parameters (e.g., `temperature=0.7`).
+
+You can serve multiple models in a single application:
+
+```console
+flama serve \
+  --model file=gemma.flm,url=/gemma,name=gemma,serving=native+openai \
+  --model file=qwen.flm,url=/qwen,name=qwen,serving=native+anthropic
+```
+
+And you can configure the server with the usual options:
+
+```console
+flama serve \
+  --model file=mlx-community_gemma-4-e2b-it-4bit.flm,url=/,name=gemma \
+  --server-host 0.0.0.0 \
+  --server-port 9000 \
+  --app-title "My LLM API" \
+  --app-docs /docs/
+```
+
+### The built-in chat interface
+
+When the native serving dialect is enabled (which it is by default), your model comes with a built-in chat interface
+accessible at the `/chat/` route (relative to the model's URL prefix). If you served the model at `/`, then navigate
+to `http://127.0.0.1:8000/chat/`
+
+You will be greeted with a polished, production-quality chat interface where you can type prompts and watch the model's
+responses stream in token by token. The interface renders Markdown, LaTeX math (via KaTeX), and Mermaid diagrams out of
+the box, so technical answers look exactly as intended.
+
+<div style={{display: 'flex', justifyContent: 'center'}}>
+<video autoPlay loop muted playsInline style={{width: '90%', borderRadius: '8px'}}>
+  <source src="/images/blog/2026-06-15_Serving_LLMs_with_Flama_CLI/chatbot-demo.webm" type="video/webm" />
+</video>
+</div>
+
+The chat interface requires no frontend code, no build step, and no external dependencies. It is a self-contained
+single-page application served directly from the framework. Every model you serve gets its own chat window (e.g.,
+`/gemma/chat/`, `/qwen/chat/`), each connected to its respective model's streaming endpoint.
+
+## Powering agentic workflows
+
+One of the most compelling use cases for a locally served LLM is powering agentic workflows. Because Flama exposes your
+model through industry-standard protocols (OpenAI, Anthropic, Ollama), any tool that speaks those protocols can use your
+local model as its backend.
+
+### Using Claude CLI with a local model
+
+A practical example is using the [Claude CLI](https://docs.anthropic.com/en/docs/claude-code) with a local model served
+by Flama. Instead of sending your prompts to Anthropic's servers, you can route them through your own locally-running
+model.
+
+First, make sure your model is serving with the Anthropic dialect enabled:
+
+```console
+flama serve --model file=mlx-community_gemma-4-e2b-it-4bit.flm,url=/,name=gemma,serving=native+anthropic
+```
+
+Then, configure Claude CLI to use your local Flama endpoint by adding the following to your
+`~/.claude/settings.json` (or `.claude/settings.local.json` for a project-specific override):
+
+```json
+{
+  "env": {
+    "ANTHROPIC_BASE_URL": "http://127.0.0.1:8000/anthropic",
+    "ANTHROPIC_DEFAULT_SONNET_MODEL": "gemma",
+    "ANTHROPIC_DEFAULT_OPUS_MODEL": "gemma",
+    "ANTHROPIC_DEFAULT_HAIKU_MODEL": "gemma"
+  }
+}
+```
+
+With this configuration in place, simply launch Claude CLI as usual:
+
+```console
+claude
+```
+
+Claude CLI will now route all its requests through your local Flama-served model instead of Anthropic's cloud. Here is
+what a typical interaction looks like:
+
+```console
+❯ claude
+
+What is this repo about?
+
+∴ Thinking…
+
+  The user is asking what the repository is about.
+  I should use the Agent tool to perform a general-purpose search or exploration,
+  as this is a broad question about the project's context.
+
+⏺ Agent(Find out what the repository is about)
+  ⎿  Done (2 tool uses · 14.5k tokens · 36s)
+
+∴ Thinking…
+
+  The agent returned a detailed summary of the project, which is a Python library
+  called "Flama" for developing and deploying APIs, especially ML APIs, focusing
+  on simplifying boilerplate code while providing robust features like schema
+  validation, dependency injection, and automatic documentation.
+
+⏺ The repository is a Python library called Flama, which provides a framework
+  for developing and deploying APIs, with a special focus on Machine Learning
+  (ML) applications.
+
+  It aims to make deploying ML APIs "ridiculously simple" by simplifying
+  boilerplate code while offering robust features such as:
+  - API development for GraphQL, REST, and ML endpoints.
+  - Resource handling with CRUD methods over SQLAlchemy tables.
+  - Schema validation for inputs and outputs.
+  - Dependency Injection via Components.
+  - Automatic generation of OpenAPI documentation (Swagger UI, ReDoc).
+
+  What specific part of the framework or implementation would you like to
+  explore next?
+
+✻ Cogitated for 1m 13s
+```
+
+Your agentic tasks (code generation, file editing, research) run entirely on your local hardware. This gives you:
+
+- **Privacy**: Your prompts and code never leave your machine.
+- **Cost**: No API usage charges for development and experimentation.
+- **Speed**: No network latency to cloud providers (especially valuable for iterative agent loops).
+- **Control**: You choose the model, the quantisation, and the generation parameters.
+
+This same pattern works with any agent framework that supports custom API base URLs: LangChain, CrewAI, AutoGen, or any
+custom tool that accepts a base URL configuration.
+
+## Conclusions
+
+Flama 2.0 makes the journey from "I want to use an LLM" to "I have a production-ready API" as short as possible. The
+CLI provides three levels of interaction:
+
+1. **`flama get`**: Download and package any model from HuggingFace into a portable `.flm` artifact.
+2. **`flama model`**: Interact with the model directly in your terminal, for quick testing and scripting.
+3. **`flama serve`**: Serve the model over HTTP with OpenAI/Anthropic/Ollama compatibility, a built-in chat interface,
+   and streaming support.
+
+No boilerplate Python code, no YAML configuration, no container orchestration. Just the CLI.
+
+The fact that Flama speaks the protocols your tools already understand (OpenAI, Anthropic, Ollama) means that
+adopting a local model in your workflow requires changing nothing but a base URL. Your existing SDKs, agent frameworks,
+and chat interfaces work without modification.
+
+In upcoming posts, we will explore how to build MCP servers with Flama to expose tools and resources to AI agents, and
+how to combine LLM serving with the Model Context Protocol for truly powerful agentic applications.
+
+## References
+
+- [Flama documentation](https://flama.dev/docs/)
+- [Generative AI section](https://flama.dev/docs/generative-ai/overview/)
+- [Flama GitHub repository](https://github.com/vortico/flama)
+- [Flama PyPI package](https://pypi.org/project/flama/)
+- [MLX Community on HuggingFace](https://huggingface.co/mlx-community)
+
+## Support our work
+
+If you find Flama useful for building robust Machine Learning and Generative AI APIs, we'd be thrilled if you showed
+your support by giving us a ⭐ on [GitHub](https://github.com/vortico/flama). Your stars are the best fuel for our
+development efforts!
+
+You can also stay updated with the latest news and development threads by following us on
+[𝕏](https://x.com/VorticoTech).
+
+## About the authors
+
+- [Vortico](https://vortico.tech/): We specialize in software development, helping businesses enhance and expand their
+  AI and technology capabilities.
