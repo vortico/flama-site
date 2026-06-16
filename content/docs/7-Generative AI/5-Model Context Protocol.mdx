@@ -17,13 +17,13 @@ uniform interface. An **MCP server** advertises three kinds of capability: *tool
 these capabilities and call them over [JSON-RPC](https://www.jsonrpc.org/) (a lightweight remote-procedure-call protocol
 that exchanges JSON messages).
 
-In <FlamaName />, an MCP server is a registry you populate with decorated Python functions, and then mount on your
-application like any other route. The framework implements the **stateless `2026-07-28`** revision of the protocol:
-rather than negotiating a session once through an `initialize` handshake, every request is self-contained, carrying its
-protocol version and capabilities in a `_meta` object and its routing data in `Mcp-Method` / `Mcp-Name` headers. This
-makes MCP servers trivial to scale horizontally, since no per-client state is held between calls.
+In <FlamaName />, an MCP server is a named registry that you mount on your application and then populate with decorated
+Python functions. The framework implements the **stateless `2026-07-28`** revision of the protocol: rather than
+negotiating a session once through an `initialize` handshake, every request is self-contained, carrying its protocol
+version and capabilities in a `_meta` object and its routing data in `Mcp-Method` / `Mcp-Name` headers. This makes MCP
+servers trivial to scale horizontally, since no per-client state is held between calls.
 
-**Why does it matter?**
+**Why is it important?**
 
 - **Interoperability**: Any MCP-capable client can use your tools without bespoke integration code.
 - **Reuse**: The same Python functions that power your API can be exposed to AI agents with a single decorator.
@@ -34,23 +34,36 @@ makes MCP servers trivial to scale horizontally, since no per-client state is he
 - **Extensibility**: Optional extensions add background Tasks, interactive Elicitation, and embeddable MCP Apps user
   interfaces.
 
-## Creating an MCP server
+The main virtue MCP brings is **a single, type-safe contract** that turns the functions already in your codebase into
+capabilities any AI client can discover and call.
 
-An MCP server is an instance of `MCPServer`. You register tools on it with the `tool` decorator; <FlamaName /> infers
-each tool's input schema from the handler's type hints:
+## Building an MCP server
+
+You register an MCP server on your application by name through the `mcp` module. The `add_server` method both creates
+the server and mounts it at a URL path, so a single application can host several servers, each under its own path:
 
 ```python
-from flama.mcp.server import MCPServer
+import flama
 
-tools_server = MCPServer("tools", version="2.0.0", instructions="Flama demo MCP tools server")
+app = flama.Flama()
+app.mcp.add_server("/mcp/tools/", "tools", version="2.0.0", instructions="Flama demo MCP tools server")
+```
 
+This registers a server named `tools`, reachable at `/mcp/tools/`. With the server in place, you populate it by name:
+every tool, resource, and prompt decorator takes an `mcp` argument identifying the server the capability belongs to.
 
-@tools_server.tool("add", description="Add two integers")
+### Tools
+
+A **tool** is a function the model can invoke. Declare one with the `tool` decorator, naming the target server through
+`mcp`; <FlamaName /> infers the tool's input and output schema from the handler's type hints:
+
+```python
+@app.mcp.tool("add", description="Add two integers", mcp="tools")
 def add(a: int, b: int) -> int:
     return a + b
 
 
-@tools_server.tool(description="Greet someone by name")
+@app.mcp.tool(description="Greet someone by name", mcp="tools")
 async def greet(name: str) -> str:
     return f"Hello, {name}!"
 ```
@@ -59,18 +72,35 @@ Tools may be synchronous or asynchronous functions. When you omit the name, the 
 omit the description, its docstring is used. The parameters and return annotation become the tool's `inputSchema` and
 `outputSchema`, advertised to clients verbatim.
 
-## Mounting servers
+### Resources
 
-A server becomes reachable once you mount it on the application through the `mcp` module. Each server is mounted at its
-own path, and a single application can host several:
+A **resource** is readable data addressed by a URI. The `resource` decorator registers one on the named server:
 
 ```python
-app.mcp.add_server("/mcp/tools/", "tools", server=tools_server)
-app.mcp.add_server("/mcp/math/", "math", server=math_server)
+import json
+
+
+@app.mcp.resource("config://app", name="config", description="Application configuration",
+                  mime_type="application/json", mcp="tools")
+def config():
+    return json.dumps({"debug": True, "name": "flama-mcp"})
 ```
 
-If you do not have a pre-built server, `add_server` can construct one for you from keyword arguments
-(`version`, `instructions`, and so on); pass `server=` only when you have already populated a server instance.
+Resources are listed and read by their URI, so a client fetches the configuration above by requesting `config://app`.
+
+### Prompts
+
+A **prompt** is a named, reusable prompt template. The `prompt` decorator registers one on the named server, deriving
+its arguments from the handler's parameters:
+
+```python
+@app.mcp.prompt("summarise", description="Summarise the given text", mcp="tools")
+def summarise(text: str):
+    return f"Summarise the following:\n\n{text}"
+```
+
+Prompts are listed by name and rendered with arguments supplied by the client; here `text` becomes the single required
+argument.
 
 ## Calling a tool
 
@@ -109,29 +139,6 @@ structured representation of the result:
 Clients discover the available tools the same way, by sending a `tools/list` method, so an AI assistant can enumerate
 your capabilities before deciding which to call.
 
-## Resources and prompts
-
-Beyond tools, a server can expose **resources** (readable data, addressed by a URI) and **prompts** (named, reusable
-prompt templates). Both use the same decorator style:
-
-```python
-import json
-
-
-@tools_server.resource("config://app", name="config", description="Application configuration",
-                       mime_type="application/json")
-def config():
-    return json.dumps({"debug": True, "name": "flama-mcp"})
-
-
-@tools_server.prompt("summarise", description="Summarise the given text")
-def summarise(text: str):
-    return f"Summarise the following:\n\n{text}"
-```
-
-Resources are listed and read by their URI; prompts are listed by name and rendered with arguments supplied by the
-client.
-
 ## Advanced extensions
 
 The `2026-07-28` protocol defines optional extensions, all supported natively. A server advertises the extensions it
@@ -143,7 +150,7 @@ Long-running tools can run as background **Tasks** rather than blocking the call
 a task handle the client can poll:
 
 ```python
-@tools_server.tool("square", task=True, description="Square a number as a background task")
+@app.mcp.tool("square", task=True, description="Square a number as a background task", mcp="tools")
 async def square(x: int) -> int:
     return x * x
 ```
@@ -157,7 +164,7 @@ A tool can pause mid-call to **elicit** further input from the user. The handler
 from flama.mcp.data_structures import Elicit, Elicitation
 
 
-@tools_server.tool("confirm", description="Confirm an action through an elicitation round-trip")
+@app.mcp.tool("confirm", description="Confirm an action through an elicitation round-trip", mcp="tools")
 def confirm(elicitation: Elicitation) -> str:
     if "confirm" not in elicitation:
         return Elicit.require("Are you sure?", {"type": "boolean"}, name="confirm")
@@ -174,20 +181,23 @@ A tool can declare a prefetchable user-interface template (an **MCP App**) that 
 Register the template with `app_template` and point the tool at it with `ui_template`:
 
 ```python
-@tools_server.app_template("ui://widget", name="widget", description="A small UI widget")
+@app.mcp.app_template("ui://widget", name="widget", description="A small UI widget", mcp="tools")
 def widget():
     return "<html><body><h1>Flama widget</h1></body></html>"
 
 
-@tools_server.tool("with_ui", description="A tool that declares a prefetchable UI template", ui_template="ui://widget")
+@app.mcp.tool("with_ui", description="A tool that declares a prefetchable UI template",
+              ui_template="ui://widget", mcp="tools")
 def with_ui() -> str:
     return "rendered"
 ```
 
 ## Example
 
-The following application assembles a tools server with a synchronous tool, an async tool, a background task, an
-elicitation round-trip, a resource, and a prompt, plus a second server mounted on the same application:
+The following application registers two servers by name on a single application, then populates each through the
+decorators. The `mcp` argument keeps every capability bound to the right server, so the `tools` server gathers a
+synchronous tool, a background task, an elicitation round-trip, a resource, and a prompt, while the `math` server hosts
+its own tool:
 
 ```python
 # examples/mcp.py
@@ -196,46 +206,6 @@ import json
 import flama
 from flama import Flama
 from flama.mcp.data_structures import Elicit, Elicitation
-from flama.mcp.server import MCPServer
-
-tools_server = MCPServer("tools", version="2.0.0", instructions="Flama demo MCP tools server")
-
-
-@tools_server.tool("add", description="Add two integers")
-def add(a: int, b: int) -> int:
-    return a + b
-
-
-@tools_server.tool("square", task=True, description="Square a number as a background task")
-async def square(x: int) -> int:
-    return x * x
-
-
-@tools_server.tool("confirm", description="Confirm an action through an elicitation round-trip")
-def confirm(elicitation: Elicitation) -> str:
-    if "confirm" not in elicitation:
-        return Elicit.require("Are you sure?", {"type": "boolean"}, name="confirm")
-    return f"confirmed={elicitation['confirm']}"
-
-
-@tools_server.resource("config://app", name="config", description="Application configuration",
-                       mime_type="application/json")
-def config():
-    return json.dumps({"debug": True, "name": "flama-mcp"})
-
-
-@tools_server.prompt("summarise", description="Summarise the given text")
-def summarise(text: str):
-    return f"Summarise the following:\n\n{text}"
-
-
-math_server = MCPServer("math", version="2.0.0")
-
-
-@math_server.tool("multiply", description="Multiply two integers")
-def multiply(a: int, b: int) -> int:
-    return a * b
-
 
 app = Flama(
     openapi={
@@ -247,8 +217,41 @@ app = Flama(
     },
 )
 
-app.mcp.add_server("/mcp/tools/", "tools", server=tools_server)
-app.mcp.add_server("/mcp/math/", "math", server=math_server)
+app.mcp.add_server("/mcp/tools/", "tools", version="2.0.0", instructions="Flama demo MCP tools server")
+app.mcp.add_server("/mcp/math/", "math", version="2.0.0")
+
+
+@app.mcp.tool("add", description="Add two integers", mcp="tools")
+def add(a: int, b: int) -> int:
+    return a + b
+
+
+@app.mcp.tool("square", task=True, description="Square a number as a background task", mcp="tools")
+async def square(x: int) -> int:
+    return x * x
+
+
+@app.mcp.tool("confirm", description="Confirm an action through an elicitation round-trip", mcp="tools")
+def confirm(elicitation: Elicitation) -> str:
+    if "confirm" not in elicitation:
+        return Elicit.require("Are you sure?", {"type": "boolean"}, name="confirm")
+    return f"confirmed={elicitation['confirm']}"
+
+
+@app.mcp.resource("config://app", name="config", description="Application configuration",
+                  mime_type="application/json", mcp="tools")
+def config():
+    return json.dumps({"debug": True, "name": "flama-mcp"})
+
+
+@app.mcp.prompt("summarise", description="Summarise the given text", mcp="tools")
+def summarise(text: str):
+    return f"Summarise the following:\n\n{text}"
+
+
+@app.mcp.tool("multiply", description="Multiply two integers", mcp="math")
+def multiply(a: int, b: int) -> int:
+    return a * b
 
 
 if __name__ == "__main__":
