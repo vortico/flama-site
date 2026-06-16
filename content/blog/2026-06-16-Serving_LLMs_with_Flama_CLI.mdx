@@ -61,11 +61,11 @@ Alternatively, you can run any command without a prior install by using
 Let us fetch a quantised version of Google's Gemma 4 model, optimised for Apple Silicon via the MLX Community:
 
 ```console
-flama get --family llm --source huggingface mlx-community/gemma-4-e2b-it-4bit
+flama get --family llm --source huggingface mlx-community/gemma-4-E2B-it-qat-4bit
 
 Downloading ━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━ 100% 2.3 GB 28.7 MB/s 0:00:00
 Packaging...
-Model saved to mlx-community_gemma-4-e2b-it-4bit.flm
+Model saved to mlx-community_gemma-4-E2B-it-qat-4bit.flm
 ```
 
 Two options are required: `--source` tells Flama where to download from (currently HuggingFace), and `--family` declares
@@ -76,7 +76,7 @@ The output path defaults to `<model-name>.flm` with slashes replaced by undersco
 `--output`:
 
 ```console
-flama get --family llm --source huggingface mlx-community/gemma-4-e2b-it-4bit --output models/gemma.flm
+flama get --family llm --source huggingface mlx-community/gemma-4-E2B-it-qat-4bit --output models/gemma.flm
 ```
 
 ### What happens under the hood
@@ -102,7 +102,7 @@ pipeline scripting.
 The `run` sub-command sends a prompt to the model, waits for the full response, and prints it:
 
 ```console
-echo "What is Flama?" | flama model mlx-community_gemma-4-e2b-it-4bit.flm run --system "Be concise."
+echo "What is Flama?" | flama model mlx-community_gemma-4-E2B-it-qat-4bit.flm run --system "Be concise."
 
 Flama is a Python framework for building production-ready APIs with a focus on machine learning
 and generative AI, enabling one-line model serving behind HTTP endpoints.
@@ -112,7 +112,7 @@ You can tune generation with `--param` flags:
 
 ```console
 echo "Explain dependency injection in three sentences." | \
-  flama model mlx-community_gemma-4-e2b-it-4bit.flm run \
+  flama model mlx-community_gemma-4-E2B-it-qat-4bit.flm run \
     --system "You are a software engineering instructor." \
     --param temperature=0.7 \
     --param max_tokens=256
@@ -122,7 +122,7 @@ For multi-turn conversations, use the `--transport conversation` flag and pass a
 
 ```console
 echo '[{"role": "user", "content": "Hi!"}, {"role": "assistant", "content": "Hello! How can I help?"}, {"role": "user", "content": "What is an API?"}]' | \
-  flama model mlx-community_gemma-4-e2b-it-4bit.flm run --transport conversation
+  flama model mlx-community_gemma-4-E2B-it-qat-4bit.flm run --transport conversation
 ```
 
 ### Streaming responses with `flama model stream`
@@ -132,7 +132,7 @@ Tokens are printed as they are generated, giving you immediate feedback:
 
 ```console
 echo "What is flama (python package)?" | \
-  flama model mlx-community_gemma-4-e2b-it-4bit.flm stream --system "Be concise."
+  flama model mlx-community_gemma-4-E2B-it-qat-4bit.flm stream --system "Be concise."
 
 Flama is a Python framework for building production-ready ML and generative AI APIs.
 It lets you serve models behind HTTP endpoints with minimal code, supporting
@@ -147,7 +147,7 @@ You can also ask the model about itself and the framework it runs on:
 
 ```console
 echo "How do I serve an ML model with Flama?" | \
-  flama model mlx-community_gemma-4-e2b-it-4bit.flm stream \
+  flama model mlx-community_gemma-4-E2B-it-qat-4bit.flm stream \
     --system "You are a helpful assistant that knows about the Flama Python framework."
 ```
 
@@ -155,7 +155,7 @@ If you want to see multiple output channels (for instance, reasoning and output)
 
 ```console
 echo "Solve step by step: what is 23 * 47?" | \
-  flama model mlx-community_gemma-4-e2b-it-4bit.flm stream \
+  flama model mlx-community_gemma-4-E2B-it-qat-4bit.flm stream \
     --channel thinking --channel output
 ```
 
@@ -169,7 +169,7 @@ code, no configuration files, no Docker images. Just `flama serve`.
 To serve the model we downloaded earlier:
 
 ```console
-flama serve --model file=mlx-community_gemma-4-e2b-it-4bit.flm,url=/,name=gemma
+flama serve --model file=mlx-community_gemma-4-E2B-it-qat-4bit.flm,url=/,name=gemma
 
 INFO:     Started server process [52341]
 INFO:     Waiting for application startup.
@@ -200,7 +200,7 @@ And you can configure the server with the usual options:
 
 ```console
 flama serve \
-  --model file=mlx-community_gemma-4-e2b-it-4bit.flm,url=/,name=gemma \
+  --model file=mlx-community_gemma-4-E2B-it-qat-4bit.flm,url=/,name=gemma \
   --server-host 0.0.0.0 \
   --server-port 9000 \
   --app-title "My LLM API" \
@@ -242,7 +242,7 @@ model.
 First, make sure your model is serving with the Anthropic dialect enabled:
 
 ```console
-flama serve --model file=mlx-community_gemma-4-e2b-it-4bit.flm,url=/,name=gemma,serving=native+anthropic
+flama serve --model file=mlx-community_gemma-4-E2B-it-qat-4bit.flm,url=/,name=gemma,serving=native+anthropic
 ```
 
 Then, configure Claude CLI to use your local Flama endpoint by adding the following to your

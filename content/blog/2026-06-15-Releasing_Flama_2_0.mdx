@@ -79,13 +79,13 @@ The complete workflow, from zero to a production API, is three commands:
 
 ```console
 # 1. Download and package the model
-flama get --family llm --source huggingface mlx-community/gemma-4-e2b-it-4bit
+flama get --family llm --source huggingface mlx-community/gemma-4-E2B-it-qat-4bit
 
 # 2. Test it locally in your terminal
-echo "What is Flama?" | flama model mlx-community_gemma-4-e2b-it-4bit.flm stream --system "Be concise."
+echo "What is Flama?" | flama model mlx-community_gemma-4-E2B-it-qat-4bit.flm stream --system "Be concise."
 
 # 3. Serve it over HTTP
-flama serve --model file=mlx-community_gemma-4-e2b-it-4bit.flm,url=/,name=gemma
+flama serve --model file=mlx-community_gemma-4-E2B-it-qat-4bit.flm,url=/,name=gemma
 ```
 
 ### Built-in chat interface
