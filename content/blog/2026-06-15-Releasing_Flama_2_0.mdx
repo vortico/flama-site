@@ -119,25 +119,29 @@ Serving a model is one half of the generative AI story; the other half is giving
 ### A quick example
 
 ```python
+import json
+
 from flama import Flama
-from flama.mcp.server import MCPServer
 
-tools_server = MCPServer("tools", version="2.0.0", instructions="Demo MCP tools server")
+app = Flama()
+app.mcp.add_server("/mcp/tools/", "tools", version="2.0.0", instructions="Demo MCP tools server")
 
-@tools_server.tool("add", description="Add two integers")
+@app.mcp.tool("add", description="Add two integers", mcp="tools")
 def add(a: int, b: int) -> int:
     return a + b
 
-@tools_server.tool("greet", description="Greet someone by name")
-async def greet(name: str) -> str:
-    return f"Hello, {name}!"
+@app.mcp.resource("config://app", name="config", description="Application configuration",
+                  mime_type="application/json", mcp="tools")
+def config():
+    return json.dumps({"debug": True, "name": "flama-mcp"})
 
-app = Flama()
-app.mcp.add_server("/mcp/tools/", "tools", server=tools_server)
+@app.mcp.prompt("summarise", description="Summarise the given text", mcp="tools")
+def summarise(text: str):
+    return f"Summarise the following:\n\n{text}"
 ```
 
-Any MCP-capable client (Claude, Cursor, VS Code Copilot, custom agents) can discover and invoke these tools through the
-standard JSON-RPC interface. No bespoke integration code required.
+Any MCP-capable client (Claude, Cursor, VS Code Copilot, custom agents) can discover and invoke these capabilities
+through the standard JSON-RPC interface. No bespoke integration code required.
 
 ## Streaming-first HTTP
 
