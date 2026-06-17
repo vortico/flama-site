@@ -1,6 +1,6 @@
 ---
 title: Upgrading
-wip: true
+wip: false 
 ---
 
 Software evolves, and <FlamaName /> is no exception. As the framework grows, a new major release occasionally relocates
@@ -16,7 +16,7 @@ environment, and the source code of your project that depends on it. Minor and p
 so updating the library is enough. Major releases are where public interfaces may shift, and that is precisely what the
 `flama upgrade` command is built for.
 
-Under the hood, the command applies **codemods** — automated source-to-source transformations — across the <PythonName />
+Under the hood, the command applies **codemods** (automated source-to-source transformations) across the <PythonName />
 files you point it at. It rewrites import statements, renamed symbols, and a handful of call patterns so they match the
 target version. Anything that has no automatic replacement is never silently dropped: it is flagged in place with a
 `# flama-upgrade` marker and reported as a manual follow-up.
@@ -55,7 +55,7 @@ flama upgrade src/ tests/
 ```
 
 By default, **upgrade** previews the changes as a unified diff and modifies nothing, which makes this the safe first
-step. When it finds pending changes in this mode, it exits with a non-zero status — a detail we will
+step. When it finds pending changes in this mode, it exits with a non-zero status, a detail we will
 [put to use](#upgrading-in-continuous-integration) shortly.
 
 Read through the diff carefully. Automatic rewrites generally fall into a few categories: modules that moved to a new

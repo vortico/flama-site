@@ -216,7 +216,7 @@ you need to speak JSON-RPC from your own routes.
 
 ## Streaming responses
 
-A **streaming** response wraps an iterator — most often an asynchronous generator — and sends each item it yields as a
+A **streaming** response wraps an iterator (most often an asynchronous generator) and sends each item it yields as a
 separate chunk over a single, long-lived connection. Every concrete streaming type implements an `encode()` method that
 turns one yielded item into the bytes placed on the wire. Because no `Content-Length` is sent, the client can begin
 processing the first chunk while the server is still producing the rest, which is precisely what makes these responses

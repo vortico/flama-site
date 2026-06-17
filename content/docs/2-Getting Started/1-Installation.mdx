@@ -1,6 +1,6 @@
 ---
 title: Installation
-wip: true
+wip: false 
 ---
 
 ## Python version
@@ -113,21 +113,24 @@ After installing <FlamaName /> you will have the <FlamaName /> command-line inte
 
 ```console
 flama --help
+
+ 🔥 Flama <VERSION>
+
 Usage: flama [OPTIONS] COMMAND [ARGS]...
+  Fire up your models with Flama
 
-  Fire up your models with Flama 🔥
-
-Options:
-  --version  Check the version of your locally installed Flama
-  --help     Get help about how to use Flama CLI
-
-Commands:
-  get      Download and package a model as .flm.
-  model    Interact with a packaged model without server.
-  run      Run a Flama Application based on a route.
-  serve    Serve one or more models within a Flama Application.
-  start    Start a Flama Application based on a config file.
-  upgrade  Upgrade a Flama codebase to a newer major version.
+╭─ Options ────────────────────────────────────────────────────────────────────╮
+│   --version      Check the version of your locally installed Flama           │
+│   --help         Get help about how to use Flama CLI                         │
+╰──────────────────────────────────────────────────────────────────────────────╯
+╭─ Commands ───────────────────────────────────────────────────────────────────╮
+│   get            Download and package a model as .flm.                       │
+│   model          Interact with a packaged model without server.              │
+│   run            Run a Flama Application based on a route.                   │
+│   serve          Serve an ML model file within a Flama Application.          │
+│   start          Start a Flama Application based on a config file.           │ 
+│   upgrade        Upgrade a Flama codebase to a newer major version.          │
+╰──────────────────────────────────────────────────────────────────────────────╯
 ```
 
 To check what version of the library you have installed, simply run:
