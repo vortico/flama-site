@@ -25,17 +25,16 @@ As always, the command **flama start** also comes with help:
 flama start --help
 
 Usage: flama start [OPTIONS] [FLAMA_CONFIG]
-
   Start a Flama Application based on a config file.
 
   Start a Flama Application with the configuration specified in <FLAMA_CONFIG>
   file (default: flama.json).
-
-Options:
-  --create-config [simple|full]  Create a config file: 'simple' only includes
-                                 the host and port of the webserver; 'full'
-                                 includes all the details of the webserver.
-  --help                         Show this message and exit.
+╭─ Options ────────────────────────────────────────────────────────────────────╮
+│   --create-config     Create a config file: 'simple' only includes the       │
+│                       host and port of the webserver; 'full' includes all    │
+│                       the details of the webserver.                          │
+│   --help              Show this message and exit.                            │
+╰──────────────────────────────────────────────────────────────────────────────╯
 ```
 
 ### Your first definition file
@@ -58,7 +57,16 @@ Let's dig into it a bit:
     "description": "API description",
     "schema": "/schema/",
     "docs": "/docs/",
-    "models": [{ "url": "/model-url/", "path": "model-path.flm", "name": "model-name" }]
+    "models": [{
+      "url": "/model-url/",
+      "path": "model-path.flm",
+      "name": "model-name",
+      "channel_scanner": null,
+      "tool_scanner": null,
+      "tool_parser": null,
+      "params": null,
+      "serving": null
+    }]
   },
   "server": { "host": "127.0.0.1", "port": 8000 }
 }
@@ -81,6 +89,9 @@ can be served in it. In particular, we find the following fields, which we can p
 - **Docs**: Route where the API documentation website will be served (e.g., **/docs/**)
 - **Models**: This represents a list of models that will be served via our API. Each model will be represented by the
   parameters **url** (e.g., "/model-url/"), **path** (e.g., "model-path.flm"), and **name** (e.g., "model-name").
+  For generative models, additional options are available: **channel_scanner**, **tool_scanner**, and **tool_parser**
+  control decoder behaviour, **params** sets default generation parameters, and **serving** selects the serving
+  dialects (e.g., `["native", "openai"]`). All default to `null` (auto-detect or omit).
 
 We can refer to this way of specifying the app properties as **import dictionary**. But, there is still another way of
 populating the "app" section of the definition file with a single line, which is the **import string**. Indeed, we have

@@ -23,23 +23,35 @@ dispatched accordingly. To inspect the command options, run:
 ```console
 flama model --help
 
-Usage: flama model [OPTIONS] FLAMA_MODEL_PATH COMMAND [ARGS]...
+🔥 Flama v2.0.4
 
+Usage: flama model [OPTIONS] FLAMA_MODEL_PATH COMMAND [ARGS]...
   Interact with a packaged model without server.
 
-  Works with both traditional ML models and large language models. <FLAMA_MODEL_PATH>
-  is the path of the model to be used, e.g. 'path/to/model.flm'.
+  Works with both traditional ML models and large language models. The
+  artifact family is recorded in the .flm manifest at download time (``flama
+  get --family ...``) and dispatched accordingly. LLM artifacts automatically
+  pick the available runtime - vLLM on Linux/CUDA, MLX on macOS / Apple
+  Silicon - based on what is importable in the current environment. To serve
+  models over HTTP, use 'flama serve'.
 
-Options:
-  --channel-scanner DECODER_REF  Channel scanner format (LLM-only).
-  --tool-scanner DECODER_REF     Tool scanner format (LLM-only).
-  --tool-parser DECODER_REF      Tool body parser (LLM-only).
-  --help                         Show this message and exit.
+  <FLAMA_MODEL_PATH> is the path of the model to be used, e.g.
+  'path/to/model.flm'. This can be passed directly as argument of the command
+  line, or by environment variable.
 
-Commands:
-  inspect  Inspect a model artifact.
-  run      Run a one-shot inference.
-  stream   Stream output from a model.
+  --channel-scanner, --tool-scanner and --tool-parser are LLM-only; they are
+  rejected for ML artifacts at build time.
+╭─ Options ────────────────────────────────────────────────────────────────────╮
+│   --channel-scanner DECODER_REF    Channel scanner format (LLM-only).        │
+│   --tool-scanner DECODER_REF       Tool scanner format (LLM-only).           │
+│   --tool-parser DECODER_REF        Tool body parser (LLM-only).              │
+│   --help                           Show this message and exit.               │
+╰──────────────────────────────────────────────────────────────────────────────╯
+╭─ Commands ───────────────────────────────────────────────────────────────────╮
+│   inspect                   Inspect a model artifact.                        │
+│   run                       Run a one-shot inference.                        │
+│   stream                    Stream output from a model.                      │
+╰──────────────────────────────────────────────────────────────────────────────╯
 ```
 
 The `--channel-scanner`, `--tool-scanner`, and `--tool-parser` options are decoder controls for generative models; they
@@ -59,12 +71,15 @@ model:
 flama model path/to/model.flm inspect --help
 
 Usage: flama model FLAMA_MODEL_PATH inspect [OPTIONS]
-
   Inspect a model artifact.
 
-Options:
-  -p, --pretty  Pretty print the model inspection.
-  --help        Show this message and exit.
+  Extracts the model metadata, including the ID, time when the model was
+  created, information of the framework, and the model info; and the list of
+  artifacts packaged with the model.
+╭─ Options ────────────────────────────────────────────────────────────────────╮
+│   -p, --pretty           Pretty print the model inspection.                  │
+│   --help                 Show this message and exit.                         │
+╰──────────────────────────────────────────────────────────────────────────────╯
 ```
 
 ### Run
@@ -77,19 +92,23 @@ generated response:
 flama model path/to/model.flm run --help
 
 Usage: flama model FLAMA_MODEL_PATH run [OPTIONS]
-
   Run a one-shot inference.
 
-Options:
-  -i, --input FILENAME   Input file to read from (defaults to stdin).
-  --transport [raw|chat|conversation]
-                         LLM input shape. Defaults to the model's default.
-  --system TEXT          LLM system instruction (chat transport only).
-  --param TEXT           Generation parameter as key=value (LLM only, repeatable).
-  -o, --output FILENAME  File to be used as output (default: stdout).
-  -p, --pretty           Pretty print the output.
-  --channel TEXT         Channel(s) to include in output (LLM only, repeatable).
-  --help                 Show this message and exit.
+  For ML models, the input must be a JSON list of feature vectors and the
+  output is a JSON list of predictions. For LLM models, the input is a prompt
+  and the output is the generated response.
+╭─ Options ────────────────────────────────────────────────────────────────────╮
+│   -i, --input FILENAME     Input file to read from (defaults to stdin).      │
+│   --transport              LLM input shape (raw|chat|conversation).          │
+│   --system TEXT            LLM system instruction (chat transport only).     │
+│   --param TEXT             Generation parameter as key=value (LLM only,      │
+│                            repeatable).                                      │
+│   -o, --output FILENAME    File to be used as output. (default: stdout).     │
+│   -p, --pretty             Pretty print the output.                          │
+│   --channel TEXT           Channel(s) to include in output (LLM only,        │
+│                            repeatable).                                      │
+│   --help                   Show this message and exit.                       │
+╰──────────────────────────────────────────────────────────────────────────────╯
 ```
 
 ### Stream
@@ -101,19 +120,25 @@ for generative models, it emits the response one block at a time:
 flama model path/to/model.flm stream --help
 
 Usage: flama model FLAMA_MODEL_PATH stream [OPTIONS]
-
   Stream output from a model.
 
-Options:
-  -i, --input FILENAME   Input file to read from (defaults to stdin).
-  --transport [raw|chat|conversation]
-                         LLM input shape. Defaults to the model's default.
-  --system TEXT          LLM system instruction (chat transport only).
-  --param TEXT           Generation parameter as key=value (LLM only, repeatable).
-  -o, --output FILENAME  File to be used as output for the stream (default: stdout).
-  -b, --buffer           Buffer all output and write at once instead of streaming.
-  --channel TEXT         Channel(s) to include in output (LLM only, repeatable).
-  --help                 Show this message and exit.
+  For ML models, the input must be a JSON list of feature vectors and the
+  model emits one output per item. For LLM models, the input is a prompt and
+  the model emits one block at a time.
+╭─ Options ────────────────────────────────────────────────────────────────────╮
+│   -i, --input FILENAME     Input file to read from (defaults to stdin).      │
+│   --transport              LLM input shape (raw|chat|conversation).          │
+│   --system TEXT            LLM system instruction (chat transport only).     │
+│   --param TEXT             Generation parameter as key=value (LLM only,      │
+│                            repeatable).                                      │
+│   -o, --output FILENAME    File to be used as output for the stream.         │
+│                            (default: stdout).                                │
+│   -b, --buffer             Buffer all output and write at once instead of    │
+│                            streaming.                                        │
+│   --channel TEXT           Channel(s) to include in output (LLM only,        │
+│                            repeatable).                                      │
+│   --help                   Show this message and exit.                       │
+╰──────────────────────────────────────────────────────────────────────────────╯
 ```
 
 ## Predictive model examples
@@ -133,22 +158,30 @@ flama model sklearn_model.flm inspect --pretty
         "foo.json"
     ],
     "meta": {
-        "id": "43dcc9bb-528f-47e7-b68b-a8b9aa6ffd22",
-        "timestamp": "2025-04-03T19:47:56.590410",
-        "framework": {
-            "family": "ml",
-            "lib": "sklearn",
-            "version": "1.8.0"
-        },
-        "model": {
-            "obj": "MLPClassifier",
-            "params": {"solver": "adam"},
-            "metrics": {"recall": "0.95"}
+        "capabilities": {
+            "kind": "ml"
         },
         "extra": {
+            "model_author": "John Doe",
+            "model_description": "This is a test model",
+            "model_license": "MIT",
             "model_version": "1.0.0",
-            "model_author": "John Doe"
-        }
+            "tags": ["test", "example"]
+        },
+        "framework": {
+            "config": null,
+            "family": "ml",
+            "lib": "sklearn",
+            "version": "1.9.0"
+        },
+        "id": "cb659dec-ca09-40f8-a804-63c1f89113f6",
+        "model": {
+            "info": { ... },
+            "metrics": {"recall": "0.95"},
+            "obj": "MLPClassifier",
+            "params": {"solver": "adam"}
+        },
+        "timestamp": "2026-06-17T16:47:58.002794"
     }
 }
 ```

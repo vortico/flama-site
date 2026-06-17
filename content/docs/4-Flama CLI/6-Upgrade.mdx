@@ -17,16 +17,30 @@ see the [Upgrading](/docs/getting-started/upgrading/) guide. To inspect the comm
 flama upgrade --help
 
 Usage: flama upgrade [OPTIONS] PATHS...
-
   Upgrade a Flama codebase to a newer major version.
 
-Options:
-  --to TEXT        Target Flama version (default: latest known migration).
-  --from TEXT      Source Flama version (default: detect installed).
-  --diff / --write Preview a diff (default) or rewrite files in place.
-  --select TEXT    Comma-separated operation ids to run exclusively.
-  --skip TEXT      Comma-separated operation ids to skip.
-  --help           Show this message and exit.
+  Rewrite import statements and renamed symbols across the Python files under
+  <PATHS> so they match the target Flama version. By default the command
+  previews a unified diff and leaves files untouched; pass --write to apply
+  the changes in place. Symbols that have no automatic replacement are flagged
+  with a '# flama-upgrade' marker and listed as manual follow-ups.
+
+  <PATHS> are the files and/or directories to process; directories are scanned
+  recursively.
+
+  Example:
+      flama upgrade src/
+      flama upgrade --write src/ tests/
+      flama upgrade --to 2.0 --skip move-module:flama.asgi src/
+╭─ Options ────────────────────────────────────────────────────────────────────╮
+│   --to TEXT           Target Flama version (default: latest known            │
+│                       migration).                                            │
+│   --from TEXT         Source Flama version (default: detect installed).      │
+│   --diff / --write    Preview a diff (default) or rewrite files in place.    │
+│   --select TEXT       Comma-separated operation ids to run exclusively.      │
+│   --skip TEXT         Comma-separated operation ids to skip.                 │
+│   --help              Show this message and exit.                            │
+╰──────────────────────────────────────────────────────────────────────────────╯
 ```
 
 ## Parameters

@@ -18,17 +18,33 @@ inspect the command options, run:
 flama get --help
 
 Usage: flama get [OPTIONS] MODEL_NAME
-
   Download and package a model as .flm.
 
-Options:
-  --source [huggingface]          Model source provider.  [required]
-  --family [ml|llm]               Artifact family recorded in the manifest.
-                                  [required]
-  -o, --output TEXT               Output .flm path (default: <model-name>.flm).
-  --max-concurrent INTEGER RANGE  Maximum number of files to download
-                                  concurrently.  [default: 8; x>=1]
-  --help                          Show this message and exit.
+  Download a model from a supported source and serialize it into Flama's .flm
+  format, ready for serving with 'flama serve' or interaction with 'flama
+  model'. The artifact family must be declared explicitly via ``--family``: ML
+  artifacts run through the framework recorded in the manifest, while LLM
+  artifacts are dispatched to vLLM or MLX at load time depending on what is
+  installed.
+
+  Example:
+      flama get --source huggingface --family ml scikit-learn/Fish-Weight
+      flama get --source huggingface --family llm Qwen/Qwen2.5-0.5B
+╭─ Options ────────────────────────────────────────────────────────────────────╮
+│   --source                          Model source provider.                   │
+│   --family                          Artifact family recorded in the          │
+│                                     manifest. Use 'ml' for traditional ML    │
+│                                     models and 'llm' for large language      │
+│                                     models. The choice is persisted in the   │
+│                                     .flm manifest and drives runtime         │
+│                                     dispatch at load time; it cannot be      │
+│                                     changed without repacking.               │
+│   -o, --output TEXT                 Output .flm path (default:               │
+│                                     <model-name>.flm).                       │
+│   --max-concurrent INTEGER RANGE    Maximum number of files to download      │
+│                                     concurrently.                            │
+│   --help                            Show this message and exit.              │
+╰──────────────────────────────────────────────────────────────────────────────╯
 ```
 
 ## Parameters
