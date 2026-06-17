@@ -1,6 +1,6 @@
 ---
 title: Flama
-wip: true
+wip: false 
 ---
 
 <FlamaName /> is a <PythonName /> framework that establishes a standard for the development and deployment of
@@ -54,17 +54,19 @@ and customise how clients interact with it through Components and Resources. See
 ## Generative AI
 
 The same one-line experience extends to large language models. <FlamaName /> provides a first-class serving layer for
-LLMs, with **HuggingFace**, **vLLM**, and **MLX** backends auto-detected at load time, as well as a compatibility layer
+LLMs, with **vLLM** and **MLX** backends auto-detected at load time based on the available hardware (CUDA on Linux,
+Metal on macOS) — same model file, the framework picks the right backend. It also provides a compatibility layer
 that exposes them through OpenAI, Anthropic, and Ollama compatible endpoints. It also ships a built-in **chatbot**
 application and native support for the **Model Context Protocol (MCP)**, to expose tools, resources, and prompts to AI
 agents. See the [Generative AI](/docs/generative-ai/overview/) section for the details.
 
 ## Domain Driven Design
 
-For larger systems, <FlamaName /> helps you place your business domain at the centre of the architecture, with the
-building blocks to apply Domain-Driven Design patterns such as **repositories**, **workers**, and domain models. See the
-[Domain Driven Design](/docs/domain-driven-design/introduction/) section to learn how to assemble an application around
-your domain.
+<FlamaName /> helps you place your business domain at the centre of the architecture from the very beginning, with the
+building blocks to apply Domain-Driven Design patterns such as **repositories**, **workers**, and domain models. Good
+practices and a clear separation of responsibilities should not be an afterthought — <FlamaName /> removes all the
+boilerplate so you get them at zero cost. See the [Domain Driven Design](/docs/domain-driven-design/introduction/)
+section to learn how to assemble an application around your domain.
 
 Now that you know the main advantages of <FlamaName />, you can learn how to install it and run your first API
 [here](/docs/getting-started/installation/).

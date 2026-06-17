@@ -59,10 +59,9 @@ drop-in compatible with the corresponding vendor clients.
 ### Backends
 
 A **backend** is the runtime that actually executes the model. <FlamaName /> integrates with
-[HuggingFace](https://huggingface.co/) transformers, [vLLM](https://docs.vllm.ai/) on Linux with CUDA, and
-[MLX](https://ml-explore.github.io/mlx/) on Apple Silicon. The choice is *hardware-driven and not persisted* in the
-artifact: at load time the framework picks vLLM when its package is importable and MLX when `mlx.core` is importable, so
-the very same `.flm` file runs wherever you deploy it.
+[vLLM](https://docs.vllm.ai/) on Linux with CUDA, and [MLX](https://ml-explore.github.io/mlx/) on Apple Silicon with
+Metal. The choice is *hardware-driven and not persisted* in the artifact: at load time the framework picks vLLM when CUDA
+is available and MLX when Metal is available, so the very same `.flm` file runs wherever you deploy it.
 
 ### Transports
 
