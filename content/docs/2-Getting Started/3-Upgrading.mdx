@@ -9,7 +9,7 @@ a module, renames a symbol, or tightens a signature. To spare you from chasing e
 walks through the upgrade process end to end, so that moving a project from one major version to the next is a routine,
 low-risk task rather than a tedious migration.
 
-## How upgrades work
+## How it works
 
 In <FlamaName />, an **upgrade** brings two things into line with a newer release: the library installed in your
 environment, and the source code of your project that depends on it. Minor and patch releases are backwards compatible,
@@ -104,7 +104,7 @@ flama upgrade --from 1.0 --to 2.0 src/
 You can also restrict which transformations run with `--select` and `--skip`. For the full list of options, run
 `flama upgrade --help` or see the [Upgrade](/docs/flama-cli/upgrade/) command reference.
 
-## Upgrading in continuous integration
+## Continuous integration
 
 Because preview mode exits with a non-zero status whenever it finds pending changes, the command doubles as a guard in a
 continuous integration and continuous deployment (CI/CD) pipeline. Adding the following step fails the build whenever a
