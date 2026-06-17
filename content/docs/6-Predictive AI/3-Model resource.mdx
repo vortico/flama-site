@@ -21,7 +21,7 @@ model via the URL which is specified as parameter **path**. Here, interacting me
   the same example.
 
 This means, when we serve/add models, <FlamaName/> takes care of creating a **Resource** object per model automatically,
-specifically a **ModelResource** object, which represents an API resource in the REST sense of the word. This object
+specifically a **MLResource** object, which represents an API resource in the REST sense of the word. This object
 defines the default way of interaction with the model itself by providing the methods just mentioned. A more thorough
 discussion about the **Resource** class and its children classes can be found in [here](/docs/api-reference/resource/).
 However, the convenience of the method **add_models** might not be sufficient for your purposes for the following
@@ -30,9 +30,9 @@ reasons:
 - You need to customise the default methods
 - You need to define new methods for the resource
 
-In what follows you will learn how to add model resources in a more customised way with the class **ModelResource**.
+In what follows you will learn how to add model resources in a more customised way with the class **MLResource**.
 
-## The ModelResource class
+## The MLResource class
 
 The best way to learn how to implement your own model resources is by example, as we've been doing so far with previous
 concepts. For this reason, we are going to re-implement the endpoints **/predict/** and **/inspect/** (which come by
@@ -53,14 +53,18 @@ import flama
 from flama import Flama
 
 # New imports (not seen so far):
-from flama.models import ModelResource
+from flama.models import MLResource
 from flama.resources.routing import ResourceRoute
 
 # Flama app instantiation:
 app = Flama(
-    title="Flama ML",
-    version="0.1.0",
-    description="Machine learning API using Flama 🔥",
+    openapi={
+        "info": {
+            "title": "Flama ML",
+            "version": "0.1.0",
+            "description": "Machine learning API using Flama 🔥",
+        }
+    },
 )
 
 # Model resources will be added here
@@ -73,8 +77,8 @@ if __name__ == "__main__":
 
 As can be seen, there are two ingredients imported which we haven't seen yet, namely:
 
-- **ModelResource**: This is a <FlamaName /> built-in class which derives from the most fundamental resource
-  class **Resource**, and the [metaclass](https://docs.python.org/3/reference/datamodel.html#metaclasses) **ModelResourceType**.
+- **MLResource**: This is a <FlamaName /> built-in class which derives from the most fundamental resource
+  class **Resource**, and the [metaclass](https://docs.python.org/3/reference/datamodel.html#metaclasses) **MLResourceType**.
   These classes can be seen as the interface that any custom model class will need to adhere to.
   In case you're not familiar with the interface design pattern, we like the definition given
   by [RealPython](https://realpython.com/python-interface/):
@@ -84,7 +88,7 @@ As can be seen, there are two ingredients imported which we haven't seen yet, na
   > An abstract method is one that the interface simply defines. It doesn’t implement the methods.
   > This is done by classes, which then implement the interface and give concrete meaning to the interface’s abstract methods.
 
-  Regarding **ModelResourceType**, this is a <FlamaName /> built-in metaclass
+  Regarding **MLResourceType**, this is a <FlamaName /> built-in metaclass
   which derives from the most fundamental resource type metaclass **ResourceType**. The concept of metaclass is a bit less intuitive, and some highly
   recognised pythonists recommend to avoid them:
 
@@ -94,8 +98,8 @@ As can be seen, there are two ingredients imported which we haven't seen yet, na
   >
   > - Tim Peters
 
-  We agree with such a claim, which is why you won't need to worry about them because you won't even have to import **ModelResourceType**,
-  since this is already handled for you by the **ModelResource** class.
+  We agree with such a claim, which is why you won't need to worry about them because you won't even have to import **MLResourceType**,
+  since this is already handled for you by the **MLResource** class.
 
 - **ResourceRoute.method**: This is a <FlamaName /> built-in class method (of `ResourceRoute`) which allows us to
   convert a given class method into an **app** endpoint, with the following main arguments:
@@ -113,7 +117,7 @@ straightforward, we only need to use the following pattern:
 ```python
 # FIXME: Missing schemas
 
-class MySKModel(ModelResource):
+class MySKModel(MLResource):
     # special names:
     verbose_name = "My ScikitLearn Model"
     model_path = "sklearn_model.flm"
@@ -129,8 +133,8 @@ class MySKModel(ModelResource):
 As we already said, this example is not functional (just yet). However, it contains a good
 amount of the pieces required, so we can start talking about these ingredients:
 
-- **MySKModel(ModelResource)**: The very first thing needed is to
-  create our own model-resource class, which means inheriting from **ModelResource**.
+- **MySKModel(MLResource)**: The very first thing needed is to
+  create our own model-resource class, which means inheriting from **MLResource**.
   Just with this, your model-resource class will be <FlamaName /> compliant.
 
 - **Special attribute names**: These three attributes are mandatory for several purposes.
@@ -146,23 +150,28 @@ amount of the pieces required, so we can start talking about these ingredients:
 It's time to know why we said the previous example won't work: it's all due to missing types and schemas.
 
 <FlamaName /> is a strongly-typed-and-schema-specific framework. Wait, what? This only means that we need to provide the
-schema type of the input and output arguments if we want any method to be <FlamaName /> compliant, and such schemas need
-to be registered in the **app**.
+schema type of the input and output arguments if we want any method to be <FlamaName /> compliant.
 
 What do we need to make this example a working example? Let's see what the correct code looks like:
 
 ```python
-import typesystem as ts
+import typing as t
 
-# Definition of input (X) and ouput (Y) schemas
-X = ts.Schema(fields={"input": ts.fields.Array()})
-Y = ts.Schema(fields={"output": ts.fields.Array()})
+import pydantic
 
-# Registration of schemas:
-app.schema.register_schema("X", X)
-app.schema.register_schema("Y", Y)
+from flama import schemas
 
-class MySKModel(ModelResource):
+
+# Definition of input (X) and output (Y) schemas
+class X(pydantic.BaseModel):
+    input: list[t.Any]
+
+
+class Y(pydantic.BaseModel):
+    output: list[t.Any]
+
+
+class MySKModel(MLResource):
     # special names:
     verbose_name = "My ScikitLearn Model"
     model_path = "sklearn_model.flm"
@@ -170,7 +179,9 @@ class MySKModel(ModelResource):
 
     # Correct typed method with some documentation
     @ResourceRoute.method("/predict/", methods=["POST"], name="model-predict")
-    def predict(self, data: X) -> Y:
+    def predict(
+        self, data: t.Annotated[schemas.Schema, schemas.SchemaMetadata(X)]
+    ) -> t.Annotated[schemas.Schema, schemas.SchemaMetadata(Y)]:
         """
         tags:
             - My ScikitLearn Model
@@ -187,22 +198,16 @@ class MySKModel(ModelResource):
 
 You will notice the following changes:
 
-- **typesystem.Schema**s: We've added two schemas to define the data type of the input and the output. We have
-  used _typesystem_ for this purpose. If you don't remember how this python package got there, go back to
-  [Quickstart](/docs/getting-started/quickstart/). Also, remember that <FlamaName /> is also compatible with
-  **Marshmallow**. For more information about how to define schemas, we refer to their official documentation
-  websites: [typesystem](https://www.encode.io/typesystem/), and [marshmallow](https://marshmallow.readthedocs.io/en/stable/),
-  respectively.
+- **pydantic.BaseModel**: We've added two schemas to define the data type of the input and the output using
+  [Pydantic](https://docs.pydantic.dev/) models. <FlamaName /> uses Pydantic as its schema library, and
+  schemas are declared as standard Pydantic models.
 
-- **app.schema.register_schema**: These lines appear right after the definition of our schemas, and they are intended
-  to register the new data schemas in the **app**. This makes possible the automatic identification of body
-  arguments in request, via the design pattern known as [dependency injection](https://en.wikipedia.org/wiki/Dependency_injection).
-  The finer details on how this happens are left aside (we recommend the curious developer to dive into the code,
-  taking advantage of the open code). In layman's terms, thanks to the registration of these schemas, <FlamaName />
-  will be in charge of identifying what's what when a request comes accompanied by data by analysing the schema
-  of the input data.
+- **`t.Annotated[schemas.Schema, schemas.SchemaMetadata(...)]`**: This is the <FlamaName /> way of annotating
+  handler parameters and return types with schema metadata. The `schemas.Schema` type tells the framework that
+  the parameter should be validated against the schema, while `schemas.SchemaMetadata(X)` binds it to the
+  concrete Pydantic model. This pattern replaces the older `app.schema.register_schema` approach.
 
-- **predict(self, data: X) -> Y**: Type hinting is mandatory, and (as we just mentioned) plays a key role in the
+- **predict(self, data: ...) -> ...**: Type hinting is mandatory, and (as we just mentioned) plays a key role in the
   dependency injection responsible for identifying and type-checking incoming data.
 
 Finally, we can put all these pieces together and get a fully functional code. Thus, you should now be able to
@@ -217,7 +222,7 @@ is completely analogous to the previous example. In the following code, we intro
 under a different route in order to be able to compare both:
 
 ```python
-class MyModel(ModelResource):
+class MyModel(MLResource):
     name = "my_model"
     verbose_name = "My ML model"
     model_path = "path/to/your_model_file.flm"
@@ -246,7 +251,7 @@ In particular, the method will return metadata information about the model, such
 the version of the library used to train it, and the version of the model itself. The code is as follows:
 
 ```python
-class MyModel(ModelResource):
+class MyModel(MLResource):
     name = "my_model"
     verbose_name = "My ML model"
     model_path = "path/to/your_model_file.flm"
@@ -273,7 +278,7 @@ class MyModel(ModelResource):
 
         return {"metadata": {
             "built-in": {"verbose_name": self._meta.verbose_name, "name": self._meta.name},
-            "custom": {**self.info, "date": datetime.now().date(), "time": datetime.now().time()},
+            "custom": {**self.info, "date": str(datetime.now().date()), "time": str(datetime.now().time())},
         }}
 ```
 
@@ -287,7 +292,7 @@ on top of the model-resource class definition. Let's see both ways:
 ### Explicit
 
 ```python
-class MyModel(ModelResource):
+class MyModel(MLResource):
     ...
 
 app.models.add_model_resource(path="/my_model", resource=MyModel)
@@ -297,7 +302,7 @@ app.models.add_model_resource(path="/my_model", resource=MyModel)
 
 ```python
 @app.models.model_resource("/model")
-class MyModel(ModelResource):
+class MyModel(MLResource):
     ...
 ```
 
@@ -328,8 +333,8 @@ namely:
 
 ```python
 @app.models.model_resource("/pytorch_model/")
-class PyTorchModel(ModelResource):
-    name = "pythorch_model"
+class PyTorchModel(MLResource):
+    name = "pytorch_model"
     verbose_name = "PyTorch model"
     model_path = "pytorch_model.flm"
 
@@ -354,7 +359,7 @@ class PyTorchModel(ModelResource):
 
         return {"metadata": {
             "built-in": {"verbose_name": self._meta.verbose_name, "name": self._meta.name},
-            "custom": {**self.info, "date": datetime.now().date(), "time": datetime.now().time()},
+            "custom": {**self.info, "date": str(datetime.now().date()), "time": str(datetime.now().time())},
         }}
 ```
 
@@ -362,8 +367,8 @@ class PyTorchModel(ModelResource):
 
 ```python
 @app.models.model_resource("/sklearn_model/")
-class SKLearnModel(ModelResource):
-    name = "pythorch_model"
+class SKLearnModel(MLResource):
+    name = "sklearn_model"
     verbose_name = "ScikitLearn model"
     model_path = "sklearn_model.flm"
 
@@ -388,7 +393,7 @@ class SKLearnModel(ModelResource):
 
         return {"metadata": {
             "built-in": {"verbose_name": self._meta.verbose_name, "name": self._meta.name},
-            "custom": {**self.info, "date": datetime.now().date(), "time": datetime.now().time()},
+            "custom": {**self.info, "date": str(datetime.now().date()), "time": str(datetime.now().time())},
         }}
 ```
 
@@ -396,7 +401,7 @@ class SKLearnModel(ModelResource):
 
 ```python
 @app.models.model_resource("/tensorflow_model/")
-class SKLearnModel(ModelResource):
+class TensorFlowModel(MLResource):
     name = "tensorflow_model"
     verbose_name = "TensorFlow model"
     model_path = "tensorflow_model.flm"
@@ -422,7 +427,7 @@ class SKLearnModel(ModelResource):
 
         return {"metadata": {
             "built-in": {"verbose_name": self._meta.verbose_name, "name": self._meta.name},
-            "custom": {**self.info, "date": datetime.now().date(), "time": datetime.now().time()},
+            "custom": {**self.info, "date": str(datetime.now().date()), "time": str(datetime.now().time())},
         }}
 ```
 

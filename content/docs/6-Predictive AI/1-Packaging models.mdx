@@ -1,6 +1,6 @@
 ---
 title: Packaging models
-wip: true
+wip: false
 ---
 
 Any machine-learning model built using one of the mainstream data-science frameworks, e.g.
@@ -79,6 +79,7 @@ import flama
 flama.dump(
     model,
     path="path/to/file.flm",
+    family="ml",
     compression="zstd",
     model_id=uuid.uuid4(),
     timestamp=datetime.datetime(2023, 3, 10, 11, 30, 0),
@@ -99,6 +100,8 @@ The first parameter is the model object itself, and the keyword argument **path*
 will be stored. The remaining parameters are optional, and are used to add metadata to the resulting file
 which might be quite useful for model management purposes:
 
+- **family**: the artifact family, either `"ml"` for predictive models or `"llm"` for large language models. This is a
+  required parameter.
 - **model_id**: a unique identifier for the model. If not provided, a random UUID will be generated.
 - **compression**: the compression format to be used. It can be one of the following: `"bz2"`, `"lzma"`, `"zlib"`, or
   `"zstd"`. The default value is `"zstd"` (Zstandard), which offers an excellent balance between compression ratio
@@ -155,12 +158,12 @@ You can specify the desired compression format when calling `flama.dump`:
 import flama
 
 # Using the default (zstd), recommended for most use cases
-flama.dump(model, path="model.flm")
+flama.dump(model, path="model.flm", family="ml")
 
 # Explicitly specifying the compression format
-flama.dump(model, path="model.flm", compression="lzma")  # Smallest file, slowest speed
-flama.dump(model, path="model.flm", compression="zlib")   # Good balance, no external dependency
-flama.dump(model, path="model.flm", compression="bz2")    # Standard library alternative
+flama.dump(model, path="model.flm", family="ml", compression="lzma")  # Smallest file, slowest speed
+flama.dump(model, path="model.flm", family="ml", compression="zlib")   # Good balance, no external dependency
+flama.dump(model, path="model.flm", family="ml", compression="bz2")    # Standard library alternative
 ```
 
 The compression format is stored within the FLM file itself, so `flama.load` automatically detects and applies the
@@ -219,7 +222,7 @@ model.fit(
     np.array([0, 1, 1, 0]),
 )
 
-flama.dump(model, path="sklearn_model.flm")
+flama.dump(model, path="sklearn_model.flm", family="ml")
 ```
 
 ### TensorFlow
@@ -244,7 +247,7 @@ model.fit(
     verbose=0,
 )
 
-flama.dump(model, path="tensorflow_model.flm")
+flama.dump(model, path="tensorflow_model.flm", family="ml")
 ```
 
 ### PyTorch
@@ -290,5 +293,5 @@ Y = torch.Tensor([0, 1, 1, 0]).view(-1, 1)
 model = Model()
 model._train(X, Y, loss=torch.nn.BCELoss(), optimizer=torch.optim.Adam(model.parameters()))
 
-flama.dump(model, path="pytorch_model.flm")
+flama.dump(model, path="pytorch_model.flm", family="ml")
 ```

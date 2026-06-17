@@ -5,7 +5,7 @@ wip: true
 
 In the previous section we covered the fundamentals of building custom model resources. Understanding
 what model resources are, and how to use them, was the first step in building a custom model. We took
-advantage of the <FlamaName /> built-in **ModelResource** to create a custom
+advantage of the <FlamaName /> built-in **MLResource** to create a custom
 model resource that incorporated custom methods and exposed them as routes of our API,
 beyond the standard **/predict/** and **/inspect/** routes added by default when using <FlamaName /> CLI,
 or the syntax **app.models.add_model** (see the sections about [adding models](/docs/predictive-ai/add-models/#add-models) and
@@ -58,92 +58,69 @@ To do so, we will need:
   is the one that is called by the dependency injection of <FlamaName /> framework, hence its
   **mandatory** character, and implementation.
 
-- A custom **ModelResource** class which will be in charge of exposing the **predict** and **inspect**
+- A custom **MLResource** class which will be in charge of exposing the **predict** and **inspect**
   methods of our custom **Model** class as routes of our API. This is, in essence, the same class we implemented
   in the previous section. We will also expose an additional method, as we did in the previous section, which
   will return some metadata, including the status of the model (whether it is loaded or not).
 
 ### Model
 
-Let's start implementing the easiest of the ingredients we have mentioned above:
+In <FlamaName /> 2.0, the built-in **MLModel** class already provides lazy loading, inspection, and prediction out of
+the box. You no longer need to subclass it for standard use cases. An **MLModel** wraps a packaged `.flm` artifact and
+defers deserialisation until you access the model backend:
 
 ```python
-import typing
-from flama.models import BaseModel
+from flama.models import MLModel
 
-class MyCustomModel(BaseModel):
-    def __init__(self, model=None, meta=None, artifacts=None):
-        self.model = model
-        self.meta = meta
-        self.artifacts = artifacts
-
-    def inspect(self) -> typing.Any:
-        return self.model.get_params()
-
-    def predict(self, x: typing.Any) -> typing.Any:
-        result = self.model.predict(x)
-        # Ensure the output is JSON-serialisable (e.g. numpy int64 -> int)
-        return [int(v) for v in result] if hasattr(result, "tolist") else result
+model = MLModel(path="sklearn_model.flm")
 ```
 
-As we can see, the **MyCustomModel** class inherits from the **BaseModel** class, which is a built-in class of <FlamaName />.
-This base class provides the initialisation of the **model** attribute, and the **inspect** and **predict** methods,
-which will be exposed as routes of our application. Note that the **predict** method includes a small conversion step
-to ensure the output is JSON-serialisable, this is necessary because some ML frameworks (e.g. Scikit-Learn) return
-numpy types which are not natively supported by JSON serialisation. If we wanted to instantiate a model object of the class
-**MyCustomModel**, we would need to pass the model object as an argument to the constructor, as follows:
-
-```python
-model_artifact = flama.load(path="sklearn_model.flm")
-model = MyCustomModel(model_artifact.model)
-```
+The model is not loaded yet. Calling `model.load()` (or accessing `model.model`) triggers the deserialisation. The
+**inspect** and **predict** methods are provided by `MLModel` directly, so you get the same functionality without writing
+any boilerplate.
 
 ### ModelComponent
 
-Now that we have the **Model** class implemented, we need the **ModelComponent** class. This class will be in charge
-of instantiating the **MyCustomModel** class, and returning it via the **resolve** method. In this particular example,
-we are going to implement a lazy loading mechanism, which means that the model will be instantiated only when the
-first request to any of the **/predict/** or **/inspect/** routes is received. This is different from what was done
-under the hood by <FlamaName /> when we used the **app.models.add_model** or **app.models.add_model_resource**.
-In both cases there was a **ModelComponent** which was created without us knowing, but the instantiation of the
-model object occurs in the **resolve** method directly, hence the model is instantiated at the startup of the
-application. In our case, we want to delay the instantiation of the model until the first _relevant_ request happens.
-Therefore, the **resolve** method will not be the one making the call to the constructor of the **MyCustomModel** class.
-Instead, we will implement a method called **load_model** which will be in charge of instantiating the model object.
-The **resolve** method will call the **load_model** method, and return the model object, if the object is not initialised
-yet. Without further ado, let's implement our **ModelComponent** class:
+Now that we understand the **MLModel** class, we need the **ModelComponent** class. This class wraps an **MLModel**
+and exposes it to the dependency-injection runtime. In this particular example,
+we are going to implement a lazy loading mechanism, which means that the model will be loaded only when the
+first request to any of the **/predict/** or **/inspect/** routes is received. By default, <FlamaName /> loads
+models during application startup (via the component's `startup` hook). To defer loading, we override the
+`startup` method to skip the automatic load, and trigger it manually in `resolve` instead:
 
 ```python
-from flama.models import ModelComponent
+import pathlib
+from flama.models import MLModel, ModelComponent
 
 class MyCustomModelComponent(ModelComponent):
     def __init__(self, model_path: str):
-        self._model_path = model_path
-        self.model = MyCustomModel()
+        model = MLModel(path=pathlib.Path(model_path))
+        super().__init__(model)
 
-    def load(self):
-        load_model = flama.load(path=self._model_path)
-        self.model = MyCustomModel(load_model.model, load_model.meta, load_model.artifacts)
+    async def startup(self) -> None:
+        # Skip auto-loading on startup to demonstrate lazy loading
+        pass
 
     def reset(self):
-        self.model = MyCustomModel()
+        self._model._backend = None
 
-    def resolve(self) -> MyCustomModel:
-        if not self.model.model:
+    @property
+    def loaded(self) -> bool:
+        return self._model._backend is not None
+
+    def resolve(self) -> MLModel:
+        if not self.loaded:
             self.load()
 
-        assert self.model.model
-        return self.model
+        return self._model
 ```
 
-In short, to instantiate an object of the **MyCustomModelComponent** class, we need to pass the path to the model object as an
-argument to the constructor. This path will be stored in the **self.\_model_path** attribute. The **self.model**
-attribute is an instance of the **MyCustomModel** class, which is initialised with a **None** value, which makes it
-lightweight by default. The **load_model** method is in charge of instantiating the model object, and
-assigning it to the **self.model** attribute. We've also added an **unload_model** method, which is in charge of
-setting the **self.model** attribute to a **None** value, i.e. to reset the model attribute.
-Finally, the **resolve** method is in charge of calling the **load_model** method, if the **self.model** attribute
-is not initialised yet, and returning the **self.model** attribute.
+In short, to instantiate an object of the **MyCustomModelComponent** class, we need to pass the path to the model file as an
+argument to the constructor. This path is forwarded to the **MLModel**, which handles lazy deserialisation internally.
+The **reset** method clears the backend, effectively unloading the model from memory.
+The **loaded** property checks whether the backend has been materialised.
+Finally, the **resolve** method triggers a synchronous **load** if the model is not yet loaded,
+and returns the model instance.
 
 How will we have to initialise the **MyCustomModelComponent** class? We will have to do it as follows:
 
@@ -152,19 +129,19 @@ component = MyCustomModelComponent("sklearn_model.flm")
 ```
 
 The object **component** will be passed to the last of the ingredients we need to implement the **ModelComponent**,
-namely the **ModelResource** class.
+namely the **MLResource** class.
 
-### ModelResource
+### MLResource
 
-We have already implemented the **ModelResource** class in the previous section, so we will not go into all the details
+We have already implemented the **MLResource** class in the previous section, so we will not go into all the details
 of the implementation. The only difference with the previous section is that we are not going to use the
 **model_path** class attribute this time. This class attribute is used to instantiate a **ModelComponent** object
 internally. However, we have our own **ModelComponent** class, so we don't want <FlamaName /> to create a
-**ModelComponent** object for us. Instead, we want to pass our own **ModelComponent** object to the **ModelResource**,
+**ModelComponent** object for us. Instead, we want to pass our own **ModelComponent** object to the **MLResource**,
 and this is what we are going to do. Let's see how:
 
 ```python
-class MyCustomModelResource(BaseModelResource[MyCustomModelComponent]):
+class MyCustomModelResource(BaseMLResource[MyCustomModelComponent]):
     name = "custom_model"
     verbose_name = "Lazy-loaded ScikitLearn Model"
     component = component
@@ -183,9 +160,9 @@ class MyCustomModelResource(BaseModelResource[MyCustomModelComponent]):
                 },
                 "custom": {
                     **self.info,
-                    "loaded": self.component.model.model is not None,
-                    "date": datetime.now().date(),
-                    "time": datetime.now().time(),
+                    "loaded": self.component.loaded,
+                    "date": str(datetime.now().date()),
+                    "time": str(datetime.now().time()),
                 },
             }
         }
@@ -214,17 +191,16 @@ class MyCustomModelResource(BaseModelResource[MyCustomModelComponent]):
 
 As we can see, the only difference with the implementation we saw in the previous section is that we are using the
 class attribute **component**, which we are setting to the **component** object we instantiated earlier. Obviously,
-we are also adding the **unload** method, which is in charge of calling the **unload_model** method of the
+we are also adding the **unload** method, which is in charge of calling the **reset** method of the
 **MyCustomModelComponent** class. The **metadata** method is also different, as it is now returning the **loaded**
-attribute, which is a boolean value indicating whether the model is loaded or not. The **loaded** attribute is
-obtained by checking whether the **self.component.model.model** attribute is **None** or not. If it is **None**,
-then the model is not loaded, and if it is not **None**, then the model is loaded. This will be useful for us to
+attribute, which is a boolean value indicating whether the model is loaded or not. The **loaded** property
+checks whether the model's backend has been materialised. This will be useful for us to
 check whether the lazy loading mechanism is working as expected. Finally, we could avoid the instantiation of the
 **component** object by calling the **MyCustomModelComponent** class directly in the **component** class attribute.
 This would look something like this:
 
 ```python
-class MyCustomModelResource(BaseModelResource[MyCustomModelComponent]):
+class MyCustomModelResource(BaseMLResource[MyCustomModelComponent]):
     name = "custom_model"
     verbose_name = "Lazy-loaded ScikitLearn Model"
     component = MyCustomModelComponent("sklearn_model.flm")
@@ -234,7 +210,7 @@ class MyCustomModelResource(BaseModelResource[MyCustomModelComponent]):
 
 ## Adding the component
 
-Now that we have implemented the **ModelComponent** and the **ModelResource**, we need to add our custom model component
+Now that we have implemented the **ModelComponent** and the **MLResource**, we need to add our custom model component
 to our application. As we can see below, the procedure is quite similar to the way in which we added a model
 resource in the previous section:
 
@@ -279,49 +255,39 @@ app.models.add_model_resource(path="/model", resource=MyCustomModelResource)
 Putting everything together, we have the following code:
 
 ```python
-import typing
+import pathlib
 from datetime import datetime
 
 import flama
 from flama import Flama
-from flama.models import BaseModel, BaseModelResource, ModelComponent
+from flama.models import MLModel, ModelComponent, BaseMLResource
 from flama.resources.routing import ResourceRoute
-
-class MyCustomModel(BaseModel):
-    def __init__(self, model=None, meta=None, artifacts=None):
-        self.model = model
-        self.meta = meta
-        self.artifacts = artifacts
-
-    def inspect(self) -> typing.Any:
-        return self.model.get_params()
-
-    def predict(self, x: typing.Any) -> typing.Any:
-        result = self.model.predict(x)
-        return [int(v) for v in result] if hasattr(result, "tolist") else result
 
 class MyCustomModelComponent(ModelComponent):
     def __init__(self, model_path: str):
-        self._model_path = model_path
-        self.model = MyCustomModel()
+        model = MLModel(path=pathlib.Path(model_path))
+        super().__init__(model)
 
-    def load(self):
-        load_model = flama.load(path=self._model_path)
-        self.model = MyCustomModel(load_model.model, load_model.meta, load_model.artifacts)
+    async def startup(self) -> None:
+        # Skip auto-loading on startup to demonstrate lazy loading
+        pass
 
     def reset(self):
-        self.model = MyCustomModel()
+        self._model._backend = None
 
-    def resolve(self) -> MyCustomModel:
-        if not self.model.model:
+    @property
+    def loaded(self) -> bool:
+        return self._model._backend is not None
+
+    def resolve(self) -> MLModel:
+        if not self.loaded:
             self.load()
 
-        assert self.model.model
-        return self.model
+        return self._model
 
 component = MyCustomModelComponent("sklearn_model.flm")
 
-class MyCustomModelResource(BaseModelResource[MyCustomModelComponent]):
+class MyCustomModelResource(BaseMLResource[MyCustomModelComponent]):
     name = "custom_model"
     verbose_name = "Lazy-loaded ScikitLearn Model"
     component = component
@@ -340,9 +306,9 @@ class MyCustomModelResource(BaseModelResource[MyCustomModelComponent]):
                 },
                 "custom": {
                     **self.info,
-                    "loaded": self.component.model.model is not None,
-                    "date": datetime.now().date(),
-                    "time": datetime.now().time(),
+                    "loaded": self.component.loaded,
+                    "date": str(datetime.now().date()),
+                    "time": str(datetime.now().time()),
                 },
             }
         }
@@ -455,7 +421,7 @@ class attribute **component**.
 ```python
 component = MyCustomModelComponent("pytorch_model.flm")
 
-class MyModelResource(BaseModelResource[MyCustomModelComponent]):
+class MyModelResource(BaseMLResource[MyCustomModelComponent]):
     name = "custom_model"
     verbose_name = "Lazy-loaded PyTorch Model"
     component = component
@@ -468,7 +434,7 @@ class MyModelResource(BaseModelResource[MyCustomModelComponent]):
 ```python
 component = MyCustomModelComponent("sklearn_model.flm")
 
-class MyModelResource(BaseModelResource[MyCustomModelComponent]):
+class MyModelResource(BaseMLResource[MyCustomModelComponent]):
     name = "custom_model"
     verbose_name = "Lazy-loaded ScikitLearn Model"
     component = component
@@ -481,7 +447,7 @@ class MyModelResource(BaseModelResource[MyCustomModelComponent]):
 ```python
 component = MyCustomModelComponent("tensorflow_model.flm")
 
-class MyModelResource(BaseModelResource[MyCustomModelComponent]):
+class MyModelResource(BaseMLResource[MyCustomModelComponent]):
     name = "custom_model"
     verbose_name = "Lazy-loaded TensorFlow Model"
     component = component
