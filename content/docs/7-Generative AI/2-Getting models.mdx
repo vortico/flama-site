@@ -20,7 +20,7 @@ machinery (vLLM or MLX) while an `ml` artifact runs through its predictive frame
 **Why does the family matter?**
 
 - **Dispatch**: The family tells <FlamaName /> whether to wrap the artifact in an `LLMResource` or a predictive
-  `ModelResource`, and which backend to load.
+  `MLResource`, and which backend to load.
 - **Portability**: The on-disk weights are framework-agnostic; the family, not the original library, decides how they
   are run, so the same artifact serves on vLLM (Linux/CUDA) or MLX (Apple Silicon).
 - **Immutability**: The family is fixed at packaging time and cannot be changed without repacking, which keeps the
@@ -35,21 +35,33 @@ step. Its inspection output describes the required options:
 flama get --help
 
 Usage: flama get [OPTIONS] MODEL_NAME
-
   Download and package a model as .flm.
 
   Download a model from a supported source and serialize it into Flama's .flm
   format, ready for serving with 'flama serve' or interaction with 'flama
-  model'.
+  model'. The artifact family must be declared explicitly via ``--family``: ML
+  artifacts run through the framework recorded in the manifest, while LLM
+  artifacts are dispatched to vLLM or MLX at load time depending on what is
+  installed.
 
-Options:
-  --source [huggingface]          Model source provider.  [required]
-  --family [ml|llm]               Artifact family recorded in the manifest.
-                                  [required]
-  -o, --output TEXT               Output .flm path (default: <model-name>.flm).
-  --max-concurrent INTEGER RANGE  Maximum number of files to download
-                                  concurrently.  [default: 8; x>=1]
-  --help                          Show this message and exit.
+  Example:
+      flama get --source huggingface --family ml scikit-learn/Fish-Weight
+      flama get --source huggingface --family llm Qwen/Qwen2.5-0.5B
+╭─ Options ────────────────────────────────────────────────────────────────────╮
+│   --source                          Model source provider.                   │
+│   --family                          Artifact family recorded in the          │
+│                                     manifest. Use 'ml' for traditional ML    │
+│                                     models and 'llm' for large language      │
+│                                     models. The choice is persisted in the   │
+│                                     .flm manifest and drives runtime         │
+│                                     dispatch at load time; it cannot be      │
+│                                     changed without repacking.               │
+│   -o, --output TEXT                 Output .flm path (default:               │
+│                                     <model-name>.flm).                       │
+│   --max-concurrent INTEGER RANGE    Maximum number of files to download      │
+│                                     concurrently.                            │
+│   --help                            Show this message and exit.              │
+╰──────────────────────────────────────────────────────────────────────────────╯
 ```
 
 Two options are required: `--source` selects the provider (currently [HuggingFace](https://huggingface.co/)), and
@@ -96,23 +108,26 @@ flama model google_gemma-4-E2B-it.flm inspect --pretty
         "tokenizer_config.json"
     ],
     "meta": {
-        "id": "0d7c3a4e-1f2b-4c8a-9e6d-5b4a3c2d1e0f",
-        "timestamp": "2026-06-13T09:12:44.512030",
-        "framework": {
-            "family": "llm",
-            "lib": "transformers",
-            "version": "4.57.0",
-            "config": null
-        },
-        "model": {
-            "obj": null,
-            "info": null,
-            "params": {},
-            "metrics": {}
+        "capabilities": {
+            "kind": "llm"
         },
         "extra": {
             "model_name": "google/gemma-4-E2B-it"
-        }
+        },
+        "framework": {
+            "config": null,
+            "family": "llm",
+            "lib": "transformers",
+            "version": "4.57.0"
+        },
+        "id": "0d7c3a4e-1f2b-4c8a-9e6d-5b4a3c2d1e0f",
+        "model": {
+            "info": null,
+            "metrics": {},
+            "obj": null,
+            "params": {}
+        },
+        "timestamp": "2026-06-13T09:12:44.512030"
     }
 }
 ```

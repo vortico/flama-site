@@ -196,8 +196,8 @@ def with_ui() -> str:
 
 The following application registers two servers by name on a single application, then populates each through the
 decorators. The `mcp` argument keeps every capability bound to the right server, so the `tools` server gathers a
-synchronous tool, a background task, an elicitation round-trip, a resource, and a prompt, while the `math` server hosts
-its own tool:
+synchronous tool, a background task, an elicitation round-trip, a resource, a prompt, and a tool with a UI template,
+while the `math` server hosts its own tool:
 
 ```python
 # examples/mcp.py
@@ -247,6 +247,17 @@ def config():
 @app.mcp.prompt("summarise", description="Summarise the given text", mcp="tools")
 def summarise(text: str):
     return f"Summarise the following:\n\n{text}"
+
+
+@app.mcp.app_template("ui://widget", name="widget", description="A small UI widget", mcp="tools")
+def widget():
+    return "<html><body><h1>Flama widget</h1></body></html>"
+
+
+@app.mcp.tool("with_ui", description="A tool that declares a prefetchable UI template",
+              ui_template="ui://widget", mcp="tools")
+def with_ui() -> str:
+    return "rendered"
 
 
 @app.mcp.tool("multiply", description="Multiply two integers", mcp="math")
