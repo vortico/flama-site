@@ -1,0 +1,511 @@
+---
+title: Building an MCP Server with Flama
+description: How to build and serve a Model Context Protocol server that exposes tools, resources, and prompts to AI agents
+authors:
+  - name: 'José Antonio Perdiguero López'
+    url: 'https://vortico.tech/team/japl/'
+  - name: 'Miguel A. Duran Olivencia'
+    url: 'https://vortico.tech/team/mado/'
+wip: false
+---
+
+# Building an MCP Server with Flama
+
+Serving a model is only half the story. The other half is giving AI agents access to your world: the functions they can
+call, the data they can read, and the prompt templates they can reuse. The **Model Context Protocol** (MCP) is the open
+standard for exactly that, and Flama provides native, first-class support for building MCP servers with nothing more than
+a few decorators on plain Python functions.
+
+In this post, we walk through building a complete MCP server with Flama. We will expose tools, resources, and prompts to
+any MCP-capable client, and we will explore the advanced extensions for background tasks, interactive input, and embedded
+user interfaces. By the end, you will have a running server that any AI assistant can discover and call.
+
+Before we dive into the details, we recommend you to have the following resources at hand:
+
+- Official Flama documentation: [Flama documentation](https://flama.dev/docs/)
+- Model Context Protocol page: [MCP docs](https://flama.dev/docs/generative-ai/model-context-protocol/)
+- Flama GitHub repository: [Flama on GitHub](https://github.com/vortico/flama)
+
+## Table of contents
+
+- [What is MCP?](#what-is-mcp)
+- [Setting up the project](#setting-up-the-project)
+- [Registering an MCP server](#registering-an-mcp-server)
+- [Exposing tools](#exposing-tools)
+- [Exposing resources](#exposing-resources)
+- [Exposing prompts](#exposing-prompts)
+- [Advanced extensions](#advanced-extensions)
+  - [Background tasks](#background-tasks)
+  - [Elicitation](#elicitation)
+  - [MCP Apps](#mcp-apps)
+- [Multiple servers in one application](#multiple-servers-in-one-application)
+- [The complete application](#the-complete-application)
+- [Testing with curl](#testing-with-curl)
+- [Conclusions](#conclusions)
+- [References](#references)
+- [Support our work](#support-our-work)
+- [About the authors](#about-the-authors)
+
+## What is MCP?
+
+The **Model Context Protocol** is an open standard that lets AI applications connect to external capabilities through a
+uniform interface. An MCP server advertises three kinds of capability:
+
+- **Tools**: functions the model can invoke.
+- **Resources**: data the model can read, addressed by URI.
+- **Prompts**: reusable prompt templates with arguments.
+
+Clients (AI assistants, agent frameworks, IDEs) discover these capabilities and call them over
+[JSON-RPC](https://www.jsonrpc.org/), a lightweight remote-procedure-call protocol that exchanges JSON messages.
+
+Flama implements the **stateless `2026-07-28`** revision of the protocol. Rather than negotiating a session through an
+`initialize` handshake, every request is self-contained, carrying its protocol version and capabilities in a `_meta`
+object and its routing data in `Mcp-Method` / `Mcp-Name` headers. This makes MCP servers trivial to scale horizontally,
+since no per-client state is held between calls.
+
+**Why does this matter?**
+
+- **Interoperability**: Any MCP-capable client can use your tools without bespoke integration code.
+- **Reuse**: The same Python functions that power your API can be exposed to AI agents with a single decorator.
+- **Type safety**: Flama derives each tool's input and output JSON Schema from the handler's type hints, so clients
+  receive accurate, self-contained contracts.
+
+## Setting up the project
+
+All examples in this post assume Flama has been installed with the pydantic extras via [uv](https://docs.astral.sh/uv/):
+
+```console
+uv pip install "flama[pydantic]"
+```
+
+Alternatively, you can run any command without a prior install by using `uvx --from "flama[pydantic]" flama ...`, but
+for brevity we assume Flama is already installed throughout.
+
+## Registering an MCP server
+
+An MCP server in Flama is a named registry that you mount on your application at a specific URL path. The `add_server`
+method both creates the server and mounts it, so a single application can host several independent servers:
+
+```python
+import flama
+from flama import Flama
+
+app = Flama(
+    openapi={
+        "info": {
+            "title": "MCP Server API",
+            "version": "1.0.0",
+            "description": "A Model Context Protocol server built with Flama 🔥",
+        },
+    },
+)
+
+app.mcp.add_server("/mcp/tools/", "tools", version="2.0.0", instructions="Flama demo MCP tools server")
+```
+
+This registers a server named `tools`, reachable at `/mcp/tools/`. The `version` parameter declares the server's
+semantic version, and `instructions` provides a human-readable description that clients can display. With the server in
+place, you populate it by name: every tool, resource, and prompt decorator takes an `mcp` argument identifying which
+server the capability belongs to.
+
+## Exposing tools
+
+A **tool** is a function the model can invoke. Declare one with the `tool` decorator, pointing it at the target server
+through the `mcp` argument. Flama infers the tool's input and output schema from the handler's type hints:
+
+```python
+@app.mcp.tool("add", description="Add two integers", mcp="tools")
+def add(a: int, b: int) -> int:
+    return a + b
+```
+
+Tools may be synchronous or asynchronous. When you omit the name, the function's own name is used; when you omit the
+description, its docstring is used instead. The parameters and return annotation become the tool's `inputSchema` and
+`outputSchema`, advertised to clients verbatim.
+
+Here is an asynchronous tool that returns a string:
+
+```python
+@app.mcp.tool("greet", description="Greet someone by name", mcp="tools")
+async def greet(name: str) -> str:
+    return f"Hello, {name}!"
+```
+
+Let us verify the tool works. Start the application:
+
+```console
+flama run app:app
+```
+
+And call it with `curl`:
+
+```console
+curl -s -X POST http://127.0.0.1:8000/mcp/tools/ \
+  -H 'Content-Type: application/json' \
+  -H 'Mcp-Method: tools/call' \
+  -H 'Mcp-Name: add' \
+  -H 'MCP-Protocol-Version: 2026-07-28' \
+  -d '{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"add","arguments":{"a":2,"b":3}}}'
+```
+
+The server responds with a JSON-RPC result:
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "result": {
+    "content": [{"type": "text", "text": "5"}],
+    "structuredContent": 5
+  }
+}
+```
+
+The `structuredContent` field carries the typed return value, while `content` provides a text representation for clients
+that prefer unstructured output.
+
+## Exposing resources
+
+A **resource** is readable data addressed by a URI. The `resource` decorator registers one on the named server:
+
+```python
+import json
+
+@app.mcp.resource("config://app", name="config", description="Application configuration",
+                  mime_type="application/json", mcp="tools")
+def config():
+    return json.dumps({"debug": True, "name": "flama-mcp"})
+```
+
+Resources are listed and read by their URI, so a client fetches the configuration above by requesting `config://app`.
+The MIME type tells the client how to interpret the content.
+
+To read the resource:
+
+```console
+curl -s -X POST http://127.0.0.1:8000/mcp/tools/ \
+  -H 'Content-Type: application/json' \
+  -H 'Mcp-Method: resources/read' \
+  -H 'Mcp-Name: config://app' \
+  -H 'MCP-Protocol-Version: 2026-07-28' \
+  -d '{"jsonrpc":"2.0","id":1,"method":"resources/read","params":{"uri":"config://app"}}'
+```
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "result": {
+    "contents": [
+      {
+        "uri": "config://app",
+        "mimeType": "application/json",
+        "text": "{\"debug\": true, \"name\": \"flama-mcp\"}"
+      }
+    ]
+  }
+}
+```
+
+## Exposing prompts
+
+A **prompt** is a named, reusable prompt template. The `prompt` decorator registers one on the named server, deriving
+its arguments from the handler's parameters:
+
+```python
+@app.mcp.prompt("summarise", description="Summarise the given text", mcp="tools")
+def summarise(text: str):
+    return f"Summarise the following:\n\n{text}"
+```
+
+Prompts are listed by name and rendered with arguments supplied by the client. Here `text` becomes the single required
+argument. To get the rendered prompt:
+
+```console
+curl -s -X POST http://127.0.0.1:8000/mcp/tools/ \
+  -H 'Content-Type: application/json' \
+  -H 'Mcp-Method: prompts/get' \
+  -H 'Mcp-Name: summarise' \
+  -H 'MCP-Protocol-Version: 2026-07-28' \
+  -d '{"jsonrpc":"2.0","id":1,"method":"prompts/get","params":{"name":"summarise","arguments":{"text":"Flama is great"}}}'
+```
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "result": {
+    "messages": [
+      {
+        "role": "user",
+        "content": {"type": "text", "text": "Summarise the following:\n\nFlama is great"}
+      }
+    ]
+  }
+}
+```
+
+## Advanced extensions
+
+The `2026-07-28` protocol defines optional extensions, all supported natively by Flama. A server advertises the
+extensions it uses in its discovery capabilities, so clients negotiate them per request.
+
+### Background tasks
+
+Long-running tools can run as background **Tasks** rather than blocking the call. Pass `task=True` and the server
+returns a task handle the client can poll:
+
+```python
+@app.mcp.tool("square", task=True, description="Square a number as a background task", mcp="tools")
+async def square(x: int) -> int:
+    return x * x
+```
+
+When a client calls `square`, the server may return the result directly for fast operations, or issue a task token for
+truly long-running computations that the client can poll until completion.
+
+### Elicitation
+
+A tool can pause mid-call to **elicit** further input from the user. The handler declares a parameter annotated with
+`Elicitation` to read the answers gathered so far, and returns `Elicit.require(...)` to request more:
+
+```python
+from flama.mcp.data_structures import Elicit, Elicitation
+
+@app.mcp.tool("confirm", description="Confirm an action through an elicitation round-trip", mcp="tools")
+def confirm(elicitation: Elicitation) -> str:
+    if "confirm" not in elicitation:
+        return Elicit.require("Are you sure?", {"type": "boolean"}, name="confirm")
+    return f"confirmed={elicitation['confirm']}"
+```
+
+The `elicitation` parameter is supplied by the server and excluded from the tool's input schema, so it never appears as
+a tool argument the client must fill. Because the protocol is stateless, the answers gathered so far are round-tripped
+through an opaque continuation token the client echoes back on the retry.
+
+When the client calls `confirm` without prior answers, it receives a response with `resultType: "inputRequired"` and a
+schema describing what the server needs. The client collects that input from the user and retries, this time carrying
+the gathered answers.
+
+### MCP Apps
+
+A tool can declare a prefetchable user-interface template (an **MCP App**) that hosts render alongside its result.
+Register the template with `app_template` and point the tool at it with `ui_template`:
+
+```python
+@app.mcp.app_template("ui://widget", name="widget", description="A small UI widget", mcp="tools")
+def widget():
+    return "<html><body><h1>Flama widget</h1></body></html>"
+
+@app.mcp.tool("with_ui", description="A tool that declares a prefetchable UI template",
+              ui_template="ui://widget", mcp="tools")
+def with_ui() -> str:
+    return "rendered"
+```
+
+Clients that support MCP Apps can prefetch the template and render it alongside the tool's result, providing a richer
+interactive experience.
+
+## Multiple servers in one application
+
+A single Flama application can host as many MCP servers as you need, each under its own path. This is useful for
+separating concerns or versioning different sets of capabilities:
+
+```python
+app.mcp.add_server("/mcp/tools/", "tools", version="2.0.0", instructions="Flama demo MCP tools server")
+app.mcp.add_server("/mcp/math/", "math", version="2.0.0")
+```
+
+Each server is independent. Tools, resources, and prompts are bound to their server by the `mcp` argument:
+
+```python
+@app.mcp.tool("multiply", description="Multiply two integers", mcp="math")
+def multiply(a: int, b: int) -> int:
+    return a * b
+```
+
+A `tools/list` request to `/mcp/tools/` returns only the tools registered on the `tools` server, while a request to
+`/mcp/math/` returns only `multiply`. Clients discover each server independently.
+
+## The complete application
+
+Putting it all together, here is the full application. It registers two MCP servers on a single Flama app, populates
+them with tools (sync, async, background task, elicitation, UI template), a resource, and a prompt:
+
+```python
+import json
+
+import flama
+from flama import Flama
+from flama.mcp.data_structures import Elicit, Elicitation
+
+app = Flama(
+    openapi={
+        "info": {
+            "title": "MCP Server API",
+            "version": "1.0.0",
+            "description": "A Model Context Protocol server built with Flama 🔥",
+        },
+    },
+)
+
+app.mcp.add_server("/mcp/tools/", "tools", version="2.0.0", instructions="Flama demo MCP tools server")
+app.mcp.add_server("/mcp/math/", "math", version="2.0.0")
+
+@app.mcp.tool("add", description="Add two integers", mcp="tools")
+def add(a: int, b: int) -> int:
+    return a + b
+
+@app.mcp.tool("greet", description="Greet someone by name", mcp="tools")
+async def greet(name: str) -> str:
+    return f"Hello, {name}!"
+
+@app.mcp.tool("square", task=True, description="Square a number as a background task", mcp="tools")
+async def square(x: int) -> int:
+    return x * x
+
+@app.mcp.tool("confirm", description="Confirm an action through an elicitation round-trip", mcp="tools")
+def confirm(elicitation: Elicitation) -> str:
+    if "confirm" not in elicitation:
+        return Elicit.require("Are you sure?", {"type": "boolean"}, name="confirm")
+    return f"confirmed={elicitation['confirm']}"
+
+@app.mcp.resource("config://app", name="config", description="Application configuration",
+                  mime_type="application/json", mcp="tools")
+def config():
+    return json.dumps({"debug": True, "name": "flama-mcp"})
+
+@app.mcp.prompt("summarise", description="Summarise the given text", mcp="tools")
+def summarise(text: str):
+    return f"Summarise the following:\n\n{text}"
+
+@app.mcp.app_template("ui://widget", name="widget", description="A small UI widget", mcp="tools")
+def widget():
+    return "<html><body><h1>Flama widget</h1></body></html>"
+
+@app.mcp.tool("with_ui", description="A tool that declares a prefetchable UI template",
+              ui_template="ui://widget", mcp="tools")
+def with_ui() -> str:
+    return "rendered"
+
+@app.mcp.tool("multiply", description="Multiply two integers", mcp="math")
+def multiply(a: int, b: int) -> int:
+    return a * b
+
+if __name__ == "__main__":
+    flama.run(flama_app=app, server_host="0.0.0.0", server_port=8000)
+```
+
+Save this as `app.py` and run it:
+
+```console
+python app.py
+```
+
+The server starts on port 8000 with both MCP endpoints ready.
+
+## Testing with curl
+
+Once the application is running, you can exercise every capability from the command line.
+
+**List available tools** on the `tools` server:
+
+```console
+curl -s -X POST http://127.0.0.1:8000/mcp/tools/ \
+  -H 'Content-Type: application/json' \
+  -H 'Mcp-Method: tools/list' \
+  -H 'MCP-Protocol-Version: 2026-07-28' \
+  -d '{"jsonrpc":"2.0","id":1,"method":"tools/list","params":{}}'
+```
+
+The response lists five tools (`add`, `confirm`, `greet`, `square`, `with_ui`), each with its full input and output
+schema derived from the Python type hints.
+
+**Call a tool** on the `math` server:
+
+```console
+curl -s -X POST http://127.0.0.1:8000/mcp/math/ \
+  -H 'Content-Type: application/json' \
+  -H 'Mcp-Method: tools/call' \
+  -H 'Mcp-Name: multiply' \
+  -H 'MCP-Protocol-Version: 2026-07-28' \
+  -d '{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"multiply","arguments":{"a":4,"b":5}}}'
+```
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "result": {
+    "content": [{"type": "text", "text": "20"}],
+    "structuredContent": 20
+  }
+}
+```
+
+**Read a resource:**
+
+```console
+curl -s -X POST http://127.0.0.1:8000/mcp/tools/ \
+  -H 'Content-Type: application/json' \
+  -H 'Mcp-Method: resources/read' \
+  -H 'Mcp-Name: config://app' \
+  -H 'MCP-Protocol-Version: 2026-07-28' \
+  -d '{"jsonrpc":"2.0","id":1,"method":"resources/read","params":{"uri":"config://app"}}'
+```
+
+**Get a rendered prompt:**
+
+```console
+curl -s -X POST http://127.0.0.1:8000/mcp/tools/ \
+  -H 'Content-Type: application/json' \
+  -H 'Mcp-Method: prompts/get' \
+  -H 'Mcp-Name: summarise' \
+  -H 'MCP-Protocol-Version: 2026-07-28' \
+  -d '{"jsonrpc":"2.0","id":1,"method":"prompts/get","params":{"name":"summarise","arguments":{"text":"Flama is great"}}}'
+```
+
+Every request follows the same pattern: a `POST` to the server's path, with `Mcp-Method` identifying the operation,
+`Mcp-Name` identifying the target, and `MCP-Protocol-Version` declaring the protocol revision.
+
+## Conclusions
+
+Flama makes the journey from "I have Python functions" to "AI agents can discover and call them" as short as possible.
+The MCP support requires no configuration files, no code generation, and no external tooling. You write plain Python
+functions, decorate them, and the framework handles the rest:
+
+1. **`add_server`**: Mount a named MCP server at any path.
+2. **`@tool`**: Expose a function as an invocable tool with full schema inference.
+3. **`@resource`**: Expose data at a URI for clients to read.
+4. **`@prompt`**: Expose a reusable prompt template with typed arguments.
+5. **Extensions**: Background tasks, elicitation, and MCP Apps for richer interactions.
+
+Because the protocol is stateless, your servers scale horizontally without sticky sessions. Because the schema is derived
+from type hints, clients receive accurate contracts without manual specification. And because multiple servers can live
+in a single application, you can organise capabilities by domain, version, or access level.
+
+In upcoming posts, we will explore how to combine MCP servers with LLM serving to build fully autonomous agent
+architectures where the model and its tools live in the same application.
+
+## References
+
+- [Flama documentation](https://flama.dev/docs/)
+- [MCP documentation](https://flama.dev/docs/generative-ai/model-context-protocol/)
+- [Generative AI section](https://flama.dev/docs/generative-ai/overview/)
+- [Flama GitHub repository](https://github.com/vortico/flama)
+- [Flama PyPI package](https://pypi.org/project/flama/)
+- [Model Context Protocol specification](https://modelcontextprotocol.io/)
+
+## Support our work
+
+If you find Flama useful for building robust Machine Learning and Generative AI APIs, we'd be thrilled if you showed
+your support by giving us a ⭐ on [GitHub](https://github.com/vortico/flama). Your stars are the best fuel for our
+development efforts!
+
+You can also stay updated with the latest news and development threads by following us on
+[𝕏](https://x.com/VorticoTech).
+
+## About the authors
+
+[Vortico](https://vortico.tech/): We specialize in software development, helping businesses enhance and expand their
+  AI and technology capabilities.
