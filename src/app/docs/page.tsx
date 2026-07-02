@@ -206,7 +206,11 @@ function SkillBanner() {
       description={
         <>
           Download the <strong>skill.md</strong> file and let your AI coding assistant build <FlamaName /> apps with
-          full framework knowledge.
+          full framework knowledge, or point it at{' '}
+          <a href="/llms.txt" className="font-semibold text-brand-600 underline dark:text-brand-400">
+            llms.txt
+          </a>
+          .
         </>
       }
       action={

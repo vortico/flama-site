@@ -40,6 +40,9 @@ export const metadata: Metadata = {
   metadataBase: new URL('https://flama.dev'),
   alternates: {
     canonical: '/',
+    types: {
+      'text/plain': '/llms.txt',
+    },
   },
   openGraph: {
     type: 'website',
