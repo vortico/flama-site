@@ -59,7 +59,6 @@ export const metadata: Metadata = {
     ],
     apple: [{ url: `${faviconPath}/apple-touch-icon.png` }],
   },
-  manifest: `${faviconPath}/manifest.json`,
   robots: {
     index: true,
     follow: true,
