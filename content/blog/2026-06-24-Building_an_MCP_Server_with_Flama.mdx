@@ -17,8 +17,8 @@ standard for exactly that, and Flama provides native, first-class support for bu
 a few decorators on plain Python functions.
 
 In this post, we walk through building a complete MCP server with Flama. We will expose tools, resources, and prompts to
-any MCP-capable client, and we will explore the advanced extensions for background tasks, interactive input, and embedded
-user interfaces. By the end, you will have a running server that any AI assistant can discover and call.
+any MCP-capable client, and we will explore the advanced capabilities for background tasks, interactive input, and
+embedded user interfaces. By the end, you will have a running server that any AI assistant can discover and call.
 
 Before we dive into the details, we recommend you to have the following resources at hand:
 
@@ -31,10 +31,11 @@ Before we dive into the details, we recommend you to have the following resource
 - [What is MCP?](#what-is-mcp)
 - [Setting up the project](#setting-up-the-project)
 - [Registering an MCP server](#registering-an-mcp-server)
+- [Discovering the server](#discovering-the-server)
 - [Exposing tools](#exposing-tools)
 - [Exposing resources](#exposing-resources)
 - [Exposing prompts](#exposing-prompts)
-- [Advanced extensions](#advanced-extensions)
+- [Advanced capabilities](#advanced-capabilities)
   - [Background tasks](#background-tasks)
   - [Elicitation](#elicitation)
   - [MCP Apps](#mcp-apps)
@@ -58,10 +59,13 @@ uniform interface. An MCP server advertises three kinds of capability:
 Clients (AI assistants, agent frameworks, IDEs) discover these capabilities and call them over
 [JSON-RPC](https://www.jsonrpc.org/), a lightweight remote-procedure-call protocol that exchanges JSON messages.
 
-Flama implements the **stateless `2026-07-28`** revision of the protocol. Rather than negotiating a session through an
-`initialize` handshake, every request is self-contained, carrying its protocol version and capabilities in a `_meta`
-object and its routing data in `Mcp-Method` / `Mcp-Name` headers. This makes MCP servers trivial to scale horizontally,
-since no per-client state is held between calls.
+Flama implements the **stateless [`2026-07-28`](https://modelcontextprotocol.io/specification/2026-07-28/)** revision of
+the protocol. The `initialize` / `initialized` handshake and the `Mcp-Session-Id` header are gone: every request is
+self-contained, carrying its protocol version, client identity, and capabilities in a `_meta` object (namespaced under
+`io.modelcontextprotocol/…`) and its routing data in the mandatory `Mcp-Method` / `Mcp-Name` headers. Clients that want
+capabilities up front call `server/discover`; it is optional, and any request can land on any server instance behind a
+plain round-robin load balancer. List and read responses also carry `ttlMs` / `cacheScope` cache hints so clients can
+reuse catalogs without sticky sessions.
 
 **Why does this matter?**
 
@@ -69,6 +73,7 @@ since no per-client state is held between calls.
 - **Reuse**: The same Python functions that power your API can be exposed to AI agents with a single decorator.
 - **Type safety**: Flama derives each tool's input and output JSON Schema from the handler's type hints, so clients
   receive accurate, self-contained contracts.
+- **Horizontal scale**: No protocol-level session means no sticky routing and no shared session store.
 
 ## Setting up the project
 
@@ -87,7 +92,6 @@ An MCP server in Flama is a named registry that you mount on your application at
 method both creates the server and mounts it, so a single application can host several independent servers:
 
 ```python
-import flama
 from flama import Flama
 
 app = Flama(
@@ -107,6 +111,50 @@ This registers a server named `tools`, reachable at `/mcp/tools/`. The `version`
 semantic version, and `instructions` provides a human-readable description that clients can display. With the server in
 place, you populate it by name: every tool, resource, and prompt decorator takes an `mcp` argument identifying which
 server the capability belongs to.
+
+## Discovering the server
+
+Under `2026-07-28` there is no session handshake. A client learns what a server offers by calling `server/discover`
+(or by listing tools, resources, and prompts directly). Discovery is exempt from protocol-version negotiation, so a
+client can probe a server before committing to a revision. Once the server is populated (as in the complete application
+below), the response looks like this:
+
+```console
+curl -s -X POST http://127.0.0.1:8000/mcp/tools/ \
+  -H 'Content-Type: application/json' \
+  -H 'Mcp-Method: server/discover' \
+  -d '{"jsonrpc":"2.0","id":1,"method":"server/discover","params":{}}'
+```
+
+The server responds with:
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "result": {
+    "resultType": "complete",
+    "supportedVersions": ["2026-07-28"],
+    "capabilities": {
+      "tools": {},
+      "resources": {},
+      "prompts": {},
+      "extensions": {
+        "io.modelcontextprotocol/apps": {},
+        "io.modelcontextprotocol/tasks": {}
+      }
+    },
+    "serverInfo": {"name": "tools", "version": "2.0.0"},
+    "ttlMs": 0,
+    "cacheScope": "public",
+    "instructions": "Flama demo MCP tools server"
+  }
+}
+```
+
+The `extensions` block appears only when the server actually uses them (for example after you register a `task=True`
+tool or an MCP App template). Clients advertise the extensions they support on each subsequent request through
+`_meta.io.modelcontextprotocol/clientCapabilities`.
 
 ## Exposing tools
 
@@ -148,7 +196,7 @@ curl -s -X POST http://127.0.0.1:8000/mcp/tools/ \
   -d '{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"add","arguments":{"a":2,"b":3}}}'
 ```
 
-The server responds with a JSON-RPC result:
+The server responds with:
 
 ```json
 {
@@ -191,6 +239,8 @@ curl -s -X POST http://127.0.0.1:8000/mcp/tools/ \
   -d '{"jsonrpc":"2.0","id":1,"method":"resources/read","params":{"uri":"config://app"}}'
 ```
 
+The server responds with:
+
 ```json
 {
   "jsonrpc": "2.0",
@@ -202,7 +252,9 @@ curl -s -X POST http://127.0.0.1:8000/mcp/tools/ \
         "mimeType": "application/json",
         "text": "{\"debug\": true, \"name\": \"flama-mcp\"}"
       }
-    ]
+    ],
+    "ttlMs": 0,
+    "cacheScope": "public"
   }
 }
 ```
@@ -230,11 +282,14 @@ curl -s -X POST http://127.0.0.1:8000/mcp/tools/ \
   -d '{"jsonrpc":"2.0","id":1,"method":"prompts/get","params":{"name":"summarise","arguments":{"text":"Flama is great"}}}'
 ```
 
+The server responds with:
+
 ```json
 {
   "jsonrpc": "2.0",
   "id": 1,
   "result": {
+    "description": "Summarise the given text",
     "messages": [
       {
         "role": "user",
@@ -245,15 +300,18 @@ curl -s -X POST http://127.0.0.1:8000/mcp/tools/ \
 }
 ```
 
-## Advanced extensions
+## Advanced capabilities
 
-The `2026-07-28` protocol defines optional extensions, all supported natively by Flama. A server advertises the
-extensions it uses in its discovery capabilities, so clients negotiate them per request.
+The `2026-07-28` protocol introduces several advanced capabilities on top of the core tool / resource / prompt
+primitives. Some of them are **extensions** negotiated through the extensions framework (SEP-2133): a server advertises
+the extensions it uses in `server/discover`, and a client opts into them per request by listing them under
+`_meta.io.modelcontextprotocol/clientCapabilities.extensions`. Others, like Multi Round-Trip Requests, are core protocol
+features available without extension negotiation. Flama supports all of them natively.
 
 ### Background tasks
 
-Long-running tools can run as background **Tasks** rather than blocking the call. Pass `task=True` and the server
-returns a task handle the client can poll:
+Long-running tools can run as background **Tasks** (the `io.modelcontextprotocol/tasks` extension) rather than blocking
+the call. Pass `task=True` and Flama registers the tool as task-capable:
 
 ```python
 @app.mcp.tool("square", task=True, description="Square a number as a background task", mcp="tools")
@@ -261,13 +319,62 @@ async def square(x: int) -> int:
     return x * x
 ```
 
-When a client calls `square`, the server may return the result directly for fast operations, or issue a task token for
-truly long-running computations that the client can poll until completion.
+Whether the call runs in the background depends on the client:
+
+- If the client does **not** advertise the tasks extension, the tool runs synchronously and returns the usual
+  `content` / `structuredContent` result.
+- If the client **does** advertise it, the server returns `resultType: "task"` with a task handle the client polls via
+  `tasks/get` (and can cancel with `tasks/cancel` or resume after elicitation with `tasks/update`).
+
+```console
+curl -s -X POST http://127.0.0.1:8000/mcp/tools/ \
+  -H 'Content-Type: application/json' \
+  -H 'Mcp-Method: tools/call' \
+  -H 'Mcp-Name: square' \
+  -H 'MCP-Protocol-Version: 2026-07-28' \
+  -d '{
+    "jsonrpc":"2.0","id":1,"method":"tools/call",
+    "params":{
+      "name":"square","arguments":{"x":7},
+      "_meta":{
+        "io.modelcontextprotocol/clientCapabilities":{
+          "extensions":{"io.modelcontextprotocol/tasks":{}}
+        }
+      }
+    }
+  }'
+```
+
+The server responds with:
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "result": {
+    "resultType": "task",
+    "task": {"taskId": "…", "status": "working", "ttlMs": 0},
+    "ttlMs": 0,
+    "cacheScope": "public"
+  }
+}
+```
+
+Poll until the task leaves `working`:
+
+```console
+curl -s -X POST http://127.0.0.1:8000/mcp/tools/ \
+  -H 'Content-Type: application/json' \
+  -H 'Mcp-Method: tasks/get' \
+  -H 'MCP-Protocol-Version: 2026-07-28' \
+  -d '{"jsonrpc":"2.0","id":2,"method":"tasks/get","params":{"taskId":"<taskId>"}}'
+```
 
 ### Elicitation
 
-A tool can pause mid-call to **elicit** further input from the user. The handler declares a parameter annotated with
-`Elicitation` to read the answers gathered so far, and returns `Elicit.require(...)` to request more:
+A tool can pause mid-call to **elicit** further input from the user (Multi Round-Trip Requests, SEP-2322). The handler
+declares a parameter annotated with `Elicitation` to read the answers gathered so far, and returns `Elicit.require(...)`
+to request more:
 
 ```python
 from flama.mcp.data_structures import Elicit, Elicitation
@@ -281,15 +388,50 @@ def confirm(elicitation: Elicitation) -> str:
 
 The `elicitation` parameter is supplied by the server and excluded from the tool's input schema, so it never appears as
 a tool argument the client must fill. Because the protocol is stateless, the answers gathered so far are round-tripped
-through an opaque continuation token the client echoes back on the retry.
+through an opaque `requestState` token the client echoes back on the retry.
 
-When the client calls `confirm` without prior answers, it receives a response with `resultType: "inputRequired"` and a
-schema describing what the server needs. The client collects that input from the user and retries, this time carrying
-the gathered answers.
+When the client calls `confirm` without prior answers, it receives `resultType: "inputRequired"`:
+
+```json
+{
+  "jsonrpc": "2.0",
+  "id": 1,
+  "result": {
+    "resultType": "inputRequired",
+    "inputRequests": {
+      "confirm": {
+        "type": "elicitation",
+        "message": "Are you sure?",
+        "schema": {"type": "boolean"}
+      }
+    },
+    "requestState": "eyJpbnB1dFJlc3BvbnNlcyI6IHt9fQ=="
+  }
+}
+```
+
+The client collects that input from the user and retries, this time carrying `inputResponses` and the echoed
+`requestState`:
+
+```console
+curl -s -X POST http://127.0.0.1:8000/mcp/tools/ \
+  -H 'Content-Type: application/json' \
+  -H 'Mcp-Method: tools/call' \
+  -H 'Mcp-Name: confirm' \
+  -H 'MCP-Protocol-Version: 2026-07-28' \
+  -d '{
+    "jsonrpc":"2.0","id":2,"method":"tools/call",
+    "params":{
+      "name":"confirm","arguments":{},
+      "inputResponses":{"confirm":true},
+      "requestState":"<requestState from the previous response>"
+    }
+  }'
+```
 
 ### MCP Apps
 
-A tool can declare a prefetchable user-interface template (an **MCP App**) that hosts render alongside its result.
+A tool can declare a prefetchable user-interface template (an **MCP App**) that hosts can render alongside its result.
 Register the template with `app_template` and point the tool at it with `ui_template`:
 
 ```python
@@ -406,7 +548,19 @@ The server starts on port 8000 with both MCP endpoints ready.
 
 ## Testing with curl
 
-Once the application is running, you can exercise every capability from the command line.
+Once the application is running, you can exercise every capability from the command line. Every request follows the same
+pattern: a `POST` to the server's path, with `Mcp-Method` identifying the operation, `Mcp-Name` identifying the target
+when the method has one, and `MCP-Protocol-Version` declaring the protocol revision. Optional `_meta` fields carry
+client identity and the extensions the client supports for that call.
+
+**Discover the server** (no protocol version required):
+
+```console
+curl -s -X POST http://127.0.0.1:8000/mcp/tools/ \
+  -H 'Content-Type: application/json' \
+  -H 'Mcp-Method: server/discover' \
+  -d '{"jsonrpc":"2.0","id":1,"method":"server/discover","params":{}}'
+```
 
 **List available tools** on the `tools` server:
 
@@ -419,7 +573,7 @@ curl -s -X POST http://127.0.0.1:8000/mcp/tools/ \
 ```
 
 The response lists five tools (`add`, `confirm`, `greet`, `square`, `with_ui`), each with its full input and output
-schema derived from the Python type hints.
+schema derived from the Python type hints, plus `ttlMs` / `cacheScope` cache hints.
 
 **Call a tool** on the `math` server:
 
@@ -431,6 +585,8 @@ curl -s -X POST http://127.0.0.1:8000/mcp/math/ \
   -H 'MCP-Protocol-Version: 2026-07-28' \
   -d '{"jsonrpc":"2.0","id":1,"method":"tools/call","params":{"name":"multiply","arguments":{"a":4,"b":5}}}'
 ```
+
+The server responds with:
 
 ```json
 {
@@ -465,9 +621,6 @@ curl -s -X POST http://127.0.0.1:8000/mcp/tools/ \
   -d '{"jsonrpc":"2.0","id":1,"method":"prompts/get","params":{"name":"summarise","arguments":{"text":"Flama is great"}}}'
 ```
 
-Every request follows the same pattern: a `POST` to the server's path, with `Mcp-Method` identifying the operation,
-`Mcp-Name` identifying the target, and `MCP-Protocol-Version` declaring the protocol revision.
-
 ## Conclusions
 
 Flama makes the journey from "I have Python functions" to "AI agents can discover and call them" as short as possible.
@@ -475,10 +628,11 @@ The MCP support requires no configuration files, no code generation, and no exte
 functions, decorate them, and the framework handles the rest:
 
 1. **`add_server`**: Mount a named MCP server at any path.
-2. **`@tool`**: Expose a function as an invocable tool with full schema inference.
-3. **`@resource`**: Expose data at a URI for clients to read.
-4. **`@prompt`**: Expose a reusable prompt template with typed arguments.
-5. **Extensions**: Background tasks, elicitation, and MCP Apps for richer interactions.
+2. **`server/discover`**: Let clients learn capabilities, supported versions, and extensions without a session.
+3. **`@tool`**: Expose a function as an invocable tool with full schema inference.
+4. **`@resource`**: Expose data at a URI for clients to read.
+5. **`@prompt`**: Expose a reusable prompt template with typed arguments.
+6. **Advanced capabilities**: Background tasks, elicitation (MRTR), and MCP Apps for richer interactions.
 
 Because the protocol is stateless, your servers scale horizontally without sticky sessions. Because the schema is derived
 from type hints, clients receive accurate contracts without manual specification. And because multiple servers can live
@@ -494,7 +648,8 @@ architectures where the model and its tools live in the same application.
 - [Generative AI section](https://flama.dev/docs/generative-ai/overview/)
 - [Flama GitHub repository](https://github.com/vortico/flama)
 - [Flama PyPI package](https://pypi.org/project/flama/)
-- [Model Context Protocol specification](https://modelcontextprotocol.io/)
+- [Model Context Protocol specification (`2026-07-28`)](https://modelcontextprotocol.io/specification/2026-07-28/)
+- [MCP `2026-07-28` release announcement](https://blog.modelcontextprotocol.io/posts/2026-07-28/)
 
 ## Support our work
 
