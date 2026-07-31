@@ -80,6 +80,7 @@ The main application instance (typically named **app**) provides these decorator
   - `@app.patch(path, ...)`
   - `@app.options(path, ...)`
   - `@app.head(path, ...)`
+  - `@app.query(path, ...)`
 
   These are equivalent to using `@app.route()` with the corresponding method specified.
 
@@ -88,6 +89,40 @@ The main application instance (typically named **app**) provides these decorator
   async def fetch_my_data():
       return {"data": "sample"}
   ```
+
+- **Searching with <Label color="purple">QUERY</Label>**:
+  `QUERY` is safe and idempotent like <Label color="green">GET</Label>, and yet it carries a request body. That
+  combination suits a search whose criteria are awkward to express in a URL, because they nest, because they run long,
+  or because they should not be recorded in logs and browser history.
+
+  ```python
+  import typing as t
+
+  from flama import types
+
+  @app.query("/products/search/")
+  async def search_products(
+      criteria: t.Annotated[types.Schema, types.SchemaMetadata(SearchCriteria)],
+  ) -> t.Annotated[types.SchemaList, types.SchemaMetadata(Product)]:
+      """
+      tags:
+          - Products
+      summary:
+          Search products
+      description:
+          Searches the catalogue with criteria too structured for a query string.
+      responses:
+          200:
+              description:
+                  Matching products.
+      """
+      ...
+  ```
+
+  Prefer <Label color="green">GET</Label> while the criteria still fit comfortably in a query string, since it is
+  simpler and cacheable by any intermediary. Reach for <Label color="purple">QUERY</Label> when they no longer do.
+  Either way, avoid <Label color="blue">POST</Label> for a read: it tells clients and caches that the request changes
+  state, which a search does not.
 
 - **Path parameters and type conversion**:
   Routes can include path parameters, which capture segments of the URL. These are defined using curly braces `{}`. <FlamaName /> supports type conversion for these parameters directly in the path string.
@@ -102,6 +137,50 @@ The main application instance (typically named **app**) provides these decorator
   async def get_product(product_id: int): # product_id will be an integer
       return {"id": product_id, "name": f"Product {product_id}"}
   ```
+
+- **Query parameters**:
+  A handler argument that names no path parameter is read from the query string instead. <FlamaName /> treats the
+  annotation as the contract: the value is converted to that type before the handler runs, and one that cannot be
+  converted is refused with a `400` response describing what was wrong. An argument without a default is required,
+  and one with a default may be omitted.
+
+  ```python
+  import datetime
+  import enum
+  import uuid
+
+  class Status(enum.Enum):
+      available = "available"
+      adopted = "adopted"
+
+  @app.get("/animals/")
+  async def list_animals(
+      status: Status | None = None,
+      since: datetime.date | None = None,
+      owner: uuid.UUID | None = None,
+      limit: int = 20,
+  ):
+      ...
+  ```
+
+  Alongside `str`, `int`, `float`, `bool`, `uuid.UUID`, `decimal.Decimal`, and the `datetime` types, an **enum** is
+  accepted. A member is written as its *value* rather than its name, so `?status=available` selects
+  `Status.available`, and the generated OpenAPI document carries the whole set of accepted values, which is why the
+  interactive documentation offers a choice of them rather than a free-text box.
+
+- **Repeated query parameters**:
+  A query string expresses a collection by repeating a name, so an argument annotated as a list receives every value
+  sent under its own.
+
+  ```python
+  @app.get("/animals/")
+  async def list_animals(id: list[int] | None = None):
+      ...
+  ```
+
+  Here `?id=1&id=2` hands the handler `[1, 2]`, and a single `?id=1` hands it `[1]`, since one occurrence of a name is
+  indistinguishable from a collection holding one value. Repeating the name of any other kind of argument keeps the
+  last value given.
 
 ###### Routes added programmatically
 

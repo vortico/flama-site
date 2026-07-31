@@ -79,7 +79,9 @@ When you do not specify a transport, the model uses its default: `chat` if the b
 Modern models interleave several kinds of output in a single stream: user-visible text, hidden reasoning, and structured
 tool calls. The **decoder** splits that stream into typed events tagged by **channel**. The `output` channel carries the
 user-visible answer; other channels (such as `thought` or `analysis`) carry reasoning the model emits between markers
-like `<think>...</think>`; and `<tool_call>...</tool_call>` blocks are parsed into structured tool events. The decoder
+like `<think>...</think>`; and `<tool_call>...</tool_call>` blocks are parsed into structured tool events. Some
+templates open the reasoning block in the prompt rather than leaving it to the model, which then emits only the closing
+marker, so the decoder reads the prompt to learn where it stands before the first token arrives. The decoder
 auto-detects the right strategy when the model starts, so most models work without any configuration.
 
 ## Base application

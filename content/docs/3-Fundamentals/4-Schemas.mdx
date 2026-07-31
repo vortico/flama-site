@@ -88,7 +88,7 @@ your schema class. <FlamaName /> will use the active schema adapter to:
 1.  Parse the request body (e.g., from JSON).
 2.  Validate the parsed data against your schema class.
 3.  If valid, provide the **validated data as a Python dictionary** to your handler function parameter.
-4.  If invalid, automatically return an **HTTP 422 Unprocessable Entity** error response with details about the
+4.  If invalid, automatically return an **HTTP 400 Bad Request** error response with details about the
     validation failures.
 
 Crucially, the handler receives the validated data as a dictionary, not (by default) a direct instance of your schema
@@ -106,6 +106,178 @@ async def create_item(data: t.Annotated[
      item_instance = MyPydanticItemSchema(**item_data)
      # Now you can use item_instance.some_method() or item_instance.some_field
      ...
+```
+
+### File uploads
+
+Schemas are not restricted to data that can be expressed in JSON. A schema field may also hold a *file*, which lets an
+endpoint receive a `multipart/form-data` body describing an upload together with whatever metadata accompanies it. In
+<FlamaName /> a file within a schema is declared with **`flama.schemas.fields.File`**, which always resolves to the
+file field of whichever schema library is active, and renders in the OpenAPI document as a binary string, so the
+interactive documentation offers a file picker for it.
+
+Pydantic derives everything from the annotation, so there **`File`** is a type to annotate with:
+
+```python
+import typing as t
+
+import pydantic
+
+from flama import Flama, schemas, types
+
+class ModelUpload(pydantic.BaseModel):
+    file: schemas.fields.File
+    thumbnail: schemas.fields.File | None = None
+    name: str
+    version: int
+```
+
+Typesystem and Marshmallow build their schemas from explicit field objects, so there the same name is a field to
+instantiate:
+
+```python
+import marshmallow
+import typesystem
+
+from flama import schemas
+
+# Typesystem
+ModelUpload = typesystem.Schema(
+    title="ModelUpload",
+    fields={
+        "file": schemas.fields.File(),
+        "name": typesystem.fields.String(),
+        "version": typesystem.fields.Integer(),
+    },
+)
+
+# Marshmallow
+class ModelUpload(marshmallow.Schema):
+    file = schemas.fields.File(required=True)
+    name = marshmallow.fields.String(required=True)
+    version = marshmallow.fields.Integer(required=True)
+```
+
+The endpoint declares the schema exactly as it would for a JSON body. Remember that the handler receives a validated
+dictionary, so the file is read from `data["file"]`, and its contents are retrieved with an awaited `read`:
+
+```python
+@app.route("/models/", methods=["POST"])
+async def upload_model(
+    data: t.Annotated[types.Schema, types.SchemaMetadata(ModelUpload)],
+) -> t.Annotated[types.Schema, types.SchemaMetadata(UploadResult)]:
+    """
+    tags:
+        - Models
+    summary:
+        Upload a model
+    description:
+        Stores a serialised model along with the metadata describing it.
+    responses:
+        200:
+            description:
+                Model stored.
+    """
+    contents = await data["file"].read()
+    return {"filename": data["file"].filename, "size": len(contents), "name": data["name"]}
+```
+
+Whichever library declares the schema, the value handed to the endpoint is a **`flama.http.UploadFile`**. Alongside
+`read`, it exposes the `filename` and `content_type` declared in the part headers, a `seek` method to rewind the
+stream, and the `headers` of the part itself.
+
+When an endpoint receives nothing but a file, a schema adds little, so a bare **`UploadFile`** parameter is accepted as
+the whole body. <FlamaName /> documents it as a multipart body with a single binary property named after the parameter:
+
+```python
+from flama.http import UploadFile
+
+@app.route("/avatar/", methods=["POST"])
+async def upload_avatar(avatar: UploadFile) -> t.Annotated[types.Schema, types.SchemaMetadata(UploadResult)]:
+    """
+    tags:
+        - Users
+    summary:
+        Upload an avatar
+    description:
+        Replaces the avatar picture of the current user.
+    responses:
+        200:
+            description:
+                Avatar updated.
+    """
+    return {"filename": avatar.filename, "size": len((await avatar.read()))}
+```
+
+Nothing about the request is specific to <FlamaName />: clients send an ordinary `multipart/form-data` body, where each
+schema field corresponds to a part of the same name.
+
+```console
+$ curl -X POST http://localhost:8000/models/ \
+    -F "file=@model.pkl" \
+    -F "name=my-model" \
+    -F "version=3"
+```
+
+```json
+{ "filename": "model.pkl", "size": 20480, "name": "my-model" }
+```
+
+#### Working with multipart bodies
+
+Multipart is a flatter format than JSON, and there are three consequences worth knowing before designing a schema
+around it.
+
+The first is that **every non-file part travels as text**. This is not something you need to compensate for, because
+each schema library coerces those strings into the declared types, so a `version` field declared as an integer arrives
+as an `int` and a boolean field sent as `true` arrives as a `bool`.
+
+The second is that **a repeated part name is how a collection is expressed**. Sending several parts that share a name
+produces a list, which is what a field such as `list[schemas.fields.File]` expects:
+
+```console
+$ curl -X POST http://localhost:8000/gallery/ \
+    -F "images=@first.png" \
+    -F "images=@second.png"
+```
+
+> [!WARNING]
+> A list field needs at least two parts to be recognised as a list. When a single part is sent, the form carries no
+> information distinguishing it from an ordinary scalar, and validation of a list-typed field fails. Where a
+> one-element upload has to be accepted, declare a field that tolerates both shapes, such as
+> `schemas.fields.File | list[schemas.fields.File]` with Pydantic, and normalise it inside the handler.
+
+The third is that **nesting cannot be expressed at all**. A part name maps to a top-level field, so a schema containing
+another schema has no valid multipart encoding, and sending the nested object as a JSON string fails validation. Where
+an upload has to be accompanied by structured metadata, either flatten the schema into individual fields, or declare
+the field as a string and parse it inside a validator.
+
+#### Large uploads
+
+Holding an entire upload in memory does not scale, so <FlamaName /> streams every part and keeps it in memory only
+while it stays below a threshold, one mebibyte by default. Past that point the part is written to a temporary file, and
+`UploadFile.path` reports where it lives. Reading is identical either way, so an endpoint never needs to know which of
+the two happened. The temporary file is removed once the response has been sent.
+
+Uploads are unbounded unless a limit is configured. To bound them, register a **`RequestDataComponent`** with the
+limits appropriate to the application, and any request exceeding them is rejected with an **HTTP 413 Content Too
+Large** response before the body is fully read:
+
+```python
+from flama import Flama
+from flama.schemas.components import RequestDataComponent
+
+app = Flama(
+    openapi={"info": {"title": "Model Registry", "version": "1.0.0"}},
+    components=[
+        RequestDataComponent(
+            max_file_size=50 * 1024 * 1024,  # Largest single upload accepted
+            max_body_size=200 * 1024 * 1024,  # Largest request body accepted
+            spool_threshold=1024 * 1024,  # Point at which a part moves to disk
+            max_files=10,  # Largest number of file parts accepted
+        )
+    ],
+)
 ```
 
 ### Response model definition

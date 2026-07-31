@@ -1,0 +1,94 @@
+---
+title: Releasing Flama 2.1
+description: The main highlights of Flama 2.1 version
+authors:
+  - name: 'José Antonio Perdiguero López'
+    url: 'https://vortico.tech/team/japl/'
+  - name: 'Miguel A. Duran Olivencia'
+    url: 'https://vortico.tech/team/mado/'
+wip: false
+---
+
+# Releasing Flama 2.1
+
+We're happy to announce **[Flama 2.1](https://github.com/vortico/flama/releases/tag/v2.1.0/)**! 🎉 Where 2.0 rebuilt
+the foundations, 2.1 builds on them: richer request shapes, collections you can actually query, and a generative AI
+stack that keeps pace with the model families released since.
+
+Here are the highlights:
+
+- **File uploads in request body schemas** (2.1.0): An endpoint can now declare an upload the same way it declares any
+  other field, and <FlamaName /> handles the `multipart/form-data` body around it. Uploads are streamed rather than
+  buffered whole, with a configurable ceiling on the largest file accepted, so a route taking a model artefact or an
+  avatar no longer needs hand-written parsing.
+
+- **The HTTP QUERY method** (2.1.0): Search criteria too structured for a query string have had an awkward choice
+  between an unwieldy <Label color="green">GET</Label> and a <Label color="blue">POST</Label> that lies about changing
+  state. `@app.query` gives you the third option the specification defines: safe, idempotent, and carrying a body.
+
+- **Collection filtering by operator** (2.1.0): A `CRUDResource` listing is no longer all-or-nothing. Declaring a
+  `filters` attribute chooses which columns are filterable and which operators each one answers, so a client can ask
+  for `?age=gte:1&age=lte:10` or `?name=contains:bob` instead of paging through everything.
+
+- **Enum support for parameters and filters** (2.1.0): An enum is now a first-class parameter type alongside `str`,
+  `int`, `uuid.UUID`, and the `datetime` types, in route parameters and in resource filters alike. Members are written
+  as their values, and the accepted set reaches the OpenAPI document.
+
+- **OpenAPI 3.2.0** (2.1.0): The generated document now declares **OpenAPI 3.2.0**, which is what lets the
+  <Label color="purple">QUERY</Label> method and the rest of that version's vocabulary appear in your schema.
+
+## Generative AI: tool calling and reasoning
+
+The model families released since 2.0 changed how they express tool calls and reasoning, and 2.1 catches up with them.
+Together these fixes mean tool calling and reasoning work on the current Qwen generation, where previously they did
+not:
+
+- **Tool calls in tag notation** (2.1.0): Models emitting `<function=…>` with `<parameter=…>` children — Qwen3-Coder,
+  Qwen3.5, and Qwen3.6 among them — are parsed into structured tool events. Previously the format went unrecognised
+  and no call was ever dispatched.
+
+- **Tool call arguments reach the template intact** (2.1.0): Arguments are normalised to an object once, so replaying
+  an assistant tool call renders correctly whether the template iterates the field or re-encodes it, instead of being
+  silently double-encoded or rejected outright.
+
+- **Reasoning stays out of the answer** (2.1.0): Some templates open the reasoning block in the prompt rather than
+  leaving it to the model. The decoder now reads the prompt to learn where it starts, so a model's private reasoning
+  reaches `reasoning_content` instead of being delivered as its answer.
+
+- **Reasoning capability detected correctly** (2.1.0): The packaging probe now renders the generation prompt, which is
+  where templates place the thinking toggle, so models that support reasoning are recorded as supporting it.
+
+- **Rehearsals are not calls** (2.1.0): A reasoning model writing the tool syntax out while working through the format
+  no longer has those rehearsals dispatched as real invocations.
+
+## Bug fixes and stability improvements
+
+- **Repeated query parameters keep every value** (2.1.0): A query string expresses a collection by repeating a name,
+  and a parameter annotated as a list now receives all of them rather than only the last.
+
+- **Enum definitions reach the OpenAPI document** (2.1.0): Enum types are no longer dropped from the generated
+  specification, so the accepted values are documented rather than implied.
+
+- **Annotation introspection unified** (2.1.0): The several places that independently unwrapped a parameter annotation
+  now agree, which removes a family of inconsistencies around optional and container types.
+
+Happy coding! 🚀
+
+## References
+
+- [Flama documentation](https://flama.dev/docs/)
+- [Flama GitHub repository](https://github.com/vortico/flama)
+- [Flama PyPI package](https://pypi.org/project/flama/)
+
+## Support our work
+
+If you find Flama useful for building robust Machine Learning APIs, we'd be thrilled if you showed your support by
+giving us a ⭐ on [GitHub](https://github.com/vortico/flama). Your stars are the best fuel for our development efforts!
+
+You can also stay updated with the latest news and development threads by following us on
+[𝕏](https://x.com/VorticoTech).
+
+## About the authors
+
+- [Vortico](https://vortico.tech/): We specialize in software development, helping businesses enhance and expand their
+  AI and technology capabilities.

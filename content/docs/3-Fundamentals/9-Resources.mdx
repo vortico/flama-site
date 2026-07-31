@@ -189,6 +189,90 @@ Just by writing these few lines, <FlamaName /> will automatically generate a com
 * <Label color="orange">PATCH</Label> `/{id}/`: Partially update a specific animal.
 * <Label color="red">DELETE</Label> `/{id}/`: Delete a specific animal.
 
+### Filtering collections
+
+The <Label color="green">GET</Label> `/` route lists the collection whole, which is rarely what a client wants once
+the table has grown. Every column whose values a query string can carry becomes a filter on that route, so a request
+narrows the listing by naming the column and the value it should hold:
+
+```console
+GET /animal/?name=Bobby
+```
+
+The primary key is left out, since the <Label color="green">GET</Label> `/{id}/` route already answers that question,
+and so is any column holding something a query string cannot express, such as a JSON document or a binary blob.
+
+An enum column is expressible and so becomes a filter like any other, and a member is written as its *value* rather
+than its name, exactly as it is written for a [route parameter](/docs/fundamentals/routes/):
+
+```console
+GET /animal/?status=available
+GET /animal/?status=in:available&status=in:adopted
+```
+
+#### Declaring the filters
+
+Matching a value exactly is a small part of what a listing is asked for. A resource declaring a **`filters`**
+attribute chooses both which of its columns are filterable and which operators each of them answers:
+
+```python
+class AnimalResource(CRUDResource):
+    name = "animal"
+    verbose_name = "Animal"
+
+    model = animal_table
+    schema = Animal
+
+    filters = {"name": ("eq", "contains"), "age": ("eq", "gte", "lte", "in", "isnull")}
+```
+
+Declaring a sequence of names rather than a mapping, as in `filters = ("name", "age")`, keeps equality as the only
+operator, which narrows the surface without granting anything further. Naming a column the model does not hold, or an
+operator that cannot compare what a column does hold, raises where the resource is declared rather than waiting until
+it is called.
+
+#### Writing a filter
+
+A filter carries its operator ahead of the value, separated by a colon, and a value written on its own asks for
+equality:
+
+```console
+GET /animal/?age=gte:1&age=lte:10    # aged between one and ten
+GET /animal/?age=in:1&age=in:10      # aged either one or ten
+GET /animal/?name=contains:bob       # named something holding "bob"
+GET /animal/?age=isnull              # age not recorded
+GET /animal/?age=not:isnull          # age recorded
+GET /animal/?name=Bobby              # named exactly "Bobby"
+```
+
+Naming a column more than once narrows the listing further, which is how a range is asked for, so the conditions
+combine with **and**. The `in` operator is the exception, and the way alternatives are offered instead: every value
+written for it belongs to one condition rather than to a condition of its own.
+
+Prefixing **`not:`** negates any operator, which is where `not:isnull` comes from, and doubles as the way to write a
+value that would otherwise read as one: `?name=eq:in:stock` filters for the literal text `in:stock`.
+
+These are the operators a column may be granted:
+
+| Operator | Asks for | Applies to |
+| --- | --- | --- |
+| `eq` | the value, exactly | any column |
+| `gt`, `gte`, `lt`, `lte` | values above or below the one given | numbers, dates, and text |
+| `in` | any one of the values given | any column |
+| `isnull` | rows holding nothing at all | any column |
+| `contains`, `startswith`, `endswith` | text holding, opening with, or closing with the value | text |
+| `icontains`, `istartswith`, `iendswith` | the same, disregarding case | text |
+| `like`, `ilike` | a pattern, reading `%` and `_` as wildcards | text |
+
+The pattern operators and their case-insensitive counterparts match the value literally, so `?name=contains:50%`
+finds the names holding a percent sign rather than every name there is. Reach for `like` when a pattern is what is
+meant.
+
+> [!WARNING]
+> A filter reaches the database as a `WHERE` clause on the column it names, so a column worth filtering by is usually
+> a column worth indexing. Granting `contains` deserves particular thought, because a match falling anywhere within a
+> value cannot be served by an ordinary index.
+
 ### Adding custom methods
 
 The `CRUDResource` is great for standard operations, but real-world applications often need custom logic 
