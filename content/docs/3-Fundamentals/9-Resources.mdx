@@ -161,7 +161,7 @@ Once we have our **Model** and **Schema** defined, creating the API is incredibl
 inheriting from `CRUDResource` and link it to them:
 
 ```python
-from flama.resources import CRUDResource
+from flama.resources.crud import CRUDResource
 
 class AnimalResource(CRUDResource):
     name = "animal"
@@ -286,9 +286,8 @@ class, just like we did with the Base Resource.
 
 ```python
 @ResourceRoute.method("/{id}/is_puppy/", methods=["GET"], name="is-puppy")
-async def is_puppy(self, id: int, ...):
+async def is_puppy(self, id: int) -> t.Annotated[schemas.Schema, schemas.SchemaMetadata(IsPuppy)]:
     ...
-
 ```
 
 ### Managing DB connection
