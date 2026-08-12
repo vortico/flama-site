@@ -162,17 +162,17 @@ app = Flama()
 app.add_route("/items/{item_id}", ItemEndpoint)
 ```
 
-However, we can also decorat the `HTTPEndpoint` with `@app.route("/items/")` if we don't want to especially add the
+However, we can also decorate the `HTTPEndpoint` with `@app.route("/items/")` if we don't want to especially add the
 route by ourselves:
 
 ```python
-# ... Same code as before
+# ... Same imports as before
 
 app = Flama()
 
-@app.route("/items/")
+@app.route("/items/{item_id}")
 class ItemEndpoint(HTTPEndpoint):
-    # ... Same code as before
+    ...  # Same methods as before
 ```
 
 Now, a <Label color="green">GET</Label> request to `/items/item_001` will be handled by the `get` method of
@@ -189,20 +189,26 @@ A simple WebSocket handler is an `async` function that accepts a `websocket` obj
 self-contained real-time logic like a basic echo server.
 
 ```python
-from flama import Flama, websockets
+from flama import Flama
+from flama.exceptions import WebSocketDisconnect
+from flama.http import WebSocket
 
 app = Flama()
 
 @app.websocket_route("/ws/echo")
-async def websocket_echo(websocket: websockets.WebSocket):
+async def websocket_echo(websocket: WebSocket):
     await websocket.accept()
     try:
         while True:
-            data = await websocket.receive_text()
-            await websocket.send_text(f"Echo: {data}")
-    except websockets.WebSocketDisconnect:
+            data = await websocket.receive(data="text")
+            await websocket.send(data=f"Echo: {data}")
+    except WebSocketDisconnect:
         pass
 ```
+
+Both `receive` and `send` take keyword-only arguments. `receive(data=...)` accepts `"text"`, `"bytes"` or `"json"` and
+decodes the incoming message accordingly, while `send` is given exactly one of `data=` (text or bytes), `json=` (a
+JSON-serialisable object) or `message=` (a raw ASGI message).
 
 ### Class-based `WebSocketEndpoint`
 
@@ -216,36 +222,40 @@ You create a class that inherits from `flama.endpoints.WebSocketEndpoint` and im
 - `on_connect(self, websocket)`: Called when a client initiates a connection. Use this to `accept()` the connection and
   perform any setup.
 - `on_receive(self, websocket, data)`: Called whenever a message is received from the client.
-- `on_disconnect(self, websocket, close_code)`: Called when the client disconnects. Use this for cleanup tasks.
+- `on_disconnect(self, websocket, websocket_code)`: Called when the client disconnects. Use this for cleanup tasks.
 
 ```python
-from flama import websockets
-from flama.endpoints import WebSocketEndpoint
 import typing as t
+
+from flama.endpoints import WebSocketEndpoint
+from flama.http import WebSocket
 
 class ChatroomEndpoint(WebSocketEndpoint):
     encoding: str = "text"  # Can be "json", "bytes", or "text"
 
     # A simple way to manage connected clients for this example
-    _connected_clients: list[websockets.WebSocket] = []
+    _connected_clients: list[WebSocket] = []
 
-    async def on_connect(self, websocket: websockets.WebSocket):
+    async def on_connect(self, websocket: WebSocket):
         await websocket.accept()
         self._connected_clients.append(websocket)
         await self.broadcast(f"A new user joined. Users online: {len(self._connected_clients)}")
 
-    async def on_disconnect(self, websocket: websockets.WebSocket, close_code: int):
+    async def on_disconnect(self, websocket: WebSocket, websocket_code: int):
         self._connected_clients.remove(websocket)
         await self.broadcast(f"A user left. Users online: {len(self._connected_clients)}")
 
-    async def on_receive(self, websocket: websockets.WebSocket, data: t.Any):
+    async def on_receive(self, websocket: WebSocket, data: t.Any):
         # We broadcast the received message to all connected clients
         await self.broadcast(f"User says: {data}")
 
     async def broadcast(self, message: str):
         for client in self._connected_clients:
-            await client.send_text(message)
+            await client.send(data=message)
 ```
+
+The disconnect hook's second argument is named `websocket_code`, and the name matters: the endpoint resolves these
+arguments by name, so calling it `close_code` leaves it unfilled.
 
 #### Utilising a `WebSocketEndpoint`
 
