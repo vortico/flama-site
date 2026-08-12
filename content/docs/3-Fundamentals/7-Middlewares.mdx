@@ -84,18 +84,21 @@ Once you've defined your middleware class, you need to add it to your <FlamaName
 ### Registering Middleware
 
 Middleware is registered with a <FlamaName /> application instance by providing a list to its **middleware** parameter.
-Each item in this list should be an instance of `flama.middleware.Middleware`.
-The **Middleware** class is a helper that takes your custom middleware class and any arguments it needs for its `__init__` method.
+Each item in this list is an *instance* of a `flama.middleware.Middleware` subclass, already configured with whatever
+arguments it needs.
+
+Note that your `__init__` does not take the downstream `app`. The application injects it when it assembles the
+middleware stack, which is why a middleware can be constructed on its own and why its constructor is free to take only
+the options that belong to it.
 
 ```python
-from flama import Flama
+from flama import Flama, types
 from flama.middleware import Middleware
 
-# Assuming MyCustomMiddleware is defined as above
-class MyCustomMiddleware:
-    def __init__(self, app: types.App, custom_argument: str = "default_value"):
-        self.app = app
+class MyCustomMiddleware(Middleware):
+    def __init__(self, *, custom_argument: str = "default_value"):
         self.custom_argument = custom_argument
+
     async def __call__(self, scope: types.Scope, receive: types.Receive, send: types.Send):
         # ... implementation ...
         await self.app(scope, receive, send)
@@ -103,8 +106,8 @@ class MyCustomMiddleware:
 
 app = Flama(
     middleware=[
-        Middleware(MyCustomMiddleware, custom_argument="my_special_value")
-        # You can add more Middleware instances here
+        MyCustomMiddleware(custom_argument="my_special_value")
+        # You can add more middleware instances here
     ]
 )
 ```
@@ -119,17 +122,13 @@ Let's create a simple middleware that measures the time taken to process a reque
 ```python
 import asyncio
 import time
-import typing as t
 
-import flama
 from flama import Flama, http, types
 from flama.middleware import Middleware
 
-# Define your custom middleware class
-class TimingMiddleware:
-    def __init__(self, app: types.App):
-        self.app: Flama = t.cast("Flama", app)
-
+# Define your custom middleware class. The downstream 'app' is injected by the
+# middleware stack, so it is available as self.app without being constructed here.
+class TimingMiddleware(Middleware):
     async def __call__(
         self, scope: types.Scope, receive: types.Receive, send: types.Send
     ):
@@ -170,7 +169,7 @@ class TimingMiddleware:
 # Create a Flama application and register your middleware
 app = Flama(
     middleware=[
-        Middleware(TimingMiddleware)  # No arguments needed for TimingMiddleware's __init__ beyond 'app'
+        TimingMiddleware()  # Registered as an instance, not as a class
     ]
 )
 

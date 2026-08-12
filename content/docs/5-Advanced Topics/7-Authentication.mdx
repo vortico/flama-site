@@ -88,7 +88,6 @@ First, we create our development environment by instantiating the `Flama` object
 ```python
 import uuid
 from flama import Flama
-from flama.middleware import Middleware
 from flama.authentication import AccessTokenComponent, AuthenticationMiddleware
 
 # The secret key used to sign and verify the tokens. Keep this safe!
@@ -96,7 +95,7 @@ SECRET_KEY = uuid.UUID(int=0).bytes
 
 app = Flama(
     components=[AccessTokenComponent(secret=SECRET_KEY)],
-    middleware=[Middleware(AuthenticationMiddleware)],
+    middleware=[AuthenticationMiddleware()],
 )
 
 ```
@@ -175,7 +174,6 @@ import typing as t
 
 from flama import Flama
 from flama.client import Client
-from flama.middleware import Middleware
 from flama.authentication import (
     AccessTokenComponent,
     AuthenticationMiddleware,
@@ -187,7 +185,7 @@ SECRET_KEY = uuid.UUID(int=0).bytes
 
 app = Flama(
     components=[AccessTokenComponent(secret=SECRET_KEY)],
-    middleware=[Middleware(AuthenticationMiddleware)],
+    middleware=[AuthenticationMiddleware()],
 )
 
 # Public endpoints
