@@ -29,11 +29,14 @@ Creating a custom module in <FlamaName /> generally involves these steps:
     from flama.modules import Module
 
     class MyCustomModule(Module):
-        pass
+        name = "custom"
     ```
 
-2.  **Define a `name`** (optional but recommended):
-    You can assign a string to the `name` class attribute. If set, this name is used to make the module instance directly accessible as an attribute on the <FlamaName /> application instance (e.g., if `name = "custom"`, you can access it via `app.custom`). It also serves as a key in the `app.modules` dictionary.
+2.  **Define a `name`** (required):
+    Every module must assign a string to the `name` class attribute; instantiating a module without one raises an
+    `AssertionError`. The name is what makes the module instance directly accessible as an attribute on the
+    <FlamaName /> application instance (e.g., with `name = "custom"`, you can access it via `app.custom`), and it also
+    serves as its key in the `app.modules` dictionary.
 
     ```python
     class MyCustomModule(Module):
