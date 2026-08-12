@@ -64,11 +64,13 @@ Instead of returning a raw list `[...]`, it returns a wrapper object with two ke
 The `data` key contains the actual list of items for the current page.
 
 The `meta` key contains information about the total dataset and the current position.
-For page number pagination, this includes fields like `count` (total items), `page`, `page_size`, `has_next`, and `has_previous`.
+For page number pagination, it includes `page`, `page_size`, and `count`.
 For limit-offset pagination, it includes `limit`, `offset`, and `count`.
 
-This structure is crucial because it allows the frontend application to render navigation controls
-(like "Next" buttons) without needing to query the API again to count the total records.
+`count` is the total number of items, and it is reported only when the request asks for it with `count=true`.
+It defaults to `false` and reports `null` otherwise, because counting the whole collection is the expensive part of
+paginating a large table, and most requests do not need it. Ask for it when the frontend has to render navigation
+controls (like a "Next" button or a page count), and leave it off when it only needs the current page.
 
 ## Example
 
@@ -83,11 +85,11 @@ They contain no logic for slicing, counting, or checking query parameters.
 
 ```python
 import asyncio
-import typing as t
+
+import pydantic
 
 from flama import Flama
 from flama.client import Client
-import pydantic
 
 
 class Product(pydantic.BaseModel):
@@ -97,7 +99,7 @@ class Product(pydantic.BaseModel):
 
 
 # We create 100 products to simulate a database.
-INVENTORY: t.List[Product] = [
+INVENTORY: list[Product] = [
     Product(id=i, name=f"Widget {i}", price=10.0 + i) for i in range(1, 101)
 ]
 
@@ -115,7 +117,7 @@ app = Flama(
 # Best for user interfaces (Next Page, Previous Page).
 # Usage: /catalogue/?page=2&page_size=10
 @app.route("/catalogue/", methods=["GET"], pagination="page_number")
-def get_catalogue(**kwargs) -> t.List[Product]:
+def get_catalogue(**kwargs) -> list[Product]:
     """
     tags:
         - Products
@@ -133,7 +135,7 @@ def get_catalogue(**kwargs) -> t.List[Product]:
 # Best for infinite scrolling or programmatic syncing.
 # Usage: /feed/?limit=5&offset=20
 @app.route("/feed/", methods=["GET"], pagination="limit_offset")
-def get_feed(**kwargs) -> t.List[Product]:
+def get_feed(**kwargs) -> list[Product]:
     """
     tags:
         - Products
@@ -154,8 +156,11 @@ async def main():
         # We expect items 6-10 (requesting page 2 with size 5)
         print("\nPage Number Strategy (Page 2)")
 
-        # We use the 'params' argument to pass query parameters
-        response = await client.get("/catalogue/", params={"page": 2, "page_size": 5})
+        # We use the 'params' argument to pass query parameters.
+        # 'count' is opt-in, so we ask for it here to see the total.
+        response = await client.get(
+            "/catalogue/", params={"page": 2, "page_size": 5, "count": True}
+        )
         data = response.json()
 
         print(f" Request URL: {response.url}")
@@ -186,21 +191,22 @@ Running this script reveals exactly how <FlamaName /> transforms the output.
 
 For the **Page Number** request, we asked for Page 2 with a size of 5.
 The framework correctly identified that in a 0-indexed list, this corresponds to items 5 through 9 (IDs 6 through 10).
-The `meta` object confirms there are 100 items in total and calculates that there are indeed previous and next pages available.
+Because we passed `count=true`, the `meta` object reports the 100 items in the full collection.
 
 For the **Limit Offset** request, we skipped 90 items and took 5.
 The result starts at "Widget 91". This precision makes it ideal for fetching specific "windows" of data.
+Here we did not ask for the count, so `meta` reports it as `None`, which is the default.
 
 ```console
 Page Number Strategy (Page 2)
- Request URL: http://localapp/catalogue/?page=2&page_size=5
- Meta Info:   {'count': 100, 'has_next': True, 'has_previous': True, 'page': 2, 'page_size': 5}
+ Request URL: http://localapp/catalogue/?page=2&page_size=5&count=true
+ Meta Info:   {'page': 2, 'page_size': 5, 'count': 100}
  Data Count:  5
  First Item:  Widget 6
 
 Limit-Offset Strategy (Skip 90, Take 5)
  Request URL: http://localapp/feed/?limit=5&offset=90
- Meta Info:   {'limit': 5, 'offset': 90, 'count': 100}
+ Meta Info:   {'limit': 5, 'offset': 90, 'count': None}
  Data Count:  5
  First Item:  Widget 91
 
