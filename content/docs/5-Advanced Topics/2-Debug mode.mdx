@@ -27,9 +27,9 @@ Instead of receiving a generic `500 Internal Server Error` JSON response when yo
 > Never enable Debug Mode in Production
 
 The debug interfaces expose extremely sensitive information about your application, including:
-* **Source Code**: Snippets of your code are displayed in the traceback.
-* **Environment Variables**: Configuration keys and secrets may be visible.
-* **Local Variables**: The exact state of memory (including potentially sensitive user data) is accessible.
+* **Source Code**: The source of every file in the traceback is displayed, not merely the failing line.
+* **Filesystem Layout**: Paths of your application and of its installed dependencies are shown.
+* **Request Details**: Headers and cookies are rendered, so any credentials the request carried are visible.
 
 Debug mode is a tool for *developers*, not for *users*. Ensure that `debug=True` is strictly disabled in any live, public-facing deployment.
 
@@ -86,8 +86,11 @@ When an unhandled exception occurs in your code, for example a `ZeroDivisionErro
 This page visualises the call stack from the point of the error all the way back up to the application entry point. Key features include:
 
 * **Code Inspection**: You can see the exact line of code that triggered the error, along with surrounding lines for context.
-* **Variable Inspection**: You can expand any frame in the stack trace to view the local variables that were present at that moment. This eliminates the need to add `print()` statements just to see what a variable held when the crash happened.
+* **Frame Navigation**: Every frame from the entry point down to the failure is listed, each with its file, function and line number, and each expandable to show that file's source positioned at the failing line. Frames coming from an installed dependency are marked with the package they belong to, which makes it quick to tell your own code apart from the library's.
 * **Request Details**: It displays full details about the incoming request, including headers, query parameters, and client information.
+
+Note that the traceback shows *code*, not *state*: the values held by local variables at the moment of the crash are
+not captured. To inspect those you still need a debugger or a `print()`.
 
 ### Handling Missing Resources - 404 Not Found
 
@@ -178,7 +181,8 @@ However, because `debug=True`, you will see the **Interactive Traceback**.
 
 - Look at the top of the page: It clearly states `ZeroDivisionError: division by zero`.
 - Scroll through the stack trace. Find the frame corresponding to the `divide` function in `debugging_example.py`.
-- Click on that frame to expand it. You will see the local variables `a=10` and `b=0`, confirming exactly why the operation failed.
+- Click on that frame to expand it. You will see the source of that file with the `return a / b` line highlighted, and
+  the path parameters `a=10` and `b=0` listed in the request details, confirming exactly why the operation failed.
 
 
 <img src="/images/docs/docs-500-zero-division.png" alt="Internal Server Error" width="1600" />
