@@ -296,12 +296,10 @@ In particular, <FlamaName /> will:
 The response schema is solely determined by the return type annotation.
 
 ```python
- async def item_detals(id: 'str') -> t.Annotated[
-  schemas.Schema,
-  schemas.SchemaMetadata(MyPydanticItemSchema)
-]
-:
-     ...
+async def item_details(id: str) -> t.Annotated[
+    schemas.Schema, schemas.SchemaMetadata(MyPydanticItemSchema)
+]:
+    ...
 ```
 
 ### The role of `Schema` and `SchemaMetadata`
