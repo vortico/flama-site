@@ -1,0 +1,128 @@
+---
+title: Releasing Flama 2.2
+description: The main highlights of Flama 2.2 version
+authors:
+  - name: 'José Antonio Perdiguero López'
+    url: 'https://vortico.tech/team/japl/'
+  - name: 'Miguel A. Duran Olivencia'
+    url: 'https://vortico.tech/team/mado/'
+wip: false
+---
+
+# Releasing Flama 2.2
+
+We're happy to announce **[Flama 2.2](https://github.com/vortico/flama/releases/tag/v2.2.0/)**! 🎉 Where 2.1 was about
+richer requests and keeping pace with the generative models, 2.2 is about trust: who signed a token, which key they
+signed it with, and how a service verifies one it did not issue itself.
+
+Here are the highlights:
+
+- **EdDSA signing** (2.2.0): Tokens can be signed with an Ed25519 keypair instead of a shared secret. The private half
+  signs and never leaves the issuer; the public half is all a verifier needs. Publishing it lets any party establish
+  who issued a token without giving them the means to issue one.
+
+- **Key identity and per-key verification** (2.2.0): A token can name the key that signed it, and a token component can
+  be given a means of looking a key up by that identity rather than a single fixed secret. One application can now
+  accept tokens from many keys, which is what per-tenant signing and key rotation need.
+
+- **Chained upgrade migrations** (2.2.0): `flama upgrade` applies every migration standing between the version your
+  code matches and the version you are heading for, in order, within one run. A codebase two releases behind arrives at
+  the newest layout rather than at an intermediate one.
+
+- **Signing algorithms named as JWA names them** (2.2.0): `HMACAlgorithm` takes the registry name of the algorithm
+  rather than a hash constructor, so an algorithm the specification does not define can no longer be assembled by
+  accident. This one changes an existing signature, and ships with a codemod that rewrites it for you.
+
+## Trust that crosses a boundary
+
+A shared secret is a fine arrangement while one service both issues and verifies its own tokens. It stops working the
+moment somebody else has to verify: anything able to check a token is equally able to mint one, so handing a partner
+service your verification key hands it your signing key too.
+
+`EdDSA` separates the two halves. <FlamaName /> generates a keypair through the algorithm itself:
+
+```python
+from flama.crypto.algorithms import EdDSAAlgorithm
+
+private_key, public_key = EdDSAAlgorithm.generate()
+```
+
+Signing then names the algorithm and the key in the header, and a verifier that holds the public key needs nothing
+else. Where an issuer signs with more than one key — a key per tenant, or an old and a new key during a rotation — the
+`kid` header says which one applies, and a component resolves it:
+
+```python
+from flama import Flama
+from flama.authentication import AccessTokenComponent, exceptions
+
+KEYS = {"issuer-2026-09": public_key}
+
+def resolve_key(kid):
+    try:
+        return KEYS[kid]
+    except KeyError:
+        raise exceptions.Unauthorized()
+
+app = Flama(components=[AccessTokenComponent(resolver=resolve_key)])
+```
+
+A resolver may be asynchronous, because looking a key up can mean reading a database or calling another service. The
+full walkthrough lives in the [Authentication](/docs/advanced-topics/authentication/) guide.
+
+## Moving your code along with it
+
+Releases accumulate, and a project should not have to be upgraded one hop at a time to keep up. `flama upgrade` now
+applies the whole chain between where your code stands and where it is going, so a 1.x codebase reaches 2.2 in a single
+pass. Naming a source version narrows the chain when you already know how far along you are:
+
+```console
+flama upgrade --from 2.0 --to 2.2 src/
+```
+
+The same work lets a minor release carry a codemod of its own, which is how the `HMACAlgorithm` change arrives with a
+migration rather than a note in a changelog:
+
+```console
+flama upgrade --write src/
+```
+
+```python
+# before
+algorithm = HMACAlgorithm(hashlib.sha256)
+
+# after
+algorithm = HMACAlgorithm("HS256")
+```
+
+## Bug fixes and stability improvements
+
+- **Bounded payload capture in the telemetry middleware** (2.2.0): The middleware kept every byte of a request and a
+  response in memory until the exchange finished, which a streaming generation or a large upload could grow without
+  limit. Payloads are now bounded by a size given when the middleware is built, and a payload cut short is marked as
+  such so a consumer can tell a short exchange from a clipped one. The recorded body is consequently an object rather
+  than raw bytes: a hook reading `data.request.body` now reads `data.request.body.content`.
+
+- **WebSocket telemetry records the right direction** (2.2.0): Frames received were recorded against the response and
+  frames sent against the request, and the inbound path read a field a WebSocket frame never carries, so nothing
+  arrived at all. Both directions are now recorded where they belong.
+
+Happy coding! 🚀
+
+## References
+
+- [Flama documentation](https://flama.dev/docs/)
+- [Flama GitHub repository](https://github.com/vortico/flama)
+- [Flama PyPI package](https://pypi.org/project/flama/)
+
+## Support our work
+
+If you find Flama useful for building robust Machine Learning APIs, we'd be thrilled if you showed your support by
+giving us a ⭐ on [GitHub](https://github.com/vortico/flama). Your stars are the best fuel for our development efforts!
+
+You can also stay updated with the latest news and development threads by following us on
+[𝕏](https://x.com/VorticoTech).
+
+## About the authors
+
+- [Vortico](https://vortico.tech/): We specialize in software development, helping businesses enhance and expand their
+  AI and technology capabilities.

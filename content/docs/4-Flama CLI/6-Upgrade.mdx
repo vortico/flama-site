@@ -35,7 +35,8 @@ Usage: flama upgrade [OPTIONS] PATHS...
 ╭─ Options ────────────────────────────────────────────────────────────────────╮
 │   --to TEXT           Target Flama version (default: latest known            │
 │                       migration).                                            │
-│   --from TEXT         Source Flama version (default: detect installed).      │
+│   --from TEXT         Source Flama version; only migrations newer than it    │
+│                       are applied (default: all of them).                    │
 │   --diff / --write    Preview a diff (default) or rewrite files in place.    │
 │   --select TEXT       Comma-separated operation ids to run exclusively.      │
 │   --skip TEXT         Comma-separated operation ids to skip.                 │
@@ -51,10 +52,14 @@ Usage: flama upgrade [OPTIONS] PATHS...
 
 ### Source and target versions
 
-By default the command detects the version installed in your environment as the source, and uses the latest known
-migration as the target. You can pin either end explicitly:
+Every migration between the two ends applies, in order, so a codebase several releases behind is brought forward in a
+single run. By default the target is the latest known migration and no source is assumed, which applies every
+migration up to it. You can pin either end explicitly:
 
-- **from**: the source version to migrate away from. Defaults to the installed <FlamaName /> version.
+- **from**: the version your code already matches. Only migrations newer than it apply, which is how you narrow the
+  chain when you know your codebase is already partway. Omitted, nothing is assumed and the whole chain runs. The
+  installed <FlamaName /> version is deliberately not consulted: you normally upgrade the package before running the
+  command, which makes it the target rather than the source.
 - **to**: the target version to migrate to. Defaults to the latest known migration.
 
 ### Preview and apply

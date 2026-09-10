@@ -38,8 +38,9 @@ A JWT is represented as a sequence of URL-safe parts separated by dots (`.`), wi
 
 #### The Header
 The header contains metadata about the token and the cryptographic operations applied to it. The most commonly used fields are:
-* **`alg`**: The algorithm used to sign the token (e.g., `HS256`, `HS384`, `HS512`).
+* **`alg`**: The algorithm used to sign the token (e.g., `HS256`, `HS384`, `HS512`, and `EdDSA`).
 * **`typ`**: The media type of the token. It is recommended to have the value `JWT` to indicate the object type.
+* **`kid`**: The identity of the key that signed the token. An issuer that signs with more than one key sets it so a verifier knows which key to check against. It is the one field a verifier may read before it has verified anything, which is precisely why it belongs in the header rather than among the claims.
 
 #### The Payload
 The payload contains the *claims* (the actual information) that the token is carrying. According to the standard, claims are divided into three categories:
@@ -48,7 +49,9 @@ The payload contains the *claims* (the actual information) that the token is car
 * **Private claims**: Custom claims intended to be shared between specific parties involved in the communication (e.g., internal user IDs or application-specific permissions).
 
 #### The Signature
-The signature ensures the integrity of the token and verifies that the sender is who it claims to be. It is generated using the encoded header, the encoded payload, the algorithm specified in the header, and a secret cryptographic key known only to the server.
+The signature ensures the integrity of the token and verifies that the sender is who it claims to be. It is generated using the encoded header, the encoded payload, the algorithm specified in the header, and a cryptographic key held by the issuer.
+
+The `alg` value determines what kind of key that is. The **HMAC** algorithms (`HS256`, `HS384`, and `HS512`) compute a *hash-based message authentication code* from a single secret key, so whoever can verify a token can also issue one, and that key must never leave the services that mint tokens. **`EdDSA`** instead produces a *digital signature* with the private half of an Ed25519 keypair, and verification needs only the public half. Publishing that public key lets any party establish who issued a token without giving them the means to issue one, which makes `EdDSA` the better fit whenever tokens cross a trust boundary.
 
 ## Authentication in Flama
 
@@ -114,8 +117,8 @@ async def login():
     # In a real app, verify user credentials (e.g., password hash) here.
     # Create the token structure
     jwt_token = jwt.JWT(
-        header={"alg": "HS256", "typ": "JWT"},
-        payload={
+        {"alg": "HS256", "typ": "JWT"},
+        {
             "data": {
                 "user_id": 123,
                 # The permissions this user is granted:
@@ -131,6 +134,10 @@ async def login():
     return {"token": token_string}
 
 ```
+
+This example signs with a shared secret, which suits a service that both issues and verifies its own tokens. To sign
+with a keypair instead, name `EdDSA` in the header and encode with the private key, as shown in
+[Signing with a keypair](#signing-with-a-keypair).
 
 ### Protecting endpoints
 
@@ -162,6 +169,68 @@ async def current_user(token: AccessToken):
     return {"your_token_data": token.to_dict()}
 
 ```
+
+### Signing with a keypair
+
+A single secret is enough while the same service issues and verifies every token. Once a token has to be verified by
+somebody other than its issuer, that arrangement stops working: anything able to check a token is equally able to mint
+one. Signing with `EdDSA` separates the two halves, so a verifier holds only the public key.
+
+<FlamaName /> generates an Ed25519 keypair through the algorithm itself:
+
+```python
+from flama.crypto.algorithms import EdDSAAlgorithm
+
+private_key, public_key = EdDSAAlgorithm.generate()
+```
+
+The private key signs, and never leaves the issuer. The public key is the one you publish, and it is all a verifier
+needs. Tokens are then issued exactly as before, naming the algorithm and the key in the header:
+
+```python
+from flama.authentication.jwt import jwt
+
+jwt_token = jwt.JWT(
+    {"alg": "EdDSA", "typ": "JWT", "kid": "issuer-2026-09"},
+    {"data": {"user_id": 123, "permissions": ["read:secure"]}, "iat": 0},
+)
+
+token_string = jwt_token.encode(private_key).decode()
+```
+
+### Verifying against many keys
+
+An application that accepts tokens from a single issuer is given that issuer's key and nothing more. An application
+serving several tenants, or one living through a key rotation, needs to choose a key per token — which is what the
+`kid` in the header is for.
+
+Instead of a fixed secret, a token component can be given a **resolver**: a callable that turns the identity in the
+header into the key to verify against.
+
+```python
+from flama import Flama
+from flama.authentication import AccessTokenComponent, AuthenticationMiddleware, exceptions
+
+KEYS = {"issuer-2026-09": public_key}
+
+def resolve_key(kid):
+    try:
+        return KEYS[kid]
+    except KeyError:
+        raise exceptions.Unauthorized()
+
+app = Flama(
+    components=[AccessTokenComponent(resolver=resolve_key)],
+    middleware=[AuthenticationMiddleware()],
+)
+```
+
+Two details are worth knowing. A resolver may be asynchronous, because looking a key up can mean reading a database or
+calling another service, and <FlamaName /> awaits it either way. And raising `Unauthorized` is how a resolver reports
+that no key answers to that identity, which the component turns into a `401`; any other exception is treated as a
+failure of the lookup itself rather than a rejected token.
+
+A component takes either a secret or a resolver, never both.
 
 ## Example
 

@@ -12,14 +12,19 @@ low-risk task rather than a tedious migration.
 ## How it works
 
 In <FlamaName />, an **upgrade** brings two things into line with a newer release: the library installed in your
-environment, and the source code of your project that depends on it. Minor and patch releases are backwards compatible,
-so updating the library is enough. Major releases are where public interfaces may shift, and that is precisely what the
-`flama upgrade` command is built for.
+environment, and the source code of your project that depends on it. Patch releases are backwards compatible, so
+updating the library is enough. Major releases are where public interfaces shift most, and a minor release
+occasionally carries a change of its own — in either case, that is precisely what the `flama upgrade` command is built
+for.
 
 Under the hood, the command applies **codemods** (automated source-to-source transformations) across the <PythonName />
 files you point it at. It rewrites import statements, renamed symbols, and a handful of call patterns so they match the
 target version. Anything that has no automatic replacement is never silently dropped: it is flagged in place with a
 `# flama-upgrade` marker and reported as a manual follow-up.
+
+Releases accumulate, and a project does not have to move one at a time to keep up. Every migration standing between
+the version your code matches and the version you are heading for is applied in order, within a single run, so a
+codebase two releases behind arrives at the newest layout rather than at an intermediate one.
 
 **Why lean on the command instead of migrating by hand?**
 
@@ -93,12 +98,15 @@ and run your test suite to confirm the migration is complete.
 
 ### Targeting a specific version
 
-By default, the command detects the version installed in the environment as the source, and uses the latest known
-migration as the target. When you run it from an isolated pipx environment, where the detected version may differ from
-your project's, it is worth being explicit about both ends:
+By default the target is the latest known migration, and every migration up to it is applied. That is the right thing
+for a codebase of unknown vintage, and it is why the installed <FlamaName /> version is never consulted: you normally
+upgrade the package first, which makes it the version you are heading for rather than the one your code matches.
+
+When you already know where your codebase stands, naming the source narrows the chain to the migrations that still
+matter:
 
 ```console
-flama upgrade --from 1.0 --to 2.0 src/
+flama upgrade --from 2.0 --to 2.2 src/
 ```
 
 You can also restrict which transformations run with `--select` and `--skip`. For the full list of options, run
