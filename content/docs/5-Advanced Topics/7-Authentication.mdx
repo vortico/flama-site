@@ -170,6 +170,22 @@ async def current_user(token: AccessToken):
 
 ```
 
+### Passing a token on
+
+An application that calls another service on the caller's behalf has to present the caller's token, and an injected
+token carries the form it arrived as for exactly that:
+
+```python
+@app.route("/report/", methods=["GET"], tags={"permissions": ["read:secure"]})
+async def report(token: AccessToken):
+    async with Client(base_url="https://reports.example") as client:
+        return await client.get("/", headers={"access_token": f"Bearer {token.raw.decode()}"})
+```
+
+Passing the token on rather than signing a new one is what lets an application verify with a key it cannot sign
+with — which is every application using a published key, since it holds only the public half. A token you construct
+yourself has no `raw` to offer until you `encode` it, so the two cases stay easy to tell apart.
+
 ### Signing with a keypair
 
 A single secret is enough while the same service issues and verifies every token. Once a token has to be verified by
@@ -205,11 +221,60 @@ serving several tenants, or one living through a key rotation, needs to choose a
 `kid` in the header is for.
 
 Instead of a fixed secret, a token component can be given a **resolver**: a callable that turns the identity in the
-header into the key to verify against.
+header into the key to verify against. An issuer that publishes its public keys as a JWKS document — which is what
+almost every issuer does — needs nothing written by hand:
 
 ```python
 from flama import Flama
-from flama.authentication import AccessTokenComponent, AuthenticationMiddleware, exceptions
+from flama.authentication import AccessTokenComponent, AuthenticationMiddleware, JWKSResolver
+
+app = Flama(
+    components=[AccessTokenComponent(resolver=JWKSResolver("https://issuer.example/.well-known/jwks.json"))],
+    middleware=[AuthenticationMiddleware()],
+)
+```
+
+The resolver keeps the keys it fetches for `ttl`, so the issuer is not consulted on every request, and an identity it
+has not seen prompts a fetch rather than a refusal — which is how a key the issuer has just started using becomes
+usable without waiting for held keys to expire.
+
+Fetches from any one document are spaced by `fetch_interval`, which matters more than it sounds: the resolver runs
+*before* a signature is verified, since the key is what verifies it, so anyone able to reach your application can name
+an identity that answers to nothing. Without that spacing each such request would become a request to the issuer.
+
+By default an issuer that cannot be reached means a token cannot be verified, and the request fails. Giving a
+`stale_ttl` instead lets a key already fetched go on being served for that long after it expires, so a brief outage at
+the issuer does not become an outage in your application:
+
+```python
+JWKSResolver("https://issuer.example/.well-known/jwks.json", stale_ttl=900)
+```
+
+That is worth choosing deliberately rather than inheriting, because it is also the only thing that can carry a
+withdrawn key past its expiry: a key the issuer has stopped publishing stays usable for that long whenever the issuer
+is unreachable.
+
+Where an issuer publishes a document per tenant rather than one for everything, the address can be derived from the
+identity itself:
+
+```python
+JWKSResolver(lambda kid: f"https://issuer.example/{kid.split('.')[0]}/keys/")
+```
+
+An application moving from a shared secret to published keys does not have to do both at once. Giving the resolver a
+`default` key keeps tokens that name none verifiable, so the resolver can be deployed before anything about signing
+changes, and the fallback removed once no such token can still be in flight:
+
+```python
+JWKSResolver("https://issuer.example/.well-known/jwks.json", default=SECRET_KEY)
+```
+
+### Writing your own resolver
+
+Anything callable will do, so a key held somewhere other than a JWKS document is no obstacle:
+
+```python
+from flama.authentication import exceptions
 
 KEYS = {"issuer-2026-09": public_key}
 
@@ -218,11 +283,6 @@ def resolve_key(kid):
         return KEYS[kid]
     except KeyError:
         raise exceptions.Unauthorized()
-
-app = Flama(
-    components=[AccessTokenComponent(resolver=resolve_key)],
-    middleware=[AuthenticationMiddleware()],
-)
 ```
 
 Two details are worth knowing. A resolver may be asynchronous, because looking a key up can mean reading a database or
